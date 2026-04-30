@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html>
+
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Checkout - StitchVale</title>
+
+  <style>
+    body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #0d0d0d;
+  color: white;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 25px 35px;
+  background: black;
+  border-bottom: 1px solid #222;
+}
+
+.logo img {
+  height: 80px;
+}
+
+nav {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+nav a {
+  color: #aaa;
+  text-decoration: none;
+  font-size: 15px;
+}
+
+nav a:hover {
+  color: white;
+}
+
+.hero {
+  text-align: center;
+  padding: 55px 20px 30px;
+  background: radial-gradient(circle at top, #1f1f1f, #0d0d0d 65%);
+}
+
+.hero h1 {
+  font-size: 42px;
+  margin-bottom: 10px;
+}
+
+.hero p {
+  color: #aaa;
+}
+
+.section {
+  padding: 45px 20px;
+  max-width: 1150px;
+  margin: auto;
+}
+
+.checkout-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+}
+
+.box {
+  background: #1a1a1a;
+  padding: 25px;
+  border-radius: 16px;
+  border: 1px solid #222;
+}
+
+.cart-item {
+  border-bottom: 1px solid #333;
+  padding: 15px 0;
+}
+
+.cart-item h3 {
+  margin: 0;
+}
+
+.cart-item p {
+  color: #aaa;
+  margin: 5px 0;
+}
+
+input, textarea, button {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px;
+  border-radius: 7px;
+  border: none;
+  margin-bottom: 15px;
+  font-family: Arial, sans-serif;
+}
+
+textarea {
+  height: 90px;
+  resize: vertical;
+}
+
+button {
+  background: white;
+  color: black;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.payment-methods {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.payment-option {
+  background: #111;
+  border: 1px solid #333;
+  padding: 14px;
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.payment-option.active {
+  border-color: white;
+  background: #222;
+}
+
+.payment-details {
+  display: none;
+  margin-top: 10px;
+}
+
+.payment-details.active {
+  display: block;
+}
+
+.total {
+  font-size: 22px;
+  font-weight: bold;
+  margin-top: 20px;
+}
+
+.success {
+  display: none;
+  background: #123d2a;
+  color: #bfffdc;
+  padding: 20px;
+  border-radius: 15px;
+  margin-top: 20px;
+}
+
+.warning {
+  background: #3d2b12;
+  color: #ffd9a0;
+  padding: 15px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  display: none;
+}
+
+.small {
+  color: #aaa;
+  font-size: 13px;
+}
+
+footer {
+  margin-top: 50px;
+  padding: 35px 20px;
+  text-align: center;
+  border-top: 1px solid #222;
+  color: #aaa;
+}
+
+/* MOBILE */
+@media (max-width: 900px) {
+  header {
+    flex-direction: column;
+    gap: 18px;
+    padding: 22px 15px;
+  }
+
+  .logo img {
+    height: 70px;
+  }
+
+  nav {
+    justify-content: center;
+    gap: 14px;
+  }
+
+  nav a {
+    font-size: 14px;
+  }
+
+  .hero h1 {
+    font-size: 34px;
+  }
+
+  .checkout-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .section {
+    padding: 35px 15px;
+  }
+}
+
+@media (max-width: 560px) {
+  .hero {
+    padding: 48px 16px 30px;
+  }
+
+  .hero h1 {
+    font-size: 30px;
+  }
+
+  .box {
+    padding: 22px;
+  }
+
+  .payment-option {
+    font-size: 14px;
+  }
+
+  .total {
+    font-size: 20px;
+  }
+}
+  </style>
+
+  
+</head>
+<body>
+  <header>
+  <div class="logo">
+    <a href="index.html">
+      <img src="logo3.jpg" alt="StitchVale Logo">
+    </a>
+  </div>
+
+  <nav>
+    <a href="novita.html">Novità</a>
+    <a href="brand.html">Brand</a>
+    <a href="account.html">Account</a>
+    <a href="catalogo.html">Catalogo</a>
+    <a href="idee.html">Idee</a>
+    <a href="outfit.html">AI Outfit</a>
+  </nav>
+</header>
+
+<section class="hero">
+  <h1>Checkout</h1>
+  <p>Completa il tuo ordine su StitchVale.</p>
+</section>
+
+<section class="section">
+  <div id="loginWarning" class="warning">
+    Devi accedere prima di completare l’ordine.
+  </div>
+
+  <div class="checkout-layout">
+
+    <div class="box">
+      <h2>Il tuo carrello</h2>
+      <div id="cartItems"></div>
+      <p class="total" id="cartTotal">Totale: €0</p>
+    </div>
+
+    <div class="box">
+      <h2>Dati ordine</h2>
+
+      <input id="name" placeholder="Nome e cognome">
+      <input id="email" placeholder="Email">
+      <input id="address" placeholder="Indirizzo di spedizione">
+      <textarea id="notes" placeholder="Note ordine"></textarea>
+
+      <h2>Metodo di pagamento</h2>
+
+      <div class="payment-methods">
+        <div class="payment-option active" onclick="selectPayment('card', this)">
+          💳 Carta di credito/debito
+        </div>
+
+        <div class="payment-option" onclick="selectPayment('paypal', this)">
+          🅿️ PayPal
+        </div>
+
+        <div class="payment-option" onclick="selectPayment('applepay', this)">
+           Apple Pay
+        </div>
+
+        <div class="payment-option" onclick="selectPayment('cash', this)">
+          📦 Pagamento alla consegna
+        </div>
+      </div>
+
+      <div id="cardDetails" class="payment-details active">
+        <input id="cardNumber" placeholder="Numero carta">
+        <input id="cardName" placeholder="Nome sulla carta">
+        <input id="cardExpiry" placeholder="Scadenza MM/AA">
+        <input id="cardCvc" placeholder="CVC">
+        <p class="small">Pagamento simulato: nessun dato reale verrà processato.</p>
+      </div>
+
+      <div id="paypalDetails" class="payment-details">
+        <input id="paypalEmail" placeholder="Email PayPal">
+        <p class="small">Pagamento PayPal simulato.</p>
+      </div>
+
+      <div id="applepayDetails" class="payment-details">
+        <p class="small">Apple Pay simulato. Conferma l’ordine per continuare.</p>
+      </div>
+
+      <div id="cashDetails" class="payment-details">
+        <p class="small">Pagherai al momento della consegna.</p>
+      </div>
+
+      <button onclick="completeOrder()">Conferma ordine</button>
+
+      <div class="success" id="successMessage">
+        Ordine completato!
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<footer>
+  <h3>StitchVale</h3>
+  <p>Email: stitchvale1@gmail.com</p>
+  <p>Instagram: @stitchvale</p>
+</footer>
+
+  <script>
+    const API_URL = "http://localhost:3000";
+let selectedPayment = "card";
+
+function isLoggedIn() {
+  return localStorage.getItem("token") !== null;
+}
+
+function getToken() {
+  return localStorage.getItem("token");
+}
+
+function requireLogin() {
+  if (!isLoggedIn()) {
+    alert("Devi accedere prima.");
+    window.location.href = "account.html";
+    return false;
+  }
+
+  return true;
+}
+
+function getCart() {
+  return JSON.parse(localStorage.getItem("cart")) || [];
+}
+
+function selectPayment(method, element) {
+  selectedPayment = method;
+
+  document.querySelectorAll(".payment-option").forEach(option => {
+    option.classList.remove("active");
+  });
+
+  element.classList.add("active");
+
+  document.querySelectorAll(".payment-details").forEach(detail => {
+    detail.classList.remove("active");
+  });
+
+  document.getElementById(method + "Details").classList.add("active");
+}
+
+function loadCheckout() {
+  if (!isLoggedIn()) {
+    document.getElementById("loginWarning").style.display = "block";
+  }
+
+  const savedEmail = localStorage.getItem("email");
+
+  if (savedEmail) {
+    document.getElementById("email").value = savedEmail;
+  }
+
+  const cart = getCart();
+  const cartItems = document.getElementById("cartItems");
+  const cartTotal = document.getElementById("cartTotal");
+
+  if (cart.length === 0) {
+    cartItems.innerHTML = "<p>Il carrello è vuoto.</p>";
+    cartTotal.innerText = "Totale: €0";
+    return;
+  }
+
+  let total = 0;
+
+  cartItems.innerHTML = cart.map(item => {
+    const subtotal = Number(item.price) * item.quantity;
+    total += subtotal;
+
+    return `
+      <div class="cart-item">
+        <h3>${item.name}</h3>
+        <p>Brand: ${item.brand}</p>
+        <p>Quantità: ${item.quantity}</p>
+        <p>Subtotale: €${subtotal}</p>
+      </div>
+    `;
+  }).join("");
+
+  cartTotal.innerText = "Totale: €" + total;
+}
+
+function validatePayment() {
+  if (selectedPayment === "card") {
+    const cardNumber = document.getElementById("cardNumber").value;
+    const cardName = document.getElementById("cardName").value;
+    const cardExpiry = document.getElementById("cardExpiry").value;
+    const cardCvc = document.getElementById("cardCvc").value;
+
+    if (!cardNumber || !cardName || !cardExpiry || !cardCvc) {
+      alert("Compila tutti i dati della carta.");
+      return false;
+    }
+  }
+
+  if (selectedPayment === "paypal") {
+    const paypalEmail = document.getElementById("paypalEmail").value;
+
+    if (!paypalEmail) {
+      alert("Inserisci l'email PayPal.");
+      return false;
+    }
+  }
+
+  return true;
+}
+
+async function completeOrder() {
+  if (!requireLogin()) return;
+
+  const cart = getCart();
+  const name = document.getElementById("name").value;
+  const email = document.getElementById("email").value;
+  const address = document.getElementById("address").value;
+  const notes = document.getElementById("notes").value;
+
+  if (cart.length === 0) {
+    alert("Il carrello è vuoto");
+    return;
+  }
+
+  if (!name || !email || !address) {
+    alert("Compila nome, email e indirizzo");
+    return;
+  }
+
+  if (!validatePayment()) return;
+
+  let total = 0;
+
+  cart.forEach(item => {
+    total += Number(item.price) * item.quantity;
+  });
+
+  const orderData = {
+    customer: {
+      name: name,
+      email: email,
+      address: address
+    },
+    items: cart,
+    total: total,
+    paymentMethod: selectedPayment,
+    notes: notes
+  };
+
+  const res = await fetch(API_URL + "/orders", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + getToken()
+    },
+    body: JSON.stringify(orderData)
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    alert(data.message || "Errore nel salvataggio ordine");
+    return;
+  }
+
+  localStorage.removeItem("cart");
+
+  document.getElementById("successMessage").innerText =
+    "Ordine completato! Numero ordine: " + data.order.id;
+
+  document.getElementById("successMessage").style.display = "block";
+
+  loadCheckout();
+}
+
+window.onload = loadCheckout;
+  </script>
+</body>
+</html>

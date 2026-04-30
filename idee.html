@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html>
+
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Idee - StitchVale</title>
+
+  <style>
+    body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #0d0d0d;
+  color: white;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 25px 35px;
+  background: black;
+  border-bottom: 1px solid #222;
+}
+
+.logo img {
+  height: 80px;
+}
+
+nav {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+nav a {
+  color: #aaa;
+  text-decoration: none;
+  font-size: 15px;
+}
+
+nav a:hover {
+  color: white;
+}
+
+.hero {
+  text-align: center;
+  padding: 60px 20px 35px;
+  background: radial-gradient(circle at top, #1f1f1f, #0d0d0d 65%);
+}
+
+.title-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.title-row h1 {
+  font-size: 42px;
+  margin: 0;
+}
+
+.title-row a {
+  background: white;
+  color: black;
+  padding: 12px 20px;
+  border-radius: 25px;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.hero p {
+  color: #aaa;
+  margin-top: 18px;
+}
+
+.search-box {
+  margin: 25px auto 0;
+  max-width: 520px;
+}
+
+.search-box input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 14px 18px;
+  border-radius: 30px;
+  border: none;
+  background: #1a1a1a;
+  color: white;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill,minmax(250px,1fr));
+  gap: 25px;
+  padding: 40px;
+}
+
+.card {
+  background: #1a1a1a;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid #222;
+}
+
+.card-main-img {
+  width: 100%;
+  height: 260px;
+  object-fit: cover;
+  background: #222;
+}
+
+.thumbs {
+  display: flex;
+  gap: 8px;
+  padding: 10px;
+  overflow-x: auto;
+  background: #111;
+}
+
+.thumbs img {
+  width: 58px;
+  height: 58px;
+  object-fit: cover;
+  border-radius: 7px;
+  cursor: pointer;
+  border: 2px solid transparent;
+}
+
+.thumbs img.active {
+  border-color: white;
+}
+
+.card-info {
+  padding: 18px;
+}
+
+.card-info h3 {
+  margin-top: 0;
+}
+
+.description {
+  color: #aaa;
+  font-size: 14px;
+  margin: 8px 0;
+  line-height: 1.4;
+}
+
+.like-btn {
+  margin-top: 10px;
+  background: white;
+  color: black;
+  border-radius: 25px;
+  padding: 10px;
+  cursor: pointer;
+  border: none;
+  width: 100%;
+  font-weight: bold;
+}
+
+.section {
+  padding: 55px 20px;
+  text-align: center;
+}
+
+.upload-box {
+  background: #1a1a1a;
+  padding: 28px;
+  border-radius: 16px;
+  max-width: 450px;
+  margin: auto;
+  border: 1px solid #222;
+}
+
+input, textarea, button {
+  padding: 12px;
+  border-radius: 6px;
+  border: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+textarea {
+  height: 120px;
+  resize: vertical;
+  font-family: Arial;
+}
+
+button {
+  background: white;
+  color: black;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+footer {
+  padding: 35px 20px;
+  text-align: center;
+  border-top: 1px solid #222;
+  color: #aaa;
+}
+
+/* MOBILE */
+@media (max-width: 900px) {
+  header {
+    flex-direction: column;
+    gap: 18px;
+    padding: 22px 15px;
+  }
+
+  .logo img {
+    height: 70px;
+  }
+
+  nav {
+    justify-content: center;
+    gap: 14px;
+  }
+
+  nav a {
+    font-size: 14px;
+  }
+
+  .title-row h1 {
+    font-size: 34px;
+  }
+
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+    padding: 25px;
+    gap: 18px;
+  }
+
+  .card-main-img {
+    height: 230px;
+  }
+}
+
+@media (max-width: 560px) {
+  .hero {
+    padding: 48px 16px 30px;
+  }
+
+  .title-row h1 {
+    font-size: 30px;
+  }
+
+  .title-row a {
+    width: 100%;
+    max-width: 240px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+    padding: 18px;
+  }
+
+  .card-main-img {
+    height: 330px;
+  }
+
+  .upload-box {
+    padding: 22px;
+  }
+}
+  </style>
+
+  
+</head>
+<body>
+  <header>
+  <div class="logo">
+    <a href="index.html"><img src="logo3.jpg" alt="StitchVale Logo"></a>
+  </div>
+
+  <nav>
+    <a href="novita.html">Novità</a>
+    <a href="brand.html">Brand</a>
+    <a href="account.html">Account</a>
+    <a href="catalogo.html">Catalogo</a>
+    <a href="idee.html">Idee</a>
+    <a href="outfit.html">AI Outfit</a>
+  </nav>
+</header>
+
+<section class="hero">
+  <div class="title-row">
+    <h1>🔥 Idee più votate</h1>
+    <a href="#upload">Carica la tua idea</a>
+  </div>
+
+  <p>Scopri le idee più apprezzate dalla community e vota quelle che vorresti vedere realizzate.</p>
+
+  <div class="search-box">
+    <input id="searchInput" placeholder="Cerca idee con AI..." oninput="aiSearch()">
+  </div>
+</section>
+
+<div id="ideas" class="grid"></div>
+
+<section id="upload" class="section">
+  <h2>Carica la tua idea</h2>
+  <p style="color:#aaa;">Condividi un concept, uno stile o un capo che vorresti vedere prodotto.</p>
+
+  <div class="upload-box">
+    <form id="ideaForm">
+
+      <input name="title" placeholder="Titolo idea" required><br><br>
+
+      <textarea name="description" placeholder="Descrizione idea: concept, stile, materiali, dettagli..." required></textarea><br><br>
+
+      <input name="contact" placeholder="Contatto Instagram o email" required><br><br>
+
+      <input type="file" name="images" accept="image/*" multiple><br><br>
+
+      <button>Invia idea</button>
+
+    </form>
+  </div>
+</section>
+
+<footer>
+  <h3>StitchVale</h3>
+  <p>Email: stitchvale1@gmail.com</p>
+  <p>Instagram: @stitchvale</p>
+</footer>
+
+  <script>
+    const API_URL = "http://localhost:3000";
+let allIdeas = [];
+
+function isLoggedIn() {
+  return localStorage.getItem("token") !== null;
+}
+
+function getToken() {
+  return localStorage.getItem("token");
+}
+
+function requireLogin() {
+  if (!isLoggedIn()) {
+    alert("Devi accedere prima.");
+    window.location.href = "account.html";
+    return false;
+  }
+
+  return true;
+}
+
+function getIdeaImages(idea) {
+  if (idea.images && idea.images.length > 0) {
+    return idea.images;
+  }
+
+  if (idea.image) {
+    return [idea.image];
+  }
+
+  return [];
+}
+
+function changeIdeaImage(id, image, element) {
+  document.getElementById("main-" + id).src = API_URL + "/uploads/" + image;
+
+  element.parentElement.querySelectorAll("img").forEach(img => {
+    img.classList.remove("active");
+  });
+
+  element.classList.add("active");
+}
+
+async function loadIdeas(){
+  const res = await fetch(API_URL + "/ideas");
+  allIdeas = await res.json();
+  showIdeas(allIdeas);
+}
+
+function showIdeas(ideas){
+  if (ideas.length === 0) {
+    document.getElementById("ideas").innerHTML = "<p style='padding:30px;'>Nessuna idea trovata.</p>";
+    return;
+  }
+
+  document.getElementById("ideas").innerHTML = ideas.map(i => {
+    const imgs = getIdeaImages(i);
+
+    return `
+      <div class="card">
+        ${
+          imgs.length > 0
+          ? `
+            <img id="main-${i.id}" class="card-main-img" src="${API_URL}/uploads/${imgs[0]}" alt="${i.title}">
+            ${
+              imgs.length > 1
+              ? `
+                <div class="thumbs">
+                  ${imgs.map((img, index) => `
+                    <img 
+                      src="${API_URL}/uploads/${img}" 
+                      class="${index === 0 ? "active" : ""}"
+                      onclick="changeIdeaImage(${i.id}, '${img}', this)"
+                    >
+                  `).join("")}
+                </div>
+              `
+              : ""
+            }
+          `
+          : ""
+        }
+
+        <div class="card-info">
+          <h3>${i.title}</h3>
+          <p class="description">${i.description || "Nessuna descrizione"}</p>
+          <p>${i.contact}</p>
+          <p>❤️ ${i.likes}</p>
+
+          <button class="like-btn" onclick="likeIdea(${i.id})">
+            👍 Like
+          </button>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function aiSearch(){
+  const q = document.getElementById("searchInput").value.toLowerCase();
+
+  if (!q) {
+    showIdeas(allIdeas);
+    return;
+  }
+
+  const results = allIdeas.filter(i =>
+    (i.title + " " + (i.description || "") + " " + i.contact)
+      .toLowerCase()
+      .includes(q)
+  );
+
+  showIdeas(results);
+}
+
+async function likeIdea(id){
+  if (!requireLogin()) return;
+
+  const res = await fetch(API_URL + "/like/" + id, {
+    method: "POST",
+    headers: {
+      "Authorization": "Bearer " + getToken()
+    }
+  });
+
+  const data = await res.json();
+
+  if (res.ok) {
+    loadIdeas();
+  } else {
+    alert(data.message || "Errore like");
+  }
+}
+
+document.getElementById("ideaForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  if (!requireLogin()) return;
+
+  const formData = new FormData(e.target);
+
+  const res = await fetch(API_URL + "/upload", {
+    method: "POST",
+    headers: {
+      "Authorization": "Bearer " + getToken()
+    },
+    body: formData
+  });
+
+  const data = await res.json();
+
+  if (res.ok) {
+    alert("Idea caricata!");
+    e.target.reset();
+    loadIdeas();
+  } else {
+    alert(data.message || "Errore nel caricamento");
+  }
+});
+
+window.onload = loadIdeas;
+  </script>
+</body>
+</html>

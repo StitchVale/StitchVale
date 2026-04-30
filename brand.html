@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Brand - StitchVale</title>
+
+  <style>
+    body {
+  margin: 0;
+  font-family: Arial;
+  background: #0d0d0d;
+  color: white;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 25px 35px;
+  background: black;
+  border-bottom: 1px solid #222;
+}
+
+.logo img {
+  height: 80px;
+}
+
+nav {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+nav a {
+  color: #aaa;
+  text-decoration: none;
+}
+
+nav a:hover {
+  color: white;
+}
+
+.hero {
+  text-align: center;
+  padding: 50px 20px;
+}
+
+.forms {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  max-width: 1000px;
+  margin: auto;
+}
+
+.box {
+  background: #1a1a1a;
+  padding: 25px;
+  border-radius: 15px;
+}
+
+input, textarea, select, button {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border-radius: 5px;
+  border: none;
+}
+
+button {
+  background: white;
+  color: black;
+  cursor: pointer;
+}
+
+.warning {
+  text-align: center;
+  margin: 30px;
+  color: orange;
+}
+
+@media(max-width: 800px){
+  .forms {
+    grid-template-columns: 1fr;
+  }
+}
+  </style>
+
+  
+</head>
+<body>
+  <header>
+<div class="logo">
+<a href="index.html"><img src="logo3.jpg"></a>
+</div>
+
+<nav>
+<a href="catalogo.html">Catalogo</a>
+<a href="idee.html">Idee</a>
+<a href="account.html">Account</a>
+</nav>
+</header>
+
+<section class="hero">
+<h1>Area Brand</h1>
+<p>Gestisci il tuo brand e carica prodotti</p>
+</section>
+
+<div id="accessMessage" class="warning"></div>
+
+<div id="content" style="display:none;">
+
+<div class="forms">
+
+<!-- PROFILO -->
+<div class="box">
+<h2>Profilo Brand</h2>
+
+<input id="brandName" placeholder="Nome brand">
+<textarea id="brandBio" placeholder="Descrizione brand"></textarea>
+<input type="file" id="brandLogo">
+
+<button onclick="saveBrand()">Salva profilo</button>
+
+<p id="status"></p>
+</div>
+
+<!-- PRODOTTO -->
+<div class="box">
+<h2>Carica prodotto</h2>
+
+<input id="name" placeholder="Nome prodotto">
+
+<select id="category">
+<option value="">Categoria</option>
+<option value="felpa">Felpa</option>
+<option value="tshirt">T-shirt</option>
+<option value="pantaloni">Pantaloni</option>
+<option value="giacca">Giacche</option>
+<option value="scarpe">Scarpe</option>
+<option value="accessori">Accessori</option>
+</select>
+
+<textarea id="description" placeholder="Descrizione prodotto"></textarea>
+
+<input id="price" placeholder="Prezzo">
+
+<input type="file" id="images" multiple>
+
+<button onclick="uploadProduct()">Carica prodotto</button>
+
+</div>
+
+</div>
+
+</div>
+
+  <script>
+    const API_URL = "http://localhost:3000";
+
+function getToken() {
+  return localStorage.getItem("token");
+}
+
+function getRole() {
+  return localStorage.getItem("role");
+}
+
+function checkAccess() {
+  if (!getToken()) {
+    document.getElementById("accessMessage").innerText = "Devi fare login";
+    return;
+  }
+
+  if (getRole() !== "brand") {
+    document.getElementById("accessMessage").innerText = "Solo account brand";
+    return;
+  }
+
+  document.getElementById("content").style.display = "block";
+}
+
+/* BRAND */
+async function saveBrand() {
+  const formData = new FormData();
+
+  formData.append("name", document.getElementById("brandName").value);
+  formData.append("bio", document.getElementById("brandBio").value);
+
+  const file = document.getElementById("brandLogo").files[0];
+  if (file) formData.append("logo", file);
+
+  const res = await fetch(API_URL + "/brands", {
+    method: "POST",
+    headers: {
+      "Authorization": "Bearer " + getToken()
+    },
+    body: formData
+  });
+
+  const data = await res.json();
+  document.getElementById("status").innerText = data.message;
+}
+
+/* PRODOTTI */
+async function uploadProduct() {
+
+  const formData = new FormData();
+
+  formData.append("name", document.getElementById("name").value);
+  formData.append("category", document.getElementById("category").value);
+  formData.append("description", document.getElementById("description").value);
+  formData.append("price", document.getElementById("price").value);
+
+  const files = document.getElementById("images").files;
+
+  for (let i = 0; i < files.length; i++) {
+    formData.append("images", files[i]);
+  }
+
+  const res = await fetch(API_URL + "/products", {
+    method: "POST",
+    headers: {
+      "Authorization": "Bearer " + getToken()
+    },
+    body: formData
+  });
+
+  const data = await res.json();
+
+  alert(data.message);
+}
+
+window.onload = checkAccess;
+  </script>
+</body>
+</html>

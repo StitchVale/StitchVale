@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html>
+
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Prodotto - StitchVale</title>
+
+  <style>
+    body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #0d0d0d;
+  color: white;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30px;
+  background: black;
+  border-bottom: 1px solid #222;
+}
+
+.logo img {
+  height: 80px;
+}
+
+nav a {
+  color: #aaa;
+  margin-left: 20px;
+  text-decoration: none;
+}
+
+nav a:hover {
+  color: white;
+}
+
+.product-page {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 50px;
+  padding: 60px;
+  max-width: 1200px;
+  margin: auto;
+}
+
+.product-image {
+  background: #1a1a1a;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.product-image img {
+  width: 100%;
+  height: 650px;
+  object-fit: cover;
+}
+
+.product-info {
+  background: #1a1a1a;
+  border-radius: 20px;
+  padding: 35px;
+}
+
+.product-info h1 {
+  font-size: 42px;
+  margin: 0 0 10px;
+}
+
+.brand-link {
+  color: #aaa;
+  text-decoration: none;
+}
+
+.brand-link:hover {
+  color: white;
+}
+
+.description {
+  color: #ccc;
+  line-height: 1.6;
+  margin-top: 25px;
+}
+
+.price {
+  font-size: 28px;
+  font-weight: bold;
+  margin: 25px 0;
+}
+
+.qty-box {
+  margin: 20px 0;
+}
+
+.qty-box input {
+  width: 80px;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+}
+
+button, .back-link {
+  display: inline-block;
+  background: white;
+  color: black;
+  border: none;
+  border-radius: 30px;
+  padding: 14px 24px;
+  cursor: pointer;
+  font-weight: bold;
+  text-decoration: none;
+  margin-top: 10px;
+}
+
+.secondary {
+  background: transparent;
+  color: white;
+  border: 1px solid white;
+  margin-left: 10px;
+}
+
+.details {
+  border-top: 1px solid #333;
+  margin-top: 30px;
+  padding-top: 20px;
+  color: #aaa;
+}
+
+footer {
+  padding: 30px;
+  text-align: center;
+  border-top: 1px solid #222;
+  color: #aaa;
+}
+
+@media (max-width: 900px) {
+  .product-page {
+    grid-template-columns: 1fr;
+    padding: 30px;
+  }
+
+  .product-image img {
+    height: 420px;
+  }
+}
+  </style>
+
+  
+</head>
+<body>
+  <header>
+  <div class="logo">
+    <a href="index.html">
+      <img src="logo3.jpg" alt="StitchVale Logo">
+    </a>
+  </div>
+
+  <nav>
+    <a href="novita.html">Novità</a>
+    <a href="brand.html">Brand</a>
+    <a href="account.html">Account</a>
+    <a href="catalogo.html">Catalogo</a>
+    <a href="idee.html">Idee</a>
+    <a href="outfit.html">AI Outfit</a>
+  </nav>
+</header>
+
+<section id="productPage" class="product-page"></section>
+
+<footer>
+  <h3>StitchVale</h3>
+  <p>Email: stitchvale1@gmail.com</p>
+  <p>Instagram: @stitchvale</p>
+</footer>
+
+  <script>
+    const API_URL = "http://localhost:3000";
+let currentProduct = null;
+
+function getProductId() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("id");
+}
+
+function isLoggedIn() {
+  return localStorage.getItem("token") !== null;
+}
+
+function requireLogin() {
+  if (!isLoggedIn()) {
+    alert("Devi accedere prima.");
+    window.location.href = "account.html";
+    return false;
+  }
+
+  return true;
+}
+
+async function loadProduct() {
+  const id = getProductId();
+
+  const res = await fetch(API_URL + "/products");
+  const products = await res.json();
+
+  const product = products.find(p => String(p.id) === String(id));
+
+  if (!product) {
+    document.getElementById("productPage").innerHTML = "<h1>Prodotto non trovato</h1>";
+    return;
+  }
+
+  currentProduct = product;
+  document.title = product.name + " - StitchVale";
+
+  document.getElementById("productPage").innerHTML = `
+    <div class="product-image">
+      ${product.image ? `<img src="${API_URL}/uploads/${product.image}" alt="${product.name}">` : ""}
+    </div>
+
+    <div class="product-info">
+      <h1>${product.name}</h1>
+
+      <p>
+        Brand:
+        <a class="brand-link" href="brand-page.html?brand=${encodeURIComponent(product.brand)}">
+          ${product.brand}
+        </a>
+      </p>
+
+      <p>Categoria: ${product.category}</p>
+
+      <p class="description">${product.description || "Nessuna descrizione disponibile."}</p>
+
+      <p class="price">€${product.price}</p>
+
+      <div class="qty-box">
+        <label>Quantità</label><br><br>
+        <input id="quantity" type="number" min="1" value="1">
+      </div>
+
+      <button onclick="addCurrentProductToCart()">Aggiungi al carrello</button>
+      <a href="catalogo.html" class="back-link secondary">Torna al catalogo</a>
+
+      <div class="details">
+        <p>Spedizione simulata tramite StitchVale.</p>
+        <p>Pagamento simulato disponibile nel checkout.</p>
+        <p>Prodotto pubblicato da un brand emergente.</p>
+      </div>
+    </div>
+  `;
+}
+
+function getCart() {
+  return JSON.parse(localStorage.getItem("cart")) || [];
+}
+
+function saveCart(cart) {
+  localStorage.setItem("cart", JSON.stringify(cart));
+}
+
+function addCurrentProductToCart() {
+  if (!requireLogin()) return;
+
+  const quantity = Number(document.getElementById("quantity").value);
+
+  if (!quantity || quantity < 1) {
+    alert("Quantità non valida");
+    return;
+  }
+
+  const cart = getCart();
+  const existing = cart.find(item => item.id === currentProduct.id);
+
+  if (existing) {
+    existing.quantity += quantity;
+  } else {
+    cart.push({
+      ...currentProduct,
+      quantity: quantity
+    });
+  }
+
+  saveCart(cart);
+  alert("Prodotto aggiunto al carrello");
+}
+
+window.onload = loadProduct;
+  </script>
+</body>
+</html>

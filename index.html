@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>StitchVale - Accesso</title>
+
+  <style>
+    body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: radial-gradient(circle at top, #1f1f1f, #0d0d0d 65%);
+  color: white;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.box {
+  background: #1a1a1a;
+  padding: 40px;
+  border-radius: 20px;
+  max-width: 450px;
+  width: 90%;
+  border: 1px solid #333;
+}
+
+.logo {
+  width: 130px;
+  margin-bottom: 20px;
+}
+
+h1 {
+  font-size: 36px;
+}
+
+.countdown {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin: 25px 0;
+}
+
+.time {
+  background: #111;
+  padding: 15px;
+  border-radius: 12px;
+}
+
+.time strong {
+  font-size: 26px;
+  display: block;
+}
+
+.time span {
+  color: #aaa;
+  font-size: 12px;
+}
+
+input, button {
+  width: 100%;
+  padding: 13px;
+  border-radius: 8px;
+  border: none;
+  margin-top: 12px;
+  box-sizing: border-box;
+}
+
+button {
+  background: white;
+  color: black;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.error {
+  color: #ff7777;
+  margin-top: 15px;
+}
+  </style>
+
+  
+</head>
+<body>
+  <div class="box">
+  <img src="logo3.jpg" class="logo">
+
+  <h1>StitchVale sta arrivando</h1>
+  <p>Accesso anticipato solo con password.</p>
+
+  <div class="countdown">
+    <div class="time"><strong id="days">0</strong><span>Giorni</span></div>
+    <div class="time"><strong id="hours">0</strong><span>Ore</span></div>
+    <div class="time"><strong id="minutes">0</strong><span>Minuti</span></div>
+    <div class="time"><strong id="seconds">0</strong><span>Secondi</span></div>
+  </div>
+
+  <input id="passwordInput" type="password" placeholder="Inserisci password">
+  <button onclick="checkPassword()">Entra nel sito</button>
+
+  <p id="error" class="error"></p>
+</div>
+
+  <script>
+    const SITE_PASSWORD = "Pizz4pizz4$";
+const launchDate = new Date("May 25, 2026 00:00:00").getTime();
+
+function updateCountdown() {
+  const now = new Date().getTime();
+  const distance = launchDate - now;
+
+  if (distance <= 0) {
+    document.getElementById("days").innerText = 0;
+    document.getElementById("hours").innerText = 0;
+    document.getElementById("minutes").innerText = 0;
+    document.getElementById("seconds").innerText = 0;
+    return;
+  }
+
+  document.getElementById("days").innerText = Math.floor(distance / (1000 * 60 * 60 * 24));
+  document.getElementById("hours").innerText = Math.floor((distance / (1000 * 60 * 60)) % 24);
+  document.getElementById("minutes").innerText = Math.floor((distance / (1000 * 60)) % 60);
+  document.getElementById("seconds").innerText = Math.floor((distance / 1000) % 60);
+}
+
+function checkPassword() {
+  const password = document.getElementById("passwordInput").value;
+
+  if (password === SITE_PASSWORD) {
+    localStorage.setItem("siteAccess", "true");
+    window.location.href = "home.html";
+  } else {
+    document.getElementById("error").innerText = "Password errata";
+  }
+}
+
+setInterval(updateCountdown, 1000);
+updateCountdown();
+  </script>
+</body>
+</html>

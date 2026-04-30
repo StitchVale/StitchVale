@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Novità - StitchVale</title>
+
+  <style>
+    body {
+  margin: 0;
+  font-family: Arial;
+  background: #0d0d0d;
+  color: white;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  padding: 30px;
+  background: black;
+  border-bottom: 1px solid #222;
+}
+
+.logo img {
+  height: 80px;
+}
+
+nav a {
+  color: #aaa;
+  margin-left: 20px;
+  text-decoration: none;
+}
+
+nav a:hover {
+  color: white;
+}
+
+.title {
+  text-align: center;
+  padding: 40px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill,minmax(250px,1fr));
+  gap: 25px;
+  padding: 20px 40px 60px;
+}
+
+.card {
+  background: #1a1a1a;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.card img {
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+}
+
+.card-info {
+  padding: 15px;
+}
+
+.badge {
+  color: #00ffcc;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.description {
+  color: #aaa;
+  font-size: 14px;
+}
+
+.price {
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+footer {
+  padding: 30px;
+  text-align: center;
+  border-top: 1px solid #222;
+  color: #aaa;
+}
+  </style>
+
+  
+</head>
+<body>
+  <header>
+  <div class="logo">
+    <a href="index.html"><img src="logo3.jpg"></a>
+  </div>
+
+  <nav>
+    <a href="novita.html">Novità</a>
+    <a href="brand.html">Brand</a>
+    <a href="account.html">Account</a>
+    <a href="catalogo.html">Catalogo</a>
+    <a href="idee.html">Idee</a>
+  </nav>
+</header>
+
+<div class="title">
+  <h1>🔥 Nuovi Arrivi</h1>
+  <p>Scopri gli ultimi prodotti caricati dai brand</p>
+</div>
+
+<div id="products" class="grid"></div>
+
+<footer>
+  <h3>StitchVale</h3>
+  <p>Email: stitchvale1@gmail.com</p>
+  <p>Instagram: @stitchvale</p>
+</footer>
+
+  <script>
+    const API_URL = "http://localhost:3000";
+
+async function loadRecentProducts(){
+  const res = await fetch(API_URL + "/products");
+  const products = await res.json();
+
+  // prende solo i primi (già ordinati dal server)
+  const recent = products.slice(0, 6);
+
+  document.getElementById("products").innerHTML = recent.map(p => `
+    <div class="card">
+      ${p.image ? `<img src="${API_URL}/uploads/${p.image}">` : ""}
+
+      <div class="card-info">
+        <div class="badge">NUOVO</div>
+        <h3>${p.name}</h3>
+        <p>${p.brand}</p>
+        <p class="description">${p.description || ""}</p>
+        <p class="price">€${p.price}</p>
+      </div>
+    </div>
+  `).join("");
+}
+
+window.onload = loadRecentProducts;
+  </script>
+</body>
+</html>

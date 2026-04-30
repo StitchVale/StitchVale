@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html>
+
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Account - StitchVale</title>
+
+  <style>
+    body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #0d0d0d;
+  color: white;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 25px 35px;
+  background: black;
+  border-bottom: 1px solid #222;
+}
+
+.logo img {
+  height: 80px;
+}
+
+nav {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+nav a {
+  color: #aaa;
+  text-decoration: none;
+  font-size: 15px;
+}
+
+nav a:hover {
+  color: white;
+}
+
+.hero {
+  text-align: center;
+  padding: 55px 20px 30px;
+  background: radial-gradient(circle at top, #1f1f1f, #0d0d0d 65%);
+}
+
+.hero h1 {
+  font-size: 42px;
+  margin-bottom: 10px;
+}
+
+.hero p {
+  color: #aaa;
+}
+
+.section {
+  padding: 45px 20px;
+  text-align: center;
+}
+
+.account-layout {
+  display: grid;
+  grid-template-columns: 420px 1fr;
+  gap: 28px;
+  max-width: 1150px;
+  margin: auto;
+  align-items: start;
+}
+
+.account-box,
+.profile-card,
+.order-card {
+  background: #1a1a1a;
+  padding: 25px;
+  border-radius: 16px;
+  border: 1px solid #222;
+}
+
+input, select, button {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px;
+  border-radius: 7px;
+  border: none;
+  margin-bottom: 15px;
+  font-family: Arial, sans-serif;
+}
+
+button {
+  background: white;
+  color: black;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.profile-card {
+  display: none;
+  margin-top: 20px;
+}
+
+.status {
+  color: #aaa;
+}
+
+.orders-section {
+  text-align: left;
+}
+
+.orders-section h2 {
+  text-align: center;
+  margin-top: 0;
+}
+
+.order-card {
+  margin-bottom: 18px;
+}
+
+.order-card h3 {
+  margin-top: 0;
+}
+
+.order-card p {
+  color: #aaa;
+}
+
+.order-item {
+  border-top: 1px solid #333;
+  padding: 10px 0;
+}
+
+.order-item p {
+  margin: 5px 0;
+}
+
+.empty-orders {
+  text-align: center;
+  color: #aaa;
+  background: #1a1a1a;
+  border: 1px solid #222;
+  padding: 25px;
+  border-radius: 16px;
+}
+
+footer {
+  margin-top: 50px;
+  padding: 35px 20px;
+  text-align: center;
+  border-top: 1px solid #222;
+  color: #aaa;
+}
+
+/* MOBILE */
+@media (max-width: 900px) {
+  header {
+    flex-direction: column;
+    gap: 18px;
+    padding: 22px 15px;
+  }
+
+  .logo img {
+    height: 70px;
+  }
+
+  nav {
+    justify-content: center;
+    gap: 14px;
+  }
+
+  nav a {
+    font-size: 14px;
+  }
+
+  .hero h1 {
+    font-size: 34px;
+  }
+
+  .account-layout {
+    grid-template-columns: 1fr;
+    padding: 0 10px;
+  }
+
+  .section {
+    padding: 35px 15px;
+  }
+}
+
+@media (max-width: 560px) {
+  .hero {
+    padding: 48px 16px 30px;
+  }
+
+  .hero h1 {
+    font-size: 30px;
+  }
+
+  .account-box,
+  .profile-card,
+  .order-card,
+  .empty-orders {
+    padding: 22px;
+  }
+}
+  </style>
+
+  
+</head>
+<body>
+  <header>
+  <div class="logo">
+    <a href="index.html">
+      <img src="logo3.jpg" alt="StitchVale Logo">
+    </a>
+  </div>
+
+  <nav>
+    <a href="novita.html">Novità</a>
+    <a href="brand.html">Brand</a>
+    <a href="account.html">Account</a>
+    <a href="catalogo.html">Catalogo</a>
+    <a href="idee.html">Idee</a>
+    <a href="outfit.html">AI Outfit</a>
+  </nav>
+</header>
+
+<section class="hero">
+  <h1>Account StitchVale</h1>
+  <p>Accedi, gestisci il profilo e controlla lo storico dei tuoi ordini.</p>
+</section>
+
+<section class="section">
+  <div class="account-layout">
+
+    <div>
+      <div class="account-box" id="loginBox">
+        <h2>Registrazione / Login</h2>
+
+        <input id="email" placeholder="Email">
+        <input id="password" type="password" placeholder="Password">
+
+        <select id="role">
+          <option value="user">Utente normale</option>
+          <option value="brand">Brand</option>
+        </select>
+
+        <button onclick="register()">Registrati</button>
+        <button onclick="login()">Login</button>
+
+        <p id="status" class="status"></p>
+      </div>
+
+      <div class="profile-card" id="profileCard">
+        <h2>Profilo</h2>
+        <p id="profileEmail"></p>
+        <p id="profileRole"></p>
+
+        <button onclick="logout()">Logout</button>
+      </div>
+    </div>
+
+    <div class="orders-section">
+      <h2>I tuoi ordini</h2>
+      <div id="orders"></div>
+    </div>
+
+  </div>
+</section>
+
+<footer>
+  <h3>StitchVale</h3>
+  <p>Email: stitchvale1@gmail.com</p>
+  <p>Instagram: @stitchvale</p>
+</footer>
+
+  <script>
+    const API_URL = "http://localhost:3000";
+
+function getToken() {
+  return localStorage.getItem("token");
+}
+
+async function register() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+  const role = document.getElementById("role").value;
+
+  if (!email || !password) {
+    alert("Inserisci email e password");
+    return;
+  }
+
+  const res = await fetch(API_URL + "/register", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      email: email,
+      password: password,
+      role: role
+    })
+  });
+
+  const data = await res.json();
+  document.getElementById("status").innerText = data.message || "Errore";
+}
+
+async function login() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  if (!email || !password) {
+    alert("Inserisci email e password");
+    return;
+  }
+
+  const res = await fetch(API_URL + "/login", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      email: email,
+      password: password
+    })
+  });
+
+  const data = await res.json();
+
+  if (data.token) {
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("email", data.email);
+    localStorage.setItem("role", data.role);
+
+    document.getElementById("status").innerText = "Login effettuato!";
+    showProfile();
+    loadOrders();
+  } else {
+    document.getElementById("status").innerText = data.message || "Errore login";
+  }
+}
+
+function showProfile() {
+  const token = localStorage.getItem("token");
+  const email = localStorage.getItem("email");
+  const role = localStorage.getItem("role");
+
+  if (token) {
+    document.getElementById("profileCard").style.display = "block";
+    document.getElementById("profileEmail").innerText = "Email: " + email;
+    document.getElementById("profileRole").innerText = "Tipo account: " + role;
+  }
+}
+
+function logout() {
+  localStorage.removeItem("token");
+  localStorage.removeItem("email");
+  localStorage.removeItem("role");
+
+  document.getElementById("profileCard").style.display = "none";
+  document.getElementById("orders").innerHTML =
+    "<div class='empty-orders'>Accedi per vedere i tuoi ordini.</div>";
+  document.getElementById("status").innerText = "Logout effettuato";
+}
+
+async function loadOrders() {
+  const token = getToken();
+
+  if (!token) {
+    document.getElementById("orders").innerHTML =
+      "<div class='empty-orders'>Accedi per vedere i tuoi ordini.</div>";
+    return;
+  }
+
+  const res = await fetch(API_URL + "/orders", {
+    headers: {
+      "Authorization": "Bearer " + token
+    }
+  });
+
+  const orders = await res.json();
+
+  if (!res.ok) {
+    document.getElementById("orders").innerHTML =
+      "<div class='empty-orders'>Errore nel caricamento ordini.</div>";
+    return;
+  }
+
+  if (orders.length === 0) {
+    document.getElementById("orders").innerHTML =
+      "<div class='empty-orders'>Non hai ancora ordini.</div>";
+    return;
+  }
+
+  document.getElementById("orders").innerHTML = orders.map(order => `
+    <div class="order-card">
+      <h3>Ordine #${order.id}</h3>
+      <p>Data: ${new Date(order.createdAt).toLocaleString()}</p>
+      <p>Totale: €${order.total}</p>
+      <p>Pagamento: ${order.paymentMethod}</p>
+
+      <h4>Prodotti:</h4>
+      ${order.items.map(item => `
+        <div class="order-item">
+          <strong>${item.name}</strong>
+          <p>Brand: ${item.brand}</p>
+          <p>Quantità: ${item.quantity}</p>
+          <p>Prezzo: €${item.price}</p>
+        </div>
+      `).join("")}
+    </div>
+  `).join("");
+}
+
+window.onload = function() {
+  showProfile();
+  loadOrders();
+};
+  </script>
+</body>
+</html>

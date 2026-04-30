@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html>
+
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Catalogo - StitchVale</title>
+
+  <style>
+    body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #0d0d0d;
+  color: white;
+}
+
+header {
+  background: black;
+  display: grid;
+  grid-template-columns: 120px 1fr 70px;
+  align-items: center;
+  padding: 15px 20px;
+  border-bottom: 1px solid #222;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.logo img { height: 55px; }
+
+.search-bar { display: flex; justify-content: center; }
+
+.search-bar input {
+  width: 90%;
+  max-width: 480px;
+  padding: 12px 18px;
+  border-radius: 30px;
+  border: none;
+  background: #1a1a1a;
+  color: white;
+}
+
+.header-actions { display: flex; justify-content: flex-end; }
+
+.cart-btn {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 30px;
+  padding: 10px 14px;
+  color: white;
+  cursor: pointer;
+}
+
+.page-title {
+  text-align: center;
+  padding: 35px 20px 10px;
+}
+
+.page-title h1 { font-size: 34px; margin-bottom: 8px; }
+.page-title p { color: #aaa; }
+
+.catalog-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 30px;
+  padding: 30px;
+}
+
+.sidebar {
+  position: sticky;
+  top: 100px;
+  align-self: start;
+}
+
+.category {
+  display: block;
+  padding: 10px 0;
+  color: #aaa;
+  cursor: pointer;
+}
+
+.category:hover { color: white; }
+
+.filter-block {
+  border-top: 1px solid #333;
+  margin-top: 25px;
+  padding-top: 20px;
+}
+
+.products-info {
+  color: #aaa;
+  margin-bottom: 20px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 25px;
+}
+
+.card {
+  background: #1a1a1a;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #222;
+}
+
+.card-img {
+  height: 260px;
+  background: #222;
+  position: relative;
+  overflow: hidden;
+}
+
+.card-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.image-count {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(0,0,0,0.65);
+  color: white;
+  padding: 5px 9px;
+  border-radius: 20px;
+  font-size: 12px;
+}
+
+.image-dots {
+  position: absolute;
+  bottom: 10px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+
+.image-dots span {
+  width: 7px;
+  height: 7px;
+  background: rgba(255,255,255,0.45);
+  border-radius: 50%;
+}
+
+.image-dots span.active { background: white; }
+
+.card-info { padding: 15px; }
+
+.card-info h3 a {
+  color: white;
+  text-decoration: none;
+}
+
+.brand-link {
+  color: #aaa;
+  text-decoration: none;
+}
+
+.brand-link:hover { color: white; }
+
+.description {
+  color: #aaa;
+  font-size: 14px;
+  line-height: 1.4;
+  margin: 8px 0;
+}
+
+.price {
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.add-btn {
+  margin-top: 10px;
+  background: white;
+  color: black;
+  border: none;
+  border-radius: 30px;
+  padding: 11px 14px;
+  cursor: pointer;
+  width: 100%;
+  font-weight: bold;
+}
+
+#cartPanel {
+  display: none;
+  position: fixed;
+  right: 20px;
+  top: 80px;
+  width: 320px;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  padding: 20px;
+  border-radius: 10px;
+  z-index: 20;
+}
+
+.cart-item {
+  border-bottom: 1px solid #333;
+  padding: 10px 0;
+}
+
+.cart-button {
+  margin-top: 10px;
+  width: 100%;
+  padding: 10px;
+  border-radius: 30px;
+  border: none;
+  cursor: pointer;
+}
+
+.checkout-btn {
+  background: white;
+  color: black;
+}
+
+.empty-btn {
+  background: #333;
+  color: white;
+}
+
+footer {
+  margin-top: 40px;
+  padding: 30px;
+  text-align: center;
+  border-top: 1px solid #222;
+  color: #aaa;
+}
+
+@media (max-width: 900px) {
+  header {
+    grid-template-columns: 80px 1fr 60px;
+    padding: 12px;
+  }
+
+  .logo img { height: 45px; }
+
+  .search-bar input {
+    width: 92%;
+    font-size: 14px;
+    padding: 11px 14px;
+  }
+
+  .catalog-layout {
+    grid-template-columns: 1fr;
+    padding: 20px;
+  }
+
+  .sidebar {
+    position: static;
+    background: #111;
+    border: 1px solid #222;
+    border-radius: 15px;
+    padding: 18px;
+  }
+
+  .category {
+    display: inline-block;
+    margin-right: 12px;
+    margin-bottom: 8px;
+    background: #1a1a1a;
+    padding: 9px 14px;
+    border-radius: 20px;
+  }
+
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+  }
+
+  .card-img { height: 220px; }
+
+  #cartPanel {
+    width: calc(100% - 40px);
+    right: 20px;
+    top: 75px;
+  }
+}
+
+@media (max-width: 560px) {
+  header {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    text-align: center;
+  }
+
+  .logo { text-align: center; }
+
+  .search-bar input {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .header-actions { justify-content: center; }
+
+  .grid { grid-template-columns: 1fr; }
+
+  .card-img { height: 340px; }
+
+  .catalog-layout { padding: 15px; }
+}
+  </style>
+
+  
+</head>
+<body>
+  <header>
+  <div class="logo">
+    <a href="index.html">
+      <img src="logo3.jpg" alt="StitchVale Logo">
+    </a>
+  </div>
+
+  <div class="search-bar">
+    <input id="searchInput" placeholder="Cerca con AI..." oninput="aiSearch()">
+  </div>
+
+  <div class="header-actions">
+    <button class="cart-btn" onclick="toggleCart()">🛍</button>
+  </div>
+</header>
+
+<section class="page-title">
+  <h1>Esplora il Catalogo</h1>
+  <p>Scopri prodotti streetwear emergenti caricati dai brand StitchVale</p>
+</section>
+
+<section class="catalog-layout">
+
+  <aside class="sidebar">
+    <h3>Categorie</h3>
+
+    <span class="category" onclick="filterCategory('all')">Tutti</span>
+    <span class="category" onclick="filterCategory('felpa')">Felpe</span>
+    <span class="category" onclick="filterCategory('tshirt')">T-shirt</span>
+    <span class="category" onclick="filterCategory('pantaloni')">Pantaloni</span>
+    <span class="category" onclick="filterCategory('giacca')">Giacche</span>
+    <span class="category" onclick="filterCategory('scarpe')">Scarpe</span>
+    <span class="category" onclick="filterCategory('cappelli')">Cappelli</span>
+    <span class="category" onclick="filterCategory('accessori')">Accessori</span>
+    <span class="category" onclick="filterCategory('borse')">Borse</span>
+    <span class="category" onclick="filterCategory('gioielli')">Gioielli</span>
+
+    <div class="filter-block">
+      <h3>Filtri</h3>
+      <span class="category" onclick="sortLow()">Prezzo crescente</span>
+      <span class="category" onclick="sortHigh()">Prezzo decrescente</span>
+      <span class="category" onclick="filterRecent()">Novità</span>
+      <span class="category" onclick="resetFilters()">Reset filtri</span>
+    </div>
+  </aside>
+
+  <main>
+    <p id="productsInfo" class="products-info">Caricamento prodotti...</p>
+    <div id="products" class="grid"></div>
+  </main>
+
+</section>
+
+<div id="cartPanel">
+  <h3>Carrello</h3>
+  <div id="cartItems"></div>
+  <p id="cartTotal">Totale: €0</p>
+
+  <button class="cart-button empty-btn" onclick="clearCart()">Svuota</button>
+
+  <a href="checkout.html">
+    <button class="cart-button checkout-btn">Vai al checkout</button>
+  </a>
+</div>
+
+<footer>
+  <h3>StitchVale</h3>
+  <p>Email: stitchvale1@gmail.com</p>
+  <p>Instagram: @stitchvale</p>
+</footer>
+
+  <script>
+    const API_URL = "http://localhost:3000";
+let allProducts = [];
+
+function isLoggedIn() {
+  return localStorage.getItem("token") !== null;
+}
+
+function requireLogin() {
+  if (!isLoggedIn()) {
+    alert("Devi accedere prima.");
+    window.location.href = "account.html";
+    return false;
+  }
+  return true;
+}
+
+function getProductImages(product) {
+  if (product.images && product.images.length > 0) return product.images;
+  if (product.image) return [product.image];
+  return [];
+}
+
+function changeCatalogImage(productId) {
+  const img = document.getElementById("catalog-img-" + productId);
+  const dots = document.querySelectorAll(".dot-" + productId);
+  const product = allProducts.find(p => String(p.id) === String(productId));
+
+  if (!product || !img) return;
+
+  const images = getProductImages(product);
+  if (images.length <= 1) return;
+
+  let index = Number(img.dataset.index || 0);
+  index = index + 1;
+
+  if (index >= images.length) index = 0;
+
+  img.dataset.index = index;
+  img.src = API_URL + "/uploads/" + images[index];
+
+  dots.forEach(dot => dot.classList.remove("active"));
+  if (dots[index]) dots[index].classList.add("active");
+}
+
+async function loadProducts() {
+  const res = await fetch(API_URL + "/products");
+  allProducts = await res.json();
+
+  showProducts(allProducts);
+  loadCart();
+}
+
+function showProducts(products) {
+  document.getElementById("productsInfo").innerText =
+    "Prodotti trovati: " + products.length;
+
+  if (products.length === 0) {
+    document.getElementById("products").innerHTML =
+      "<p>Nessun prodotto trovato.</p>";
+    return;
+  }
+
+  document.getElementById("products").innerHTML = products.map(p => {
+    const imgs = getProductImages(p);
+    const firstImg = imgs[0];
+
+    return `
+      <div class="card">
+        <div class="card-img" onclick="changeCatalogImage(${p.id})">
+          ${
+            firstImg
+              ? `<img id="catalog-img-${p.id}" data-index="0" src="${API_URL}/uploads/${firstImg}" alt="${p.name}">`
+              : ""
+          }
+
+          ${imgs.length > 1 ? `<div class="image-count">${imgs.length} foto</div>` : ""}
+
+          ${
+            imgs.length > 1
+              ? `
+                <div class="image-dots">
+                  ${imgs.map((img, index) => `
+                    <span class="dot-${p.id} ${index === 0 ? "active" : ""}"></span>
+                  `).join("")}
+                </div>
+              `
+              : ""
+          }
+        </div>
+
+        <div class="card-info">
+          <h3>
+            <a href="prodotto.html?id=${p.id}">
+              ${p.name}
+            </a>
+          </h3>
+
+          <p>
+            Brand:
+            <a class="brand-link" href="brand-page.html?brand=${encodeURIComponent(p.brand)}">
+              ${p.brand}
+            </a>
+          </p>
+
+          <p>Categoria: ${p.category}</p>
+          <p class="description">${p.description || "Nessuna info prodotto disponibile"}</p>
+          <p class="price">€${p.price}</p>
+
+          <button class="add-btn" onclick='addToCart(${JSON.stringify(p)})'>
+            Aggiungi al carrello
+          </button>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function aiSearch() {
+  const query = document.getElementById("searchInput").value.toLowerCase();
+
+  if (!query) {
+    showProducts(allProducts);
+    return;
+  }
+
+  const words = query.split(" ").filter(word => word.length > 1);
+
+  const results = allProducts.filter(p => {
+    const text = (
+      p.name + " " +
+      p.brand + " " +
+      p.category + " " +
+      (p.description || "")
+    ).toLowerCase();
+
+    return words.some(word => text.includes(word));
+  });
+
+  showProducts(results);
+}
+
+function filterCategory(category) {
+  if (category === "all") {
+    showProducts(allProducts);
+    return;
+  }
+
+  const results = allProducts.filter(p =>
+    String(p.category).toLowerCase() === category
+  );
+
+  showProducts(results);
+}
+
+function sortLow() {
+  const sorted = [...allProducts].sort((a, b) => Number(a.price) - Number(b.price));
+  showProducts(sorted);
+}
+
+function sortHigh() {
+  const sorted = [...allProducts].sort((a, b) => Number(b.price) - Number(a.price));
+  showProducts(sorted);
+}
+
+function filterRecent() {
+  const recent = [...allProducts].sort((a, b) =>
+    new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
+  );
+
+  showProducts(recent);
+}
+
+function resetFilters() {
+  document.getElementById("searchInput").value = "";
+  showProducts(allProducts);
+}
+
+function getCart() {
+  return JSON.parse(localStorage.getItem("cart")) || [];
+}
+
+function saveCart(cart) {
+  localStorage.setItem("cart", JSON.stringify(cart));
+}
+
+function addToCart(product) {
+  if (!requireLogin()) return;
+
+  let cart = getCart();
+  let existing = cart.find(item => item.id === product.id);
+
+  if (existing) {
+    existing.quantity++;
+  } else {
+    cart.push({...product, quantity: 1});
+  }
+
+  saveCart(cart);
+  loadCart();
+  alert("Prodotto aggiunto al carrello");
+}
+
+function loadCart() {
+  let cart = getCart();
+  let total = 0;
+
+  if (cart.length === 0) {
+    document.getElementById("cartItems").innerHTML = "<p>Carrello vuoto</p>";
+    document.getElementById("cartTotal").innerText = "Totale: €0";
+    return;
+  }
+
+  document.getElementById("cartItems").innerHTML = cart.map(item => {
+    let subtotal = Number(item.price) * item.quantity;
+    total += subtotal;
+
+    return `
+      <div class="cart-item">
+        <h4>${item.name}</h4>
+        <p>Quantità: ${item.quantity}</p>
+        <p>Subtotale: €${subtotal}</p>
+      </div>
+    `;
+  }).join("");
+
+  document.getElementById("cartTotal").innerText = "Totale: €" + total;
+}
+
+function clearCart() {
+  localStorage.removeItem("cart");
+  loadCart();
+}
+
+function toggleCart() {
+  let panel = document.getElementById("cartPanel");
+  panel.style.display = panel.style.display === "block" ? "none" : "block";
+}
+
+window.onload = function() {
+  loadProducts();
+  loadCart();
+};
+  </script>
+</body>
+</html>

@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html>
+
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>StitchVale</title>
+
+  <style>
+    body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #0d0d0d;
+  color: white;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 25px 35px;
+  background: black;
+  border-bottom: 1px solid #222;
+}
+
+.logo img {
+  height: 80px;
+}
+
+nav {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+nav a {
+  color: #aaa;
+  text-decoration: none;
+  font-size: 15px;
+}
+
+nav a:hover {
+  color: white;
+}
+
+.hero {
+  text-align: center;
+  padding: 90px 25px;
+  background: radial-gradient(circle at top, #1f1f1f, #0d0d0d 65%);
+}
+
+.hero h1 {
+  font-size: 54px;
+  margin-bottom: 20px;
+}
+
+.hero p {
+  color: #ccc;
+  font-size: 18px;
+  max-width: 780px;
+  margin: auto;
+  line-height: 1.6;
+}
+
+.buttons {
+  margin-top: 35px;
+}
+
+.buttons a {
+  display: inline-block;
+  margin: 8px;
+  padding: 14px 26px;
+  border-radius: 30px;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.primary {
+  background: white;
+  color: black;
+}
+
+.secondary {
+  border: 1px solid white;
+  color: white;
+}
+
+.section {
+  padding: 65px 25px;
+  text-align: center;
+}
+
+.section h2 {
+  font-size: 34px;
+  margin-bottom: 10px;
+}
+
+.section p {
+  color: #aaa;
+  max-width: 700px;
+  margin: auto;
+  line-height: 1.5;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 22px;
+  max-width: 1150px;
+  margin: 35px auto 0;
+}
+
+.card {
+  background: #1a1a1a;
+  padding: 28px 20px;
+  border-radius: 18px;
+  border: 1px solid #222;
+}
+
+.card h3 {
+  margin-bottom: 10px;
+}
+
+.card p {
+  font-size: 14px;
+}
+
+.highlight {
+  background: linear-gradient(135deg, #111, #1f1f1f, #000);
+  border-top: 1px solid #222;
+  border-bottom: 1px solid #222;
+}
+
+footer {
+  padding: 40px 20px;
+  text-align: center;
+  border-top: 1px solid #222;
+  color: #aaa;
+}
+
+/* MOBILE */
+@media (max-width: 900px) {
+  header {
+    flex-direction: column;
+    gap: 18px;
+    padding: 22px 15px;
+  }
+
+  .logo img {
+    height: 70px;
+  }
+
+  nav {
+    justify-content: center;
+    gap: 14px;
+  }
+
+  nav a {
+    font-size: 14px;
+  }
+
+  .hero {
+    padding: 70px 20px;
+  }
+
+  .hero h1 {
+    font-size: 40px;
+  }
+
+  .hero p {
+    font-size: 16px;
+  }
+
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .hero h1 {
+    font-size: 34px;
+  }
+
+  .buttons a {
+    display: block;
+    margin: 12px auto;
+    max-width: 260px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .section h2 {
+    font-size: 28px;
+  }
+}
+  </style>
+
+  
+</head>
+<body>
+  <header>
+  <div class="logo">
+    <a href="index.html">
+      <img src="logo3.jpg" alt="StitchVale Logo">
+    </a>
+  </div>
+
+  <nav>
+    <a href="novita.html">Novità</a>
+    <a href="catalogo.html">Catalogo</a>
+    <a href="brand.html">Brand</a>
+    <a href="idee.html">Idee</a>
+    <a href="outfit.html">AI Outfit</a>
+    <a href="account.html">Account</a>
+  </nav>
+</header>
+
+<section class="hero">
+  <h1>Il futuro dello streetwear emergente parte da qui</h1>
+
+  <p>
+    StitchVale connette brand emergenti, creativi e appassionati di moda.
+    Scopri capi originali, carica le tue idee, trova nuovi brand e crea il prossimo trend.
+  </p>
+
+  <div class="buttons">
+    <a href="catalogo.html" class="primary">Esplora catalogo</a>
+    <a href="idee.html" class="secondary">Carica la tua idea</a>
+  </div>
+</section>
+
+<section class="section">
+  <h2>🔥 Cosa puoi fare</h2>
+  <p>Una piattaforma pensata per scoprire, creare e vendere streetwear indipendente.</p>
+
+  <div class="grid">
+    <div class="card">
+      <h3>Scopri prodotti</h3>
+      <p>Esplora capi caricati da brand emergenti e trova il tuo stile.</p>
+    </div>
+
+    <div class="card">
+      <h3>Carica idee</h3>
+      <p>Condividi concept, bozze e design con la community.</p>
+    </div>
+
+    <div class="card">
+      <h3>Diventa brand</h3>
+      <p>Crea il tuo profilo, carica prodotti e costruisci il tuo pubblico.</p>
+    </div>
+
+    <div class="card">
+      <h3>AI Outfit</h3>
+      <p>Descrivi lo stile che cerchi e ricevi suggerimenti dal catalogo.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section highlight">
+  <h2>🚀 Inizia ora</h2>
+  <p>Scopri nuovi prodotti, crea un account o pubblica il tuo brand su StitchVale.</p>
+
+  <div class="buttons">
+    <a href="account.html" class="primary">Crea account</a>
+    <a href="brand.html" class="secondary">Area brand</a>
+  </div>
+</section>
+
+<footer>
+  <h3>StitchVale</h3>
+  <p>Email: stitchvale1@gmail.com</p>
+  <p>Instagram: @stitchvale</p>
+</footer>
+
+  <script>
+    
+  </script>
+</body>
+</html>
