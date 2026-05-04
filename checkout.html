@@ -237,7 +237,39 @@ footer {
 }
   </style>
 
-  
+  <script>
+async function pagaConStripe() {
+  const cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+  if (cart.length === 0) {
+    alert("Il carrello è vuoto");
+    return;
+  }
+
+  const totale = cart.reduce((sum, item) => {
+    return sum + Number(item.price) * Number(item.quantity || 1);
+  }, 0);
+
+  const res = await fetch("https://stitchvale-api.onrender.com/create-checkout-session", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      name: "Ordine StitchVale",
+      price: totale
+    })
+  });
+
+  const data = await res.json();
+
+  if (data.url) {
+    window.location.href = data.url;
+  } else {
+    alert("Errore pagamento");
+  }
+}
+</script>
 </head>
 <body>
   <header>
