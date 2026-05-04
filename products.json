@@ -1,16 +1,11 @@
 [
   {
-    "id": 1777294103559,
+    "id": 1,
     "name": "Felpa nera",
     "brand": "StitchVale",
-    "category": "felpa",
-    "description": "100% cotone",
-    "price": 100,
-    "images": [
-      "109b3d85603c9898b4cceb48c18139a2"
-    ],
-    "image": "109b3d85603c9898b4cceb48c18139a2",
-    "createdAt": "2026-04-27T12:48:23.559Z",
-    "createdBy": "federicacertrato@gmail.com"
+    "category": "Felpe",
+    "description": "Felpa streetwear nera oversize",
+    "price": 50,
+    "image": "logo3.jpg"
   }
 ]
