@@ -168,8 +168,8 @@ app.post("/create-checkout-session", async (req, res) => {
           quantity: 1
         }
       ],
-      success_url: "https://stitchvale-1.onrender.com/success.html",
-      cancel_url: "https://stitchvale-1.onrender.com/cancel.html"
+      success_url: "https://stitchvale-1.onrender.com/home.html",
+      cancel_url: "https://stitchvale-1.onrender.com/checkout.html"
     });
 
     res.json({ url: session.url });
