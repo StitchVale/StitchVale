@@ -1,343 +1,182 @@
 const express = require("express");
 const cors = require("cors");
 const fs = require("fs");
-const multer = require("multer");
-const bcrypt = require("bcrypt");
+const path = require("path");
+const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const Stripe = require("stripe");
 
 const app = express();
+const PORT = process.env.PORT || 10000;
+
+const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+const JWT_SECRET = process.env.JWT_SECRET || "stitchvale_secret_key";
 
 app.use(cors());
 app.use(express.json());
-app.use("/uploads", express.static("uploads"));
 app.use(express.static(__dirname));
 
-const upload = multer({ dest: "uploads/" });
+const usersFile = path.join(__dirname, "users.json");
+const productsFile = path.join(__dirname, "products.json");
+const ordersFile = path.join(__dirname, "orders.json");
 
-const IDEAS_FILE = "ideas.json";
-const USERS_FILE = "users.json";
-const PRODUCTS_FILE = "products.json";
-const BRANDS_FILE = "brands.json";
-const ORDERS_FILE = "orders.json";
-
-const SECRET = "stitchvale_secret_key";
-
-function readFile(file) {
-  if (!fs.existsSync(file)) {
-    fs.writeFileSync(file, JSON.stringify([]));
-  }
-
-  const content = fs.readFileSync(file, "utf8").trim();
-
-  if (!content) {
-    fs.writeFileSync(file, JSON.stringify([]));
-    return [];
-  }
-
-  return JSON.parse(content);
+function readJSON(file) {
+  if (!fs.existsSync(file)) fs.writeFileSync(file, "[]");
+  return JSON.parse(fs.readFileSync(file));
 }
 
-function saveFile(file, data) {
+function writeJSON(file, data) {
   fs.writeFileSync(file, JSON.stringify(data, null, 2));
 }
 
-function clean(text) {
-  return String(text || "").trim();
-}
-
-function isValidEmail(email) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-}
-
-function verifyToken(req, res, next) {
-  const authHeader = req.headers.authorization;
-
-  if (!authHeader) {
-    return res.status(401).json({ message: "Devi effettuare il login" });
-  }
-
-  const token = authHeader.split(" ")[1];
-
-  try {
-    req.user = jwt.verify(token, SECRET);
-    next();
-  } catch {
-    return res.status(401).json({ message: "Sessione scaduta" });
-  }
-}
-
-function requireBrand(req, res, next) {
-  if (req.user.role !== "brand") {
-    return res.status(403).json({ message: "Solo i brand possono fare questa azione" });
-  }
-
-  next();
-}
-
-/* HOME COUNTDOWN */
 app.get("/", (req, res) => {
-  res.sendFile(__dirname + "/index.html");
+  res.send("Server StitchVale attivo");
 });
 
-/* IDEE */
-app.post("/upload", verifyToken, upload.array("images", 8), (req, res) => {
-  const title = clean(req.body.title);
-  const description = clean(req.body.description);
-  const contact = clean(req.body.contact);
-
-  if (!title || !description || !contact) {
-    return res.status(400).json({ message: "Campi obbligatori mancanti" });
-  }
-
-  const ideas = readFile(IDEAS_FILE);
-  const images = req.files ? req.files.map(f => f.filename) : [];
-
-  const newIdea = {
-    id: Date.now(),
-    title,
-    description,
-    contact,
-    images,
-    image: images[0] || null,
-    likes: 0,
-    createdBy: req.user.email,
-    createdAt: new Date().toISOString()
-  };
-
-  ideas.push(newIdea);
-  saveFile(IDEAS_FILE, ideas);
-
-  res.json(newIdea);
-});
-
-app.get("/ideas", (req, res) => {
-  const ideas = readFile(IDEAS_FILE);
-  ideas.sort((a, b) => b.likes - a.likes);
-  res.json(ideas);
-});
-
-app.post("/like/:id", verifyToken, (req, res) => {
-  const ideas = readFile(IDEAS_FILE);
-  const idea = ideas.find(i => i.id == req.params.id);
-
-  if (!idea) {
-    return res.status(404).json({ message: "Idea non trovata" });
-  }
-
-  idea.likes++;
-  saveFile(IDEAS_FILE, ideas);
-
-  res.json(idea);
-});
-
-/* UTENTI */
+/* REGISTER */
 app.post("/register", async (req, res) => {
-  const email = clean(req.body.email).toLowerCase();
-  const password = clean(req.body.password);
-  const role = clean(req.body.role) === "brand" ? "brand" : "user";
+  const { email, password, role } = req.body;
 
-  if (!isValidEmail(email)) {
-    return res.status(400).json({ message: "Email non valida" });
+  if (!email || !password) {
+    return res.status(400).json({ message: "Email e password obbligatorie" });
   }
 
-  if (password.length < 6) {
-    return res.status(400).json({ message: "Password troppo corta" });
-  }
-
-  const users = readFile(USERS_FILE);
+  const users = readJSON(usersFile);
 
   if (users.find(u => u.email === email)) {
     return res.status(400).json({ message: "Utente già registrato" });
   }
 
-  const hashed = await bcrypt.hash(password, 10);
+  const hashedPassword = await bcrypt.hash(password, 10);
 
   users.push({
     id: Date.now(),
     email,
-    password: hashed,
-    role,
-    createdAt: new Date().toISOString()
+    password: hashedPassword,
+    role: role || "user"
   });
 
-  saveFile(USERS_FILE, users);
+  writeJSON(usersFile, users);
 
   res.json({ message: "Registrazione completata" });
 });
 
+/* LOGIN */
 app.post("/login", async (req, res) => {
-  const email = clean(req.body.email).toLowerCase();
-  const password = clean(req.body.password);
+  const { email, password } = req.body;
 
-  const users = readFile(USERS_FILE);
+  const users = readJSON(usersFile);
   const user = users.find(u => u.email === email);
 
   if (!user) {
     return res.status(400).json({ message: "Utente non trovato" });
   }
 
-  const valid = await bcrypt.compare(password, user.password);
+  const validPassword = await bcrypt.compare(password, user.password);
 
-  if (!valid) {
+  if (!validPassword) {
     return res.status(400).json({ message: "Password errata" });
   }
 
   const token = jwt.sign(
-    {
-      id: user.id,
-      email: user.email,
-      role: user.role
-    },
-    SECRET,
+    { id: user.id, email: user.email, role: user.role },
+    JWT_SECRET,
     { expiresIn: "7d" }
   );
 
   res.json({
-    message: "Login riuscito",
+    message: "Login effettuato",
     token,
     email: user.email,
     role: user.role
   });
 });
 
-/* PRODOTTI */
-app.post("/products", verifyToken, requireBrand, upload.array("images", 8), (req, res) => {
-  const name = clean(req.body.name);
-  const category = clean(req.body.category);
-  const description = clean(req.body.description);
-  const price = Number(req.body.price);
+/* MIDDLEWARE TOKEN */
+function auth(req, res, next) {
+  const header = req.headers.authorization;
 
-  const brands = readFile(BRANDS_FILE);
-  const brandProfile = brands.find(b => b.createdBy === req.user.email);
-
-  if (!brandProfile) {
-    return res.status(400).json({ message: "Crea prima il profilo brand" });
+  if (!header) {
+    return res.status(401).json({ message: "Token mancante" });
   }
 
-  if (!name || !category || !description) {
-    return res.status(400).json({ message: "Campi mancanti" });
+  const token = header.split(" ")[1];
+
+  try {
+    req.user = jwt.verify(token, JWT_SECRET);
+    next();
+  } catch {
+    res.status(401).json({ message: "Token non valido" });
   }
+}
 
-  if (!price || price <= 0) {
-    return res.status(400).json({ message: "Prezzo non valido" });
-  }
+/* PRODUCTS */
+app.get("/products", (req, res) => {
+  const products = readJSON(productsFile);
+  res.json(products);
+});
 
-  const products = readFile(PRODUCTS_FILE);
-  const images = req.files ? req.files.map(f => f.filename) : [];
+app.post("/products", auth, (req, res) => {
+  const products = readJSON(productsFile);
 
-  const newProduct = {
+  const product = {
     id: Date.now(),
-    name,
-    brand: brandProfile.name,
-    category,
-    description,
-    price,
-    images,
-    image: images[0] || null,
+    name: req.body.name,
+    brand: req.body.brand,
+    category: req.body.category,
+    description: req.body.description,
+    price: Number(req.body.price),
+    image: req.body.image || "",
     createdAt: new Date().toISOString(),
     createdBy: req.user.email
   };
 
-  products.push(newProduct);
-  saveFile(PRODUCTS_FILE, products);
+  products.push(product);
+  writeJSON(productsFile, products);
 
-  res.json({
-    message: "Prodotto caricato",
-    product: newProduct
-  });
+  res.json({ message: "Prodotto aggiunto", product });
 });
 
-app.get("/products", (req, res) => {
-  const products = readFile(PRODUCTS_FILE);
-  products.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
-  res.json(products);
-});
-
-/* BRAND */
-app.post("/brands", verifyToken, requireBrand, upload.single("logo"), (req, res) => {
-  const name = clean(req.body.name);
-  const bio = clean(req.body.bio);
-
-  if (!name || !bio) {
-    return res.status(400).json({ message: "Campi mancanti" });
-  }
-
-  const brands = readFile(BRANDS_FILE);
-  const existing = brands.find(b => b.createdBy === req.user.email);
-
-  if (existing) {
-    existing.name = name;
-    existing.bio = bio;
-    existing.logo = req.file ? req.file.filename : existing.logo;
-    existing.updatedAt = new Date().toISOString();
-    existing.updatedBy = req.user.email;
-
-    saveFile(BRANDS_FILE, brands);
-
-    return res.json({
-      message: "Brand aggiornato",
-      brand: existing
-    });
-  }
-
-  const newBrand = {
-    id: Date.now(),
-    name,
-    bio,
-    logo: req.file ? req.file.filename : null,
-    createdBy: req.user.email,
-    createdAt: new Date().toISOString()
-  };
-
-  brands.push(newBrand);
-  saveFile(BRANDS_FILE, brands);
-
-  res.json({
-    message: "Brand creato",
-    brand: newBrand
-  });
-});
-
-app.get("/brands", (req, res) => {
-  res.json(readFile(BRANDS_FILE));
-});
-
-/* ORDINI */
-app.post("/orders", verifyToken, (req, res) => {
-  const orders = readFile(ORDERS_FILE);
-
-  const newOrder = {
-    id: Date.now(),
-    customer: req.body.customer,
-    items: req.body.items,
-    total: req.body.total,
-    paymentMethod: req.body.paymentMethod,
-    notes: req.body.notes,
-    createdAt: new Date().toISOString(),
-    userEmail: req.user.email
-  };
-
-  orders.push(newOrder);
-  saveFile(ORDERS_FILE, orders);
-
-  res.json({
-    message: "Ordine salvato",
-    order: newOrder
-  });
-});
-
-app.get("/orders", verifyToken, (req, res) => {
-  const orders = readFile(ORDERS_FILE);
-
-  const userOrders = orders
-    .filter(o => o.userEmail === req.user.email)
-    .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
-
+/* ORDERS */
+app.get("/orders", auth, (req, res) => {
+  const orders = readJSON(ordersFile);
+  const userOrders = orders.filter(order => order.email === req.user.email);
   res.json(userOrders);
 });
 
-/* SERVER */
-const PORT = process.env.PORT || 3000;
+/* STRIPE CHECKOUT */
+app.post("/create-checkout-session", async (req, res) => {
+  try {
+    const { name, price } = req.body;
+
+    if (!name || !price) {
+      return res.status(400).json({ error: "Nome e prezzo obbligatori" });
+    }
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      mode: "payment",
+      line_items: [
+        {
+          price_data: {
+            currency: "eur",
+            product_data: {
+              name: name
+            },
+            unit_amount: Math.round(Number(price) * 100)
+          },
+          quantity: 1
+        }
+      ],
+      success_url: "https://stitchvale-1.onrender.com/success.html",
+      cancel_url: "https://stitchvale-1.onrender.com/cancel.html"
+    });
+
+    res.json({ url: session.url });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 app.listen(PORT, () => {
   console.log("Server avviato su porta " + PORT);

@@ -324,7 +324,7 @@ footer {
         <p class="small">Pagherai al momento della consegna.</p>
       </div>
 
-      <button onclick="completeOrder()">Conferma ordine</button>
+      <button onclick="pagaConStripe()">Paga con carta</button>
 
       <div class="success" id="successMessage">
         Ordine completato!
@@ -341,7 +341,7 @@ footer {
 </footer>
 
   <script>
-    const API_URL = "http://localhost:3000";
+    const API_URL = "https://stitchvale.onrender.com";
 let selectedPayment = "card";
 
 function isLoggedIn() {
@@ -514,5 +514,40 @@ async function completeOrder() {
 
 window.onload = loadCheckout;
   </script>
+  <script>
+const API_URL = "https://stitchvale-api.onrender.com";
+
+async function pagaConStripe() {
+  const cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+  if (cart.length === 0) {
+    alert("Carrello vuoto");
+    return;
+  }
+
+  const totale = cart.reduce((sum, item) => {
+    return sum + (item.price * item.quantity);
+  }, 0);
+
+  const res = await fetch(API_URL + "/create-checkout-session", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      name: "Ordine StitchVale",
+      price: totale
+    })
+  });
+
+  const data = await res.json();
+
+  if (data.url) {
+    window.location.href = data.url;
+  } else {
+    alert("Errore pagamento");
+  }
+}
+</script>
 </body>
 </html>
