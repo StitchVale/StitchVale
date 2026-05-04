@@ -1,14 +1,12 @@
 <!DOCTYPE html>
 <html>
-
-<html>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Checkout - StitchVale</title>
 
   <style>
-    body {
+body {
   margin: 0;
   font-family: Arial, sans-serif;
   background: #0d0d0d;
@@ -236,144 +234,113 @@ footer {
   }
 }
   </style>
-
-  <script>
-async function pagaConStripe() {
-  const cart = JSON.parse(localStorage.getItem("cart")) || [];
-
-  if (cart.length === 0) {
-    alert("Il carrello è vuoto");
-    return;
-  }
-
-  const totale = cart.reduce((sum, item) => {
-    return sum + Number(item.price) * Number(item.quantity || 1);
-  }, 0);
-
-  const res = await fetch("https://stitchvale-api.onrender.com/create-checkout-session", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      name: "Ordine StitchVale",
-      price: totale
-    })
-  });
-
-  const data = await res.json();
-
-  if (data.url) {
-    window.location.href = data.url;
-  } else {
-    alert("Errore pagamento");
-  }
-}
-</script>
 </head>
+
 <body>
   <header>
-  <div class="logo">
-    <a href="home.html">
-      <img src="logo3.jpg" alt="StitchVale Logo">
-    </a>
-  </div>
-
-  <nav>
-    <a href="novita.html">Novità</a>
-    <a href="brand.html">Brand</a>
-    <a href="account.html">Account</a>
-    <a href="catalogo.html">Catalogo</a>
-    <a href="idee.html">Idee</a>
-    <a href="outfit.html">AI Outfit</a>
-  </nav>
-</header>
-
-<section class="hero">
-  <h1>Checkout</h1>
-  <p>Completa il tuo ordine su StitchVale.</p>
-</section>
-
-<section class="section">
-  <div id="loginWarning" class="warning">
-    Devi accedere prima di completare l’ordine.
-  </div>
-
-  <div class="checkout-layout">
-
-    <div class="box">
-      <h2>Il tuo carrello</h2>
-      <div id="cartItems"></div>
-      <p class="total" id="cartTotal">Totale: €0</p>
+    <div class="logo">
+      <a href="home.html">
+        <img src="logo3.jpg" alt="StitchVale Logo">
+      </a>
     </div>
 
-    <div class="box">
-      <h2>Dati ordine</h2>
+    <nav>
+      <a href="novita.html">Novità</a>
+      <a href="brand.html">Brand</a>
+      <a href="account.html">Account</a>
+      <a href="catalogo.html">Catalogo</a>
+      <a href="idee.html">Idee</a>
+      <a href="outfit.html">AI Outfit</a>
+    </nav>
+  </header>
 
-      <input id="name" placeholder="Nome e cognome">
-      <input id="email" placeholder="Email">
-      <input id="address" placeholder="Indirizzo di spedizione">
-      <textarea id="notes" placeholder="Note ordine"></textarea>
+  <section class="hero">
+    <h1>Checkout</h1>
+    <p>Completa il tuo ordine su StitchVale.</p>
+  </section>
 
-      <h2>Metodo di pagamento</h2>
-
-      <div class="payment-methods">
-        <div class="payment-option active" onclick="selectPayment('card', this)">
-          💳 Carta di credito/debito
-        </div>
-
-        <div class="payment-option" onclick="selectPayment('paypal', this)">
-          🅿️ PayPal
-        </div>
-
-        <div class="payment-option" onclick="selectPayment('applepay', this)">
-           Apple Pay
-        </div>
-
-        <div class="payment-option" onclick="selectPayment('cash', this)">
-          📦 Pagamento alla consegna
-        </div>
-      </div>
-
-      <div id="cardDetails" class="payment-details active">
-        <input id="cardNumber" placeholder="Numero carta">
-        <input id="cardName" placeholder="Nome sulla carta">
-        <input id="cardExpiry" placeholder="Scadenza MM/AA">
-        <input id="cardCvc" placeholder="CVC">
-        <p class="small">Pagamento simulato: nessun dato reale verrà processato.</p>
-      </div>
-
-      <div id="paypalDetails" class="payment-details">
-        <input id="paypalEmail" placeholder="Email PayPal">
-        <p class="small">Pagamento PayPal simulato.</p>
-      </div>
-
-      <div id="applepayDetails" class="payment-details">
-        <p class="small">Apple Pay simulato. Conferma l’ordine per continuare.</p>
-      </div>
-
-      <div id="cashDetails" class="payment-details">
-        <p class="small">Pagherai al momento della consegna.</p>
-      </div>
-
-      <button onclick="pagaConStripe()">Paga con carta</button>
-
-      <div class="success" id="successMessage">
-        Ordine completato!
-      </div>
+  <section class="section">
+    <div id="loginWarning" class="warning">
+      Devi accedere prima di completare l’ordine.
     </div>
 
-  </div>
-</section>
+    <div class="checkout-layout">
 
-<footer>
-  <h3>StitchVale</h3>
-  <p>Email: stitchvale1@gmail.com</p>
-  <p>Instagram: @stitchvale</p>
-</footer>
+      <div class="box">
+        <h2>Il tuo carrello</h2>
+        <div id="cartItems"></div>
+        <p class="total" id="cartTotal">Totale: €0</p>
+      </div>
+
+      <div class="box">
+        <h2>Dati ordine</h2>
+
+        <input id="name" placeholder="Nome e cognome">
+        <input id="email" placeholder="Email">
+        <input id="address" placeholder="Indirizzo di spedizione">
+        <textarea id="notes" placeholder="Note ordine"></textarea>
+
+        <h2>Metodo di pagamento</h2>
+
+        <div class="payment-methods">
+          <div class="payment-option active" onclick="selectPayment('card', this)">
+            💳 Carta di credito/debito
+          </div>
+
+          <div class="payment-option" onclick="selectPayment('paypal', this)">
+            🅿️ PayPal
+          </div>
+
+          <div class="payment-option" onclick="selectPayment('applepay', this)">
+             Apple Pay
+          </div>
+
+          <div class="payment-option" onclick="selectPayment('cash', this)">
+            📦 Pagamento alla consegna
+          </div>
+        </div>
+
+        <div id="cardDetails" class="payment-details active">
+          <input id="cardNumber" placeholder="Numero carta">
+          <input id="cardName" placeholder="Nome sulla carta">
+          <input id="cardExpiry" placeholder="Scadenza MM/AA">
+          <input id="cardCvc" placeholder="CVC">
+          <p class="small">Pagamento sicuro tramite Stripe. Verrai reindirizzato alla pagina di pagamento.</p>
+        </div>
+
+        <div id="paypalDetails" class="payment-details">
+          <input id="paypalEmail" placeholder="Email PayPal">
+          <p class="small">PayPal non è ancora attivo. Usa il pagamento con carta.</p>
+        </div>
+
+        <div id="applepayDetails" class="payment-details">
+          <p class="small">Apple Pay sarà gestito tramite Stripe quando disponibile.</p>
+        </div>
+
+        <div id="cashDetails" class="payment-details">
+          <p class="small">Pagamento alla consegna non ancora disponibile.</p>
+        </div>
+
+        <button onclick="pagaConStripe()">Paga con carta</button>
+
+        <div class="success" id="successMessage">
+          Ordine completato!
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <footer>
+    <h3>StitchVale</h3>
+    <p>Email: stitchvale1@gmail.com</p>
+    <p>Instagram: @stitchvale</p>
+  </footer>
 
   <script>
-    const API_URL = "https://stitchvale.onrender.com";
+const API_URL = "https://stitchvale.onrender.com";
+const STRIPE_API_URL = "https://stitchvale-api.onrender.com";
+
 let selectedPayment = "card";
 
 function isLoggedIn() {
@@ -438,14 +405,14 @@ function loadCheckout() {
   let total = 0;
 
   cartItems.innerHTML = cart.map(item => {
-    const subtotal = Number(item.price) * item.quantity;
+    const subtotal = Number(item.price) * Number(item.quantity || 1);
     total += subtotal;
 
     return `
       <div class="cart-item">
         <h3>${item.name}</h3>
         <p>Brand: ${item.brand}</p>
-        <p>Quantità: ${item.quantity}</p>
+        <p>Quantità: ${item.quantity || 1}</p>
         <p>Subtotale: €${subtotal}</p>
       </div>
     `;
@@ -455,25 +422,9 @@ function loadCheckout() {
 }
 
 function validatePayment() {
-  if (selectedPayment === "card") {
-    const cardNumber = document.getElementById("cardNumber").value;
-    const cardName = document.getElementById("cardName").value;
-    const cardExpiry = document.getElementById("cardExpiry").value;
-    const cardCvc = document.getElementById("cardCvc").value;
-
-    if (!cardNumber || !cardName || !cardExpiry || !cardCvc) {
-      alert("Compila tutti i dati della carta.");
-      return false;
-    }
-  }
-
-  if (selectedPayment === "paypal") {
-    const paypalEmail = document.getElementById("paypalEmail").value;
-
-    if (!paypalEmail) {
-      alert("Inserisci l'email PayPal.");
-      return false;
-    }
+  if (selectedPayment !== "card") {
+    alert("Per ora è disponibile solo il pagamento con carta tramite Stripe.");
+    return false;
   }
 
   return true;
@@ -503,7 +454,7 @@ async function completeOrder() {
   let total = 0;
 
   cart.forEach(item => {
-    total += Number(item.price) * item.quantity;
+    total += Number(item.price) * Number(item.quantity || 1);
   });
 
   const orderData = {
@@ -544,42 +495,56 @@ async function completeOrder() {
   loadCheckout();
 }
 
-window.onload = loadCheckout;
-  </script>
-  <script>
-const API_URL = "https://stitchvale-api.onrender.com";
-
 async function pagaConStripe() {
-  const cart = JSON.parse(localStorage.getItem("cart")) || [];
+  if (!requireLogin()) return;
+
+  const cart = getCart();
+
+  const name = document.getElementById("name").value;
+  const email = document.getElementById("email").value;
+  const address = document.getElementById("address").value;
 
   if (cart.length === 0) {
     alert("Carrello vuoto");
     return;
   }
 
+  if (!name || !email || !address) {
+    alert("Compila nome, email e indirizzo prima di pagare.");
+    return;
+  }
+
+  if (!validatePayment()) return;
+
   const totale = cart.reduce((sum, item) => {
-    return sum + (item.price * item.quantity);
+    return sum + Number(item.price) * Number(item.quantity || 1);
   }, 0);
 
-  const res = await fetch(API_URL + "/create-checkout-session", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      name: "Ordine StitchVale",
-      price: totale
-    })
-  });
+  try {
+    const res = await fetch(STRIPE_API_URL + "/create-checkout-session", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        name: "Ordine StitchVale",
+        price: totale
+      })
+    });
 
-  const data = await res.json();
+    const data = await res.json();
 
-  if (data.url) {
-    window.location.href = data.url;
-  } else {
-    alert("Errore pagamento");
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      alert("Errore pagamento: " + (data.error || "riprova"));
+    }
+  } catch (error) {
+    alert("Errore di connessione al pagamento.");
   }
 }
-</script>
+
+window.onload = loadCheckout;
+  </script>
 </body>
 </html>
