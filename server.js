@@ -28,16 +28,38 @@ app.post("/webhook", express.raw({ type: "application/json" }), (req, res) => {
     console.log("Webhook signature error:", err.message);
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
+if (event.type === "checkout.session.completed") {
+  const session = event.data.object;
 
-  if (event.type === "checkout.session.completed") {
-    const session = event.data.object;
+  console.log("Pagamento completato:", session.id);
+  console.log("Email cliente:", session.customer_details?.email);
+  console.log("Totale:", session.amount_total / 100);
 
-    console.log("Pagamento completato:", session.id);
-    console.log("Email cliente:", session.customer_details?.email);
-    console.log("Totale:", session.amount_total / 100);
+  const orders = readJSON(ordersFile);
 
-    // Qui dopo salveremo l'ordine vero
+  const ordineEsisteGia = orders.find(order => order.stripeSessionId === session.id);
+
+  if (!ordineEsisteGia) {
+    const newOrder = {
+      id: Date.now(),
+      stripeSessionId: session.id,
+      email: session.customer_details?.email || "Email non disponibile",
+      name: session.customer_details?.name || "Nome non disponibile",
+      total: session.amount_total / 100,
+      currency: session.currency,
+      status: "paid",
+      paymentStatus: session.payment_status,
+      createdAt: new Date().toISOString()
+    };
+
+    orders.push(newOrder);
+    writeJSON(ordersFile, orders);
+
+    console.log("Ordine salvato:", newOrder.id);
+  } else {
+    console.log("Ordine già salvato:", session.id);
   }
+} 
 
   res.json({ received: true });
 });
