@@ -5,6 +5,7 @@ const path = require("path");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const Stripe = require("stripe");
+const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
 const app = express();
 const PORT = process.env.PORT || 10000;
@@ -13,6 +14,35 @@ const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 const JWT_SECRET = process.env.JWT_SECRET || "stitchvale_secret_key";
 
 app.use(cors());
+app.post("/webhook", express.raw({ type: "application/json" }), (req, res) => {
+  const sig = req.headers["stripe-signature"];
+
+  let event;
+
+  try {
+    event = stripe.webhooks.constructEvent(
+      req.body,
+      sig,
+      process.env.STRIPE_WEBHOOK_SECRET
+    );
+  } catch (err) {
+    console.log("Webhook signature error:", err.message);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+
+  if (event.type === "checkout.session.completed") {
+    const session = event.data.object;
+
+    console.log("Pagamento completato:", session.id);
+    console.log("Email cliente:", session.customer_details?.email);
+    console.log("Totale:", session.amount_total / 100);
+
+    // Qui dopo salveremo l'ordine vero
+  }
+
+  res.json({ received: true });
+});
+
 app.use(express.json());
 app.use(express.static(__dirname));
 
@@ -168,8 +198,8 @@ app.post("/create-checkout-session", async (req, res) => {
           quantity: 1
         }
       ],
-      success_url: "https://stitchvale-1.onrender.com/home.html",
-      cancel_url: "https://stitchvale-1.onrender.com/checkout.html"
+      success_url: "https://www.stitchvale.com/success.html",
+      cancel_url: "https://www.stitchvale.com/cancel.html"
     });
 
     res.json({ url: session.url });
