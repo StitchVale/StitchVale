@@ -194,7 +194,16 @@ app.get("/orders", auth, (req, res) => {
   const userOrders = orders.filter(order => order.email === req.user.email);
   res.json(userOrders);
 });
+app.get("/admin-orders", (req, res) => {
+  const password = req.query.password;
 
+  if (password !== "STITCHVALEADMIN") {
+    return res.status(403).json({ message: "Accesso negato" });
+  }
+
+  const orders = readJSON(ordersFile);
+  res.json(orders);
+});
 /* STRIPE CHECKOUT */
 app.post("/create-checkout-session", async (req, res) => {
   try {
