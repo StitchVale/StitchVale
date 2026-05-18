@@ -10,7 +10,6 @@ const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 const JWT_SECRET = process.env.JWT_SECRET || "stitchvale_secret_key";
 
 app.use(cors());
