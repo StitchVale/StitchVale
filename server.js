@@ -232,6 +232,6 @@ app.post("/create-checkout-session", async (req, res) => {
 app.listen(PORT, () => {
   console.log("Server avviato su porta " + PORT);
 });
-.
+
 
 
