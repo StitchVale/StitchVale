@@ -306,6 +306,30 @@ app.get("/admin-users", (req, res) => {
 
   res.json(users);
 });
+/* BRAND IN ATTESA */
+app.get("/pending-brands", (req, res) => {
+  const password = req.query.password;
+
+  if (password !== "STITCHVALEADMIN") {
+    return res.status(403).json({
+      message: "Accesso negato"
+    });
+  }
+
+  const users = readJSON(usersFile);
+
+  const pendingBrands = users
+    .filter(user => user.role === "brand" && user.approved !== true)
+    .map(user => ({
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      approved: user.approved,
+      createdAt: user.createdAt
+    }));
+
+  res.json(pendingBrands);
+});
 
 /* APPROVA BRAND */
 app.post("/approve-brand", (req, res) => {
