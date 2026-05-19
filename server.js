@@ -285,7 +285,6 @@ app.get("/admin-orders", (req, res) => {
   const orders = readJSON(ordersFile);
   res.json(orders);
 });
-
 /* ADMIN USERS */
 app.get("/admin-users", (req, res) => {
   const password = req.query.password;
@@ -306,6 +305,7 @@ app.get("/admin-users", (req, res) => {
 
   res.json(users);
 });
+
 /* BRAND IN ATTESA */
 app.get("/pending-brands", (req, res) => {
   const password = req.query.password;
@@ -330,7 +330,6 @@ app.get("/pending-brands", (req, res) => {
 
   res.json(pendingBrands);
 });
-
 /* APPROVA BRAND */
 app.post("/approve-brand", (req, res) => {
   const { password, email } = req.body;
