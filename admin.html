@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin StitchVale</title>
+
+  <style>
+    body{
+      background:#111;
+      color:white;
+      font-family:Arial;
+      max-width:600px;
+      margin:auto;
+      padding:40px 20px;
+    }
+
+    input, button{
+      width:100%;
+      padding:12px;
+      margin-bottom:15px;
+      border:none;
+      border-radius:8px;
+      box-sizing:border-box;
+    }
+
+    button{
+      background:white;
+      color:black;
+      font-weight:bold;
+      cursor:pointer;
+    }
+
+    #result{
+      margin-top:20px;
+      color:#ccc;
+    }
+  </style>
+
+  
+</head>
+<body>
+  <h1>Admin StitchVale</h1>
+
+<input
+  type="email"
+  id="email"
+  placeholder="Email del brand"
+/>
+
+<button onclick="approveBrand()">
+  Approva Brand
+</button>
+
+<div id="result"></div>
+
+  <script>
+    const API_URL = "https://stitchvale-api.onrender.com";
+
+async function approveBrand() {
+
+  const email = document.getElementById("email").value;
+
+  if(!email){
+    alert("Inserisci email");
+    return;
+  }
+
+  const res = await fetch(
+    API_URL + "/approve-brand",
+    {
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({
+        password:"STITCHVALEADMIN",
+        email:email
+      })
+    }
+  );
+
+  const data = await res.json();
+
+  document.getElementById("result").innerText =
+    data.message || "Operazione completata";
+}
+  </script>
+</body>
+</html>
