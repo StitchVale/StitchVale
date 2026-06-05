@@ -217,14 +217,16 @@ function auth(req, res, next) {
 
 /* SOLO BRAND APPROVATI */
 function requireApprovedBrand(req, res, next) {
-  if (req.user.role !== "brand") {
-    return res.status(403).json({
-      message: "Solo i brand possono fare questa azione"
-    });
-  }
+
+  console.log("TOKEN EMAIL:", req.user.email);
 
   const users = readJSON(usersFile);
-  const user = users.find(u => u.email === req.user.email);
+
+  const user = users.find(
+    u => u.email === req.user.email
+  );
+
+  console.log("USER TROVATO:", user);
 
   if (!user || user.approved !== true) {
     return res.status(403).json({
@@ -234,7 +236,6 @@ function requireApprovedBrand(req, res, next) {
 
   next();
 }
-
 /* PRODUCTS */
 app.get("/products", (req, res) => {
   const products = readJSON(productsFile);
