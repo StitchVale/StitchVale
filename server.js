@@ -1,5 +1,6 @@
 const multer = require("multer");
 const upload = multer({ dest: "uploads/" });
+
 const express = require("express");
 const cors = require("cors");
 const fs = require("fs");
@@ -19,6 +20,7 @@ const usersFile = path.join(__dirname, "users.json");
 const productsFile = path.join(__dirname, "products.json");
 const ordersFile = path.join(__dirname, "orders.json");
 
+/* ---------------- JSON HELPERS ---------------- */
 function readJSON(file) {
   if (!fs.existsSync(file)) fs.writeFileSync(file, "[]");
 
@@ -36,10 +38,12 @@ function writeJSON(file, data) {
   fs.writeFileSync(file, JSON.stringify(data, null, 2));
 }
 
-/* CORS */
+/* ---------------- MIDDLEWARE ---------------- */
 app.use(cors());
+app.use(express.json());
+app.use(express.static(__dirname));
 
-/* STRIPE WEBHOOK - deve stare PRIMA di express.json */
+/* ---------------- STRIPE WEBHOOK ---------------- */
 app.post("/webhook", express.raw({ type: "application/json" }), (req, res) => {
   const sig = req.headers["stripe-signature"];
 
@@ -52,73 +56,46 @@ app.post("/webhook", express.raw({ type: "application/json" }), (req, res) => {
       process.env.STRIPE_WEBHOOK_SECRET
     );
   } catch (err) {
-    console.log("Webhook signature error:", err.message);
+    console.log("Webhook error:", err.message);
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
   if (event.type === "checkout.session.completed") {
     const session = event.data.object;
 
-    console.log("Pagamento completato:", session.id);
-    console.log("Email cliente:", session.customer_details?.email);
-    console.log("Totale:", session.amount_total / 100);
-
     const orders = readJSON(ordersFile);
 
-    const ordineEsisteGia = orders.find(
-      order => order.stripeSessionId === session.id
-    );
+    const exists = orders.find(o => o.stripeSessionId === session.id);
 
-    if (!ordineEsisteGia) {
-      const newOrder = {
+    if (!exists) {
+      orders.push({
         id: Date.now(),
         stripeSessionId: session.id,
-        email: session.customer_details?.email || "Email non disponibile",
-        name: session.customer_details?.name || "Nome non disponibile",
+        email: session.customer_details?.email,
+        name: session.customer_details?.name,
         total: session.amount_total / 100,
         currency: session.currency,
         status: "paid",
-        paymentStatus: session.payment_status,
         createdAt: new Date().toISOString()
-      };
+      });
 
-      orders.push(newOrder);
       writeJSON(ordersFile, orders);
-
-      console.log("Ordine salvato:", newOrder.id);
-    } else {
-      console.log("Ordine già salvato:", session.id);
+      console.log("Ordine salvato");
     }
   }
 
   res.json({ received: true });
 });
 
-app.use(express.json());
-app.use(express.static(__dirname));
-
-app.get("/", (req, res) => {
-  res.send("Server StitchVale attivo");
-});
-
-/* REGISTER */
+/* ---------------- REGISTER ---------------- */
 app.post("/register", async (req, res) => {
   const { email, password, role } = req.body;
 
-  if (!email || !password) {
-    return res.status(400).json({
-      message: "Email e password obbligatorie"
-    });
-  }
-
   const users = readJSON(usersFile);
   const cleanEmail = email.toLowerCase().trim();
-  const userRole = role === "brand" ? "brand" : "user";
 
   if (users.find(u => u.email === cleanEmail)) {
-    return res.status(400).json({
-      message: "Utente già registrato"
-    });
+    return res.status(400).json({ message: "Utente già registrato" });
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -127,26 +104,22 @@ app.post("/register", async (req, res) => {
     id: Date.now(),
     email: cleanEmail,
     password: hashedPassword,
-    role: userRole,
-    approved: userRole === "brand" ? false : true,
+    role: role === "brand" ? "brand" : "user",
+    approved: role === "brand" ? false : true,
     createdAt: new Date().toISOString()
   };
 
   users.push(newUser);
   writeJSON(usersFile, users);
 
-  if (userRole === "brand") {
-    return res.json({
-      message: "Registrazione brand inviata. Attendi approvazione."
-    });
-  }
-
   res.json({
-    message: "Registrazione completata"
+    message: role === "brand"
+      ? "Registrazione brand inviata"
+      : "Registrazione completata"
   });
 });
 
-/* LOGIN */
+/* ---------------- LOGIN ---------------- */
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
@@ -155,23 +128,14 @@ app.post("/login", async (req, res) => {
 
   const user = users.find(u => u.email === cleanEmail);
 
-  if (!user) {
-    return res.status(400).json({
-      message: "Utente non trovato"
-    });
-  }
+  if (!user) return res.status(400).json({ message: "Utente non trovato" });
 
-  const validPassword = await bcrypt.compare(password, user.password);
-
-  if (!validPassword) {
-    return res.status(400).json({
-      message: "Password errata"
-    });
-  }
+  const ok = await bcrypt.compare(password, user.password);
+  if (!ok) return res.status(400).json({ message: "Password errata" });
 
   if (user.role === "brand" && user.approved !== true) {
     return res.status(403).json({
-      message: "Il tuo account brand è in attesa di approvazione."
+      message: "Account brand non approvato"
     });
   }
 
@@ -186,24 +150,14 @@ app.post("/login", async (req, res) => {
     { expiresIn: "7d" }
   );
 
-  res.json({
-    message: "Login effettuato",
-    token,
-    email: user.email,
-    role: user.role,
-    approved: user.approved
-  });
+  res.json({ token, email: user.email, role: user.role });
 });
 
-/* MIDDLEWARE TOKEN */
+/* ---------------- AUTH ---------------- */
 function auth(req, res, next) {
   const header = req.headers.authorization;
 
-  if (!header) {
-    return res.status(401).json({
-      message: "Token mancante"
-    });
-  }
+  if (!header) return res.status(401).json({ message: "Token mancante" });
 
   const token = header.split(" ")[1];
 
@@ -211,24 +165,15 @@ function auth(req, res, next) {
     req.user = jwt.verify(token, JWT_SECRET);
     next();
   } catch {
-    res.status(401).json({
-      message: "Token non valido"
-    });
+    res.status(401).json({ message: "Token non valido" });
   }
 }
 
-/* SOLO BRAND APPROVATI */
+/* ---------------- BRAND CHECK ---------------- */
 function requireApprovedBrand(req, res, next) {
-
-  console.log("TOKEN EMAIL:", req.user.email);
-
   const users = readJSON(usersFile);
 
-  const user = users.find(
-    u => u.email === req.user.email
-  );
-
-  console.log("USER TROVATO:", user);
+  const user = users.find(u => u.email === req.user.email);
 
   if (!user || user.approved !== true) {
     return res.status(403).json({
@@ -238,10 +183,10 @@ function requireApprovedBrand(req, res, next) {
 
   next();
 }
-/* PRODUCTS */
+
+/* ---------------- PRODUCTS ---------------- */
 app.get("/products", (req, res) => {
-  const products = readJSON(productsFile);
-  res.json(products);
+  res.json(readJSON(productsFile));
 });
 
 app.post(
@@ -279,149 +224,83 @@ app.post(
     });
   }
 );
-/* ORDERS UTENTE */
+
+/* ---------------- ORDERS ---------------- */
 app.get("/orders", auth, (req, res) => {
   const orders = readJSON(ordersFile);
-  const userOrders = orders.filter(order => order.email === req.user.email);
-  res.json(userOrders);
+  res.json(orders.filter(o => o.email === req.user.email));
 });
 
-/* ADMIN ORDERS */
-app.get("/admin-orders", (req, res) => {
-  const password = req.query.password;
-
-  if (password !== "STITCHVALEADMIN") {
-    return res.status(403).json({
-      message: "Accesso negato"
-    });
-  }
-
-  const orders = readJSON(ordersFile);
-  res.json(orders);
-});
-/* ADMIN USERS */
+/* ---------------- ADMIN SIMPLE ---------------- */
 app.get("/admin-users", (req, res) => {
-  const password = req.query.password;
-
-  if (password !== "STITCHVALEADMIN") {
-    return res.status(403).json({
-      message: "Accesso negato"
-    });
+  if (req.query.password !== "STITCHVALEADMIN") {
+    return res.status(403).json({ message: "No access" });
   }
 
-  const users = readJSON(usersFile).map(user => ({
-    id: user.id,
-    email: user.email,
-    role: user.role,
-    approved: user.approved,
-    createdAt: user.createdAt
+  const users = readJSON(usersFile).map(u => ({
+    id: u.id,
+    email: u.email,
+    role: u.role,
+    approved: u.approved
   }));
 
   res.json(users);
 });
 
-/* BRAND IN ATTESA */
-app.get("/pending-brands", (req, res) => {
-  const password = req.query.password;
-
-  if (password !== "STITCHVALEADMIN") {
-    return res.status(403).json({
-      message: "Accesso negato"
-    });
+app.get("/admin-orders", (req, res) => {
+  if (req.query.password !== "STITCHVALEADMIN") {
+    return res.status(403).json({ message: "No access" });
   }
 
-  const users = readJSON(usersFile);
-
-  const pendingBrands = users
-    .filter(user => user.role === "brand" && user.approved !== true)
-    .map(user => ({
-      id: user.id,
-      email: user.email,
-      role: user.role,
-      approved: user.approved,
-      createdAt: user.createdAt
-    }));
-
-  res.json(pendingBrands);
+  res.json(readJSON(ordersFile));
 });
-/* APPROVA BRAND */
+
+/* ---------------- APPROVE BRAND ---------------- */
 app.post("/approve-brand", (req, res) => {
   const { password, email } = req.body;
 
   if (password !== "STITCHVALEADMIN") {
-    return res.status(403).json({
-      message: "Accesso negato"
-    });
+    return res.status(403).json({ message: "No access" });
   }
 
   const users = readJSON(usersFile);
   const user = users.find(u => u.email === email);
 
-  if (!user) {
-    return res.status(404).json({
-      message: "Utente non trovato"
-    });
-  }
-
-  if (user.role !== "brand") {
-    return res.status(400).json({
-      message: "Questo utente non è un brand"
-    });
-  }
+  if (!user) return res.status(404).json({ message: "Not found" });
 
   user.approved = true;
-  user.approvedAt = new Date().toISOString();
 
   writeJSON(usersFile, users);
 
-  res.json({
-    message: "Brand approvato",
-    email: user.email
-  });
+  res.json({ message: "Brand approvato" });
 });
 
-/* STRIPE CHECKOUT */
+/* ---------------- STRIPE ---------------- */
 app.post("/create-checkout-session", async (req, res) => {
-  try {
-    const { name, price } = req.body;
+  const { name, price } = req.body;
 
-    if (!name || !price) {
-      return res.status(400).json({
-        error: "Nome e prezzo obbligatori"
-      });
-    }
+  const session = await stripe.checkout.sessions.create({
+    payment_method_types: ["card"],
+    mode: "payment",
+    line_items: [
+      {
+        price_data: {
+          currency: "eur",
+          product_data: { name },
+          unit_amount: Math.round(price * 100)
+        },
+        quantity: 1
+      }
+    ],
+    success_url: "https://www.stitchvale.com/success.html",
+    cancel_url: "https://www.stitchvale.com/cancel.html"
+  });
 
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
-      mode: "payment",
-      line_items: [
-        {
-          price_data: {
-            currency: "eur",
-            product_data: {
-              name: name
-            },
-            unit_amount: Math.round(Number(price) * 100)
-          },
-          quantity: 1
-        }
-      ],
-      success_url: "https://www.stitchvale.com/success.html",
-      cancel_url: "https://www.stitchvale.com/cancel.html"
-    });
-
-    res.json({
-      url: session.url
-    });
-  } catch (error) {
-    res.status(500).json({
-      error: error.message
-    });
-  }
+  res.json({ url: session.url });
 });
 
+/* ---------------- START ---------------- */
 app.listen(PORT, () => {
   console.log("Server avviato su porta " + PORT);
 });
-
 
