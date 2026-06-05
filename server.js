@@ -1,116 +1,77 @@
-const multer = require("multer");
-const upload = multer({ dest: "uploads/" });
-
 const express = require("express");
 const cors = require("cors");
-const fs = require("fs");
-const path = require("path");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const Stripe = require("stripe");
-
-const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+const multer = require("multer");
+const { createClient } = require("@supabase/supabase-js");
 
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-const JWT_SECRET = process.env.JWT_SECRET || "stitchvale_secret_key";
+/* ================= ENV ================= */
+const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+const JWT_SECRET = process.env.JWT_SECRET;
 
-const usersFile = path.join(__dirname, "users.json");
-const productsFile = path.join(__dirname, "products.json");
-const ordersFile = path.join(__dirname, "orders.json");
+/* ================= SUPABASE ================= */
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_KEY
+);
 
-/* ---------------- JSON HELPERS ---------------- */
-function readJSON(file) {
-  if (!fs.existsSync(file)) fs.writeFileSync(file, "[]");
-
-  const content = fs.readFileSync(file, "utf8").trim();
-
-  if (!content) {
-    fs.writeFileSync(file, "[]");
-    return [];
-  }
-
-  return JSON.parse(content);
-}
-
-function writeJSON(file, data) {
-  fs.writeFileSync(file, JSON.stringify(data, null, 2));
-}
-
-/* ---------------- MIDDLEWARE ---------------- */
+/* ================= MIDDLEWARE ================= */
 app.use(cors());
 app.use(express.json());
 app.use(express.static(__dirname));
 
-/* ---------------- STRIPE WEBHOOK ---------------- */
-app.post("/webhook", express.raw({ type: "application/json" }), (req, res) => {
-  const sig = req.headers["stripe-signature"];
+const upload = multer({ dest: "uploads/" });
 
-  let event;
+/* ================= AUTH ================= */
+function auth(req, res, next) {
+  const header = req.headers.authorization;
+
+  if (!header) {
+    return res.status(401).json({ message: "Token mancante" });
+  }
+
+  const token = header.split(" ")[1];
 
   try {
-    event = stripe.webhooks.constructEvent(
-      req.body,
-      sig,
-      process.env.STRIPE_WEBHOOK_SECRET
-    );
-  } catch (err) {
-    console.log("Webhook error:", err.message);
-    return res.status(400).send(`Webhook Error: ${err.message}`);
+    req.user = jwt.verify(token, JWT_SECRET);
+    next();
+  } catch {
+    return res.status(401).json({ message: "Token non valido" });
   }
+}
 
-  if (event.type === "checkout.session.completed") {
-    const session = event.data.object;
-
-    const orders = readJSON(ordersFile);
-
-    const exists = orders.find(o => o.stripeSessionId === session.id);
-
-    if (!exists) {
-      orders.push({
-        id: Date.now(),
-        stripeSessionId: session.id,
-        email: session.customer_details?.email,
-        name: session.customer_details?.name,
-        total: session.amount_total / 100,
-        currency: session.currency,
-        status: "paid",
-        createdAt: new Date().toISOString()
-      });
-
-      writeJSON(ordersFile, orders);
-      console.log("Ordine salvato");
-    }
-  }
-
-  res.json({ received: true });
-});
-
-/* ---------------- REGISTER ---------------- */
+/* ================= REGISTER ================= */
 app.post("/register", async (req, res) => {
   const { email, password, role } = req.body;
 
-  const users = readJSON(usersFile);
   const cleanEmail = email.toLowerCase().trim();
 
-  if (users.find(u => u.email === cleanEmail)) {
+  const { data: existing } = await supabase
+    .from("users")
+    .select("*")
+    .eq("email", cleanEmail);
+
+  if (existing && existing.length > 0) {
     return res.status(400).json({ message: "Utente già registrato" });
   }
 
-  const hashedPassword = await bcrypt.hash(password, 10);
+  const hashed = await bcrypt.hash(password, 10);
 
-  const newUser = {
-    id: Date.now(),
-    email: cleanEmail,
-    password: hashedPassword,
-    role: role === "brand" ? "brand" : "user",
-    approved: role === "brand" ? false : true,
-    createdAt: new Date().toISOString()
-  };
+  const { error } = await supabase.from("users").insert([
+    {
+      email: cleanEmail,
+      password: hashed,
+      role: role === "brand" ? "brand" : "user",
+      approved: role === "brand" ? false : true,
+      created_at: new Date().toISOString()
+    }
+  ]);
 
-  users.push(newUser);
-  writeJSON(usersFile, users);
+  if (error) return res.status(500).json(error);
 
   res.json({
     message: role === "brand"
@@ -119,24 +80,31 @@ app.post("/register", async (req, res) => {
   });
 });
 
-/* ---------------- LOGIN ---------------- */
+/* ================= LOGIN ================= */
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
-  const users = readJSON(usersFile);
   const cleanEmail = email.toLowerCase().trim();
 
-  const user = users.find(u => u.email === cleanEmail);
+  const { data } = await supabase
+    .from("users")
+    .select("*")
+    .eq("email", cleanEmail);
 
-  if (!user) return res.status(400).json({ message: "Utente non trovato" });
+  const user = data?.[0];
+
+  if (!user) {
+    return res.status(400).json({ message: "Utente non trovato" });
+  }
 
   const ok = await bcrypt.compare(password, user.password);
-  if (!ok) return res.status(400).json({ message: "Password errata" });
+
+  if (!ok) {
+    return res.status(400).json({ message: "Password errata" });
+  }
 
   if (user.role === "brand" && user.approved !== true) {
-    return res.status(403).json({
-      message: "Account brand non approvato"
-    });
+    return res.status(403).json({ message: "Brand non approvato" });
   }
 
   const token = jwt.sign(
@@ -150,132 +118,98 @@ app.post("/login", async (req, res) => {
     { expiresIn: "7d" }
   );
 
-  res.json({ token, email: user.email, role: user.role });
+  res.json({
+    token,
+    email: user.email,
+    role: user.role
+  });
 });
 
-/* ---------------- AUTH ---------------- */
-function auth(req, res, next) {
-  const header = req.headers.authorization;
+/* ================= PRODUCTS ================= */
+app.get("/products", async (req, res) => {
+  const { data, error } = await supabase.from("products").select("*");
 
-  if (!header) return res.status(401).json({ message: "Token mancante" });
+  if (error) return res.status(500).json(error);
 
-  const token = header.split(" ")[1];
-
-  try {
-    req.user = jwt.verify(token, JWT_SECRET);
-    next();
-  } catch {
-    res.status(401).json({ message: "Token non valido" });
-  }
-}
-
-/* ---------------- BRAND CHECK ---------------- */
-function requireApprovedBrand(req, res, next) {
-  const users = readJSON(usersFile);
-
-  const user = users.find(u => u.email === req.user.email);
-
-  if (!user || user.approved !== true) {
-    return res.status(403).json({
-      message: "Account brand non approvato"
-    });
-  }
-
-  next();
-}
-
-/* ---------------- PRODUCTS ---------------- */
-app.get("/products", (req, res) => {
-  res.json(readJSON(productsFile));
+  res.json(data);
 });
 
 app.post(
   "/products",
   auth,
-  requireApprovedBrand,
   upload.array("images", 8),
-  (req, res) => {
-    console.log("BODY:", req.body);
-    console.log("FILES:", req.files);
-
-    const products = readJSON(productsFile);
-
+  async (req, res) => {
     const images = req.files ? req.files.map(f => f.filename) : [];
 
-    const product = {
-      id: Date.now(),
-      name: req.body.name,
-      brand: req.user.email,
-      category: req.body.category,
-      description: req.body.description,
-      price: Number(req.body.price || 0),
-      images: images,
-      image: images[0] || "",
-      createdAt: new Date().toISOString(),
-      createdBy: req.user.email
-    };
+    const { error } = await supabase.from("products").insert([
+      {
+        name: req.body.name,
+        brand: req.user.email,
+        category: req.body.category,
+        description: req.body.description,
+        price: Number(req.body.price),
+        images: images,
+        image: images[0] || "",
+        created_at: new Date().toISOString(),
+        created_by: req.user.email
+      }
+    ]);
 
-    products.push(product);
-    writeJSON(productsFile, products);
+    if (error) return res.status(500).json(error);
 
-    res.json({
-      message: "Prodotto aggiunto",
-      product
-    });
+    res.json({ message: "Prodotto creato" });
   }
 );
 
-/* ---------------- ORDERS ---------------- */
-app.get("/orders", auth, (req, res) => {
-  const orders = readJSON(ordersFile);
-  res.json(orders.filter(o => o.email === req.user.email));
+/* ================= ORDERS ================= */
+app.get("/orders", auth, async (req, res) => {
+  const { data } = await supabase
+    .from("orders")
+    .select("*")
+    .eq("email", req.user.email);
+
+  res.json(data);
 });
 
-/* ---------------- ADMIN SIMPLE ---------------- */
-app.get("/admin-users", (req, res) => {
-  if (req.query.password !== "STITCHVALEADMIN") {
-    return res.status(403).json({ message: "No access" });
-  }
-
-  const users = readJSON(usersFile).map(u => ({
-    id: u.id,
-    email: u.email,
-    role: u.role,
-    approved: u.approved
-  }));
-
-  res.json(users);
-});
-
-app.get("/admin-orders", (req, res) => {
-  if (req.query.password !== "STITCHVALEADMIN") {
-    return res.status(403).json({ message: "No access" });
-  }
-
-  res.json(readJSON(ordersFile));
-});
-
-/* ---------------- APPROVE BRAND ---------------- */
-app.post("/approve-brand", (req, res) => {
+/* ================= APPROVE BRAND (ADMIN) ================= */
+app.post("/approve-brand", async (req, res) => {
   const { password, email } = req.body;
 
   if (password !== "STITCHVALEADMIN") {
     return res.status(403).json({ message: "No access" });
   }
 
-  const users = readJSON(usersFile);
-  const user = users.find(u => u.email === email);
+  const { error } = await supabase
+    .from("users")
+    .update({ approved: true })
+    .eq("email", email);
 
-  if (!user) return res.status(404).json({ message: "Not found" });
-
-  user.approved = true;
-
-  writeJSON(usersFile, users);
+  if (error) return res.status(500).json(error);
 
   res.json({ message: "Brand approvato" });
 });
 
-/* ---------------- STRIPE ---------------- */
+/* ================= ADMIN USERS ================= */
+app.get("/admin-users", async (req, res) => {
+  if (req.query.password !== "STITCHVALEADMIN") {
+    return res.status(403).json({ message: "No access" });
+  }
+
+  const { data } = await supabase.from("users").select("*");
+  res.json(data);
+});
+
+/* ================= ADMIN ORDERS ================= */
+app.get("/admin-orders", async (req, res) => {
+  if (req.query.password !== "STITCHVALEADMIN") {
+    return res.status(403).json({ message: "No access" });
+  }
+
+  const { data } = await supabase.from("orders").select("*");
+  res.json(data);
+});
+
+/* ================= STRIPE ================= */
 app.post("/create-checkout-session", async (req, res) => {
   const { name, price } = req.body;
 
@@ -299,8 +233,7 @@ app.post("/create-checkout-session", async (req, res) => {
   res.json({ url: session.url });
 });
 
-/* ---------------- START ---------------- */
+/* ================= START ================= */
 app.listen(PORT, () => {
-  console.log("Server avviato su porta " + PORT);
+  console.log("Server Supabase attivo su porta " + PORT);
 });
-
