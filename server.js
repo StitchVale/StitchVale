@@ -243,6 +243,7 @@ app.get("/products", (req, res) => {
 });
 
 app.post("/products", auth, requireApprovedBrand, (req, res) => {
+  console.log("BODY:", req.body);
   const products = readJSON(productsFile);
 
   const product = {
