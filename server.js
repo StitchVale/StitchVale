@@ -1,3 +1,5 @@
+const multer = require("multer");
+const upload = multer({ dest: "uploads/" });
 const express = require("express");
 const cors = require("cors");
 const fs = require("fs");
@@ -242,31 +244,41 @@ app.get("/products", (req, res) => {
   res.json(products);
 });
 
-app.post("/products", auth, requireApprovedBrand, (req, res) => {
-  console.log("BODY:", req.body);
-  const products = readJSON(productsFile);
+app.post(
+  "/products",
+  auth,
+  requireApprovedBrand,
+  upload.array("images", 8),
+  (req, res) => {
+    console.log("BODY:", req.body);
+    console.log("FILES:", req.files);
 
-  const product = {
-    id: Date.now(),
-    name: req.body.name,
-    brand: req.body.brand,
-    category: req.body.category,
-    description: req.body.description,
-    price: Number(req.body.price),
-    image: req.body.image || "",
-    createdAt: new Date().toISOString(),
-    createdBy: req.user.email
-  };
+    const products = readJSON(productsFile);
 
-  products.push(product);
-  writeJSON(productsFile, products);
+    const images = req.files ? req.files.map(f => f.filename) : [];
 
-  res.json({
-    message: "Prodotto aggiunto",
-    product
-  });
-});
+    const product = {
+      id: Date.now(),
+      name: req.body.name,
+      brand: req.user.email,
+      category: req.body.category,
+      description: req.body.description,
+      price: Number(req.body.price || 0),
+      images: images,
+      image: images[0] || "",
+      createdAt: new Date().toISOString(),
+      createdBy: req.user.email
+    };
 
+    products.push(product);
+    writeJSON(productsFile, products);
+
+    res.json({
+      message: "Prodotto aggiunto",
+      product
+    });
+  }
+);
 /* ORDERS UTENTE */
 app.get("/orders", auth, (req, res) => {
   const orders = readJSON(ordersFile);
