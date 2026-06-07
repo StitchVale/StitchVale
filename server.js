@@ -5,6 +5,7 @@ const jwt = require("jsonwebtoken");
 const Stripe = require("stripe");
 const multer = require("multer");
 const path = require("path"); // Gestisce le estensioni dei file (.jpg, .png)
+const fs = require("fs");
 const { createClient } = require("@supabase/supabase-js");
 
 const app = express();
@@ -24,25 +25,21 @@ const supabase = createClient(
 app.use(cors());
 app.use(express.json());
 app.use(express.static(__dirname));
-// Rende accessibili al browser i file caricati nella cartella uploads
-const fs = require("fs");
 
-// Middleware di controllo per la cartella uploads
+// Middleware di controllo per la cartella uploads per evitare crash se Render cancella le foto
 app.use("/uploads/:file", (req, res, next) => {
   const filePath = path.join(__dirname, "uploads", req.params.file);
   
-  // Controlla se il file esiste fisicamente sul server Render
   if (fs.existsSync(filePath)) {
     return next();
   } else {
-    // Se il file è andato perduto nei riavvii di Render, mostra una pic elegante senza crashare
     return res.redirect("https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=500&q=80");
   }
 });
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// Configurazione Multer: mantiene le estensioni originali dei file caricati
+// Configurazione Multer
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "uploads/");
@@ -55,7 +52,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-/* ================= AUTH ================= */
+/* ================= AUTH MIDDLEWARE ================= */
 function auth(req, res, next) {
   const header = req.headers.authorization;
 
@@ -75,89 +72,97 @@ function auth(req, res, next) {
 
 /* ================= REGISTER ================= */
 app.post("/register", async (req, res) => {
-  const { email, password, role } = req.body;
+  try {
+    const { email, password, role } = req.body;
+    const cleanEmail = email.toLowerCase().trim();
 
-  const cleanEmail = email.toLowerCase().trim();
+    const { data: existing } = await supabase
+      .from("users")
+      .select("*")
+      .eq("email", cleanEmail);
 
-  const { data: existing } = await supabase
-    .from("users")
-    .select("*")
-    .eq("email", cleanEmail);
-
-  if (existing && existing.length > 0) {
-    return res.status(400).json({ message: "Utente già registrato" });
-  }
-
-  const hashed = await bcrypt.hash(password, 10);
-
-  const { error } = await supabase.from("users").insert([
-    {
-      email: cleanEmail,
-      password: hashed,
-      role: role === "brand" ? "brand" : "user",
-      approved: role === "brand" ? false : true,
-      created_at: new Date().toISOString()
+    if (existing && existing.length > 0) {
+      return res.status(400).json({ message: "Utente già registrato" });
     }
-  ]);
 
-  if (error) {
-    console.log(error);
-    return res.status(500).json(error);
+    const hashed = await bcrypt.hash(password, 10);
+
+    const { error } = await supabase.from("users").insert([
+      {
+        email: cleanEmail,
+        password: hashed,
+        role: role === "brand" ? "brand" : "user",
+        approved: role === "brand" ? false : true,
+        created_at: new Date().toISOString()
+      }
+    ]);
+
+    if (error) {
+      console.error(error);
+      return res.status(500).json(error);
+    }
+
+    res.json({
+      message: role === "brand"
+        ? "Registrazione brand inviata"
+        : "Registrazione completata"
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Errore interno del server" });
   }
-
-  res.json({
-    message: role === "brand"
-      ? "Registrazione brand inviata"
-      : "Registrazione completata"
-  });
 });
 
 /* ================= LOGIN ================= */
 app.post("/login", async (req, res) => {
-  const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
+    const cleanEmail = email.toLowerCase().trim();
 
-  const cleanEmail = email.toLowerCase().trim();
+    const { data } = await supabase
+      .from("users")
+      .select("*")
+      .eq("email", cleanEmail);
 
-  const { data } = await supabase
-    .from("users")
-    .select("*")
-    .eq("email", cleanEmail);
+    const user = data?.[0];
 
-  const user = data?.[0];
+    if (!user) {
+      return res.status(400).json({ message: "Utente non trovato" });
+    }
 
-  if (!user) {
-    return res.status(400).json({ message: "Utente non trovato" });
-  }
+    const ok = await bcrypt.compare(password, user.password);
 
-  const ok = await bcrypt.compare(password, user.password);
+    if (!ok) {
+      return res.status(400).json({ message: "Password errata" });
+    }
 
-  if (!ok) {
-    return res.status(400).json({ message: "Password errata" });
-  }
+    if (user.role === "brand" && user.approved !== true) {
+      return res.status(403).json({ message: "Brand non approvato" });
+    }
 
-  if (user.role === "brand" && user.approved !== true) {
-    return res.status(403).json({ message: "Brand non approvato" });
-  }
+    const token = jwt.sign(
+      {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        approved: user.approved
+      },
+      JWT_SECRET,
+      { expiresIn: "7d" }
+    );
 
-  const token = jwt.sign(
-    {
-      id: user.id,
+    res.json({
+      token,
       email: user.email,
-      role: user.role,
-      approved: user.approved
-    },
-    JWT_SECRET,
-    { expiresIn: "7d" }
-  );
-
-  res.json({
-    token,
-    email: user.email,
-    role: user.role
-  });
+      role: user.role
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Errore interno del server" });
+  }
 });
 
-/* ================= BRANDS PROFILE ================= */
+/* ================= BRANDS PROFILE (SALVATAGGIO) ================= */
 app.post("/brands", auth, upload.single("logo"), async (req, res) => {
   try {
     const brandData = {
@@ -195,7 +200,7 @@ app.post("/brands", auth, upload.single("logo"), async (req, res) => {
     }
 
     if (result.error) {
-      return res.status(400).json(result.error); // Corretto qui!
+      return res.status(400).json(result.error);
     }
 
     res.json({ message: "Profilo brand salvato con successo!" });
@@ -204,67 +209,47 @@ app.post("/brands", auth, upload.single("logo"), async (req, res) => {
     res.status(500).json({ message: "Errore interno del server" });
   }
 });    
-// Se è stato caricato un file per il logo, inseriamo il nome del file generato
-    if (req.file) {
-      brandData.logo = req.file.filename;
-    }
 
-    // Controlla se il brand ha già creato un profilo in passato
-    const { data: existingBrand } = await supabase
+/* ================= BRANDS LIST (RICHIESTA PUBBLICA PER IL CATALOGO) ================= */
+app.get("/brands-list", async (req, res) => {
+  try {
+    const { data, error } = await supabase
       .from("brand")
-      .select("*")
-      .eq("email", req.user.email);
+      .select("email, name, logo, bio, style, instagram, website");
 
-    let result;
-    if (existingBrand && existingBrand.length > 0) {
-      // Se esiste già, aggiorna i dati attuali
-      result = await supabase
-        .from("brand")
-        .update(brandData)
-        .eq("email", req.user.email);
-    } else {
-      // Se è la prima volta, crea un record da zero
-      result = await supabase
-        .from("brand")
-        .insert([brandData]);
+    if (error) {
+      return res.status(400).json(error);
     }
-
-    if (result.error) {
-      console.log("SUPABASE ERR:", result.error);
-      return res.status(400).json(result.error);
-    }
-
-    res.json({ message: "Profilo brand salvato con successo!" });
+    res.json(data);
   } catch (err) {
-    console.log("SERVER ERR:", err);
+    console.error(err);
     res.status(500).json({ message: "Errore interno del server" });
   }
 });
 
 /* ================= PRODUCTS ================= */
 app.get("/products", async (req, res) => {
-  const { data, error } = await supabase
-    .from("products")
-    .select("*")
-    .order("created_at", { ascending: false });
+  try {
+    const { data, error } = await supabase
+      .from("products")
+      .select("*")
+      .order("created_at", { ascending: false });
 
-  if (error) {
-    console.log(error);
-    return res.status(500).json(error);
+    if (error) {
+      console.error(error);
+      return res.status(500).json(error);
+    }
+
+    res.json(data);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Errore interno del server" });
   }
-
-  res.json(data);
 });
 
-app.post(
-  "/products",
-  auth,
-  upload.array("images", 8),
-  async (req, res) => {
+app.post("/products", auth, upload.array("images", 8), async (req, res) => {
+  try {
     const images = req.files ? req.files.map(f => f.filename) : [];
-
-    console.log("BODY:", req.body);
-    console.log("IMAGES:", images);
 
     const { error } = await supabase.from("products").insert([
       {
@@ -281,82 +266,113 @@ app.post(
     ]);
 
     if (error) {
-      console.log("SUPABASE ERROR:", error);
+      console.error("SUPABASE ERROR:", error);
       return res.status(400).json(error);
     }
 
     res.json({ message: "Prodotto creato" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Errore interno del server" });
   }
-);
+});
 
 /* ================= ORDERS ================= */
 app.get("/orders", auth, async (req, res) => {
-  const { data } = await supabase
-    .from("orders")
-    .select("*")
-    .eq("email", req.user.email);
+  try {
+    const { data, error } = await supabase
+      .from("orders")
+      .select("*")
+      .eq("email", req.user.email);
 
-  res.json(data);
+    if (error) return res.status(400).json(error);
+    res.json(data);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Errore interno del server" });
+  }
 });
 
 /* ================= ADMIN ================= */
 app.post("/approve-brand", async (req, res) => {
-  const { password, email } = req.body;
+  try {
+    const { password, email } = req.body;
 
-  if (password !== "STITCHVALEADMIN") {
-    return res.status(403).json({ message: "No access" });
+    if (password !== "STITCHVALEADMIN") {
+      return res.status(403).json({ message: "No access" });
+    }
+
+    const { error } = await supabase
+      .from("users")
+      .update({ approved: true })
+      .eq("email", email);
+
+    if (error) return res.status(500).json(error);
+
+    res.json({ message: "Brand approvato" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Errore interno del server" });
   }
-
-  const { error } = await supabase
-    .from("users")
-    .update({ approved: true })
-    .eq("email", email);
-
-  if (error) return res.status(500).json(error);
-
-  res.json({ message: "Brand approvato" });
 });
 
-  app.get("/admin-users", async (req, res) => {
-  if (req.query.password !== "STITCHVALEADMIN") {
-    return res.status(403).json({ message: "No access" });
-  }
+app.get("/admin-users", async (req, res) => {
+  try {
+    if (req.query.password !== "STITCHVALEADMIN") {
+      return res.status(403).json({ message: "No access" });
+    }
 
-  const { data } = await supabase.from("users").select("*");
-  res.json(data);
+    const { data, error } = await supabase.from("users").select("*");
+    if (error) return res.status(400).json(error);
+    res.json(data);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Errore interno del server" });
+  }
 });
 
 app.get("/admin-orders", async (req, res) => {
-  if (req.query.password !== "STITCHVALEADMIN") {
-    return res.status(403).json({ message: "No access" });
-  }
+  try {
+    if (req.query.password !== "STITCHVALEADMIN") {
+      return res.status(403).json({ message: "No access" });
+    }
 
-  const { data } = await supabase.from("orders").select("*");
-  res.json(data);
+    const { data, error } = await supabase.from("orders").select("*");
+    if (error) return res.status(400).json(error);
+    res.json(data);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Errore interno del server" });
+  }
 });
 
 /* ================= STRIPE ================= */
 app.post("/create-checkout-session", async (req, res) => {
-  const { name, price } = req.body;
+  try {
+    const { name, price } = req.body;
 
-  const session = await stripe.checkout.sessions.create({
-    payment_method_types: ["card"],
-    mode: "payment",
-    line_items: [
-      {
-        price_data: {
-          currency: "eur",
-          product_data: { name },
-          unit_amount: Math.round(price * 100)
-        },
-        quantity: 1
-      }
-    ],
-    success_url: "https://www.stitchvale.com/success.html",
-    cancel_url: "https://www.stitchvale.com/cancel.html"
-  });
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      mode: "payment",
+      line_items: [
+        {
+          price_data: {
+            currency: "eur",
+            product_data: { name },
+            unit_amount: Math.round(price * 100)
+          },
+          quantity: 1
+        }
+      ],
+      success_url: "https://www.stitchvale.com/success.html",
+      cancel_url: "https://www.stitchvale.com/cancel.html"
+    });
 
-  res.json({ url: session.url });
+    res.json({ url: session.url });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Errore durante la creazione della sessione Stripe" });
+  }
 });
 
 /* ================= START ================= */
