@@ -145,7 +145,7 @@
     /* --- PREMIUM STYLED CARD --- */
     .card {
       background: var(--bg-card);
-      border-radius: 0px; /* Angoli netti stile high-streetwear */
+      border-radius: 0px; 
       overflow: hidden;
       border: 1px solid var(--border-color);
       transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), border-color 0.4s;
@@ -214,7 +214,6 @@
       background: linear-gradient(to bottom, #121212, #0f0f0f);
     }
 
-    /* MINI BRAND HEADER (IDENTICO A BRAND-PAGE.HTML) */
     .card-brand-header {
       display: flex;
       align-items: center;
@@ -482,9 +481,10 @@
       return true;
     }
 
+    // Gestione unificata e sicura delle immagini
     function getProductImages(product) {
+      if (Array.isArray(product.images) && product.images.length > 0) return product.images;
       if (product.image) return [product.image];
-      if (product.images && product.images.length > 0) return product.images;
       return [];
     }
 
@@ -538,15 +538,19 @@
     }
 
     function showProducts(products) {
-      document.getElementById("productsInfo").innerText = "MODELLI DISPONIBILI: " + products.length;
+      // Controllo di sicurezza principale sull'array dei prodotti in arrivo dal server
+      const safeProducts = Array.isArray(products) ? products : [];
+      document.getElementById("productsInfo").innerText = "MODELLI DISPONIBILI: " + safeProducts.length;
 
-      if (products.length === 0) {
+      if (safeProducts.length === 0) {
         document.getElementById("products").innerHTML = "<p>Nessun articolo trovato.</p>";
         return;
       }
 
-      document.getElementById("products").innerHTML = products.map(p => {
-        const imgs = getProductImages(p);
+      document.getElementById("products").innerHTML = safeProducts.map(p => {
+        // Forza imgs ad essere sempre trattato come un Array valido
+        const rawImgs = getProductImages(p);
+        const imgs = Array.isArray(rawImgs) ? rawImgs : [];
         const firstImg = imgs[0];
         
         const cleanBrandEmail = (p.brand || "").toLowerCase().trim();
@@ -554,7 +558,6 @@
         
         const realBrandName = brandProfile ? brandProfile.name : (p.brand || "Brand Anonimo");
         
-        // Creazione dinamica del logo rotondo
         const brandLogoHtml = brandProfile && brandProfile.logo 
           ? `<img src="${API_URL}/uploads/${brandProfile.logo}" alt="${realBrandName}" class="card-brand-logo">`
           : `<div class="card-brand-default">${realBrandName.charAt(0).toUpperCase()}</div>`;
@@ -612,7 +615,6 @@
       }).join("");
     }
 
-    // Gestione sicura del click sul carrello tramite ID prodotto
     function handleAddToCart(productId) {
       const product = allProducts.find(p => String(p.id) === String(productId));
       if (product) {
