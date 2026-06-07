@@ -377,7 +377,7 @@
   <script>
     const API_URL = "https://stitchvale-api.onrender.com";
     let allProducts = [];
-    let brandMap = {}; // Contiene l'associazione [email]: NomeReale
+    let brandMap = {}; 
 
     function isLoggedIn() {
       return localStorage.getItem("token") !== null;
@@ -420,22 +420,20 @@
       if (dots[index]) dots[index].classList.add("active");
     }
 
-    // Carica simultaneamente prodotti e mappa dei nomi reali dei brand
     async function loadProducts() {
       try {
-        // 1. Scarica i prodotti
         const resProducts = await fetch(API_URL + "/products");
         allProducts = await resProducts.json();
 
-        // 2. Scarica la lista pubblica dei brand dal backend
         const resBrands = await fetch(API_URL + "/brands-list");
         const brandsData = await resBrands.json();
 
-        // Popoliamo la mappa temporanea
         brandMap = {};
-        brandsData.forEach(b => {
-          brandMap[b.email] = b.name;
-        });
+        if (Array.isArray(brandsData)) {
+          brandsData.forEach(b => {
+            if (b.email) brandMap[b.email] = b.name;
+          });
+        }
 
         showProducts(allProducts);
         loadCart();
@@ -456,9 +454,7 @@
       document.getElementById("products").innerHTML = products.map(p => {
         const imgs = getProductImages(p);
         const firstImg = imgs[0];
-        
-        // Recupera il nome del brand reale o usa l'email come rimpiazzo temporaneo
-        const realBrandName = brandMap[p.brand] || p.brand;
+        const realBrandName = brandMap[p.brand] || p.brand || "Brand Anonimo";
 
         return `
           <div class="card">
@@ -520,10 +516,10 @@
       const words = query.split(" ").filter(word => word.length > 1);
 
       const results = allProducts.filter(p => {
-        const realBrandName = brandMap[p.brand] || p.brand;
+        const realBrandName = brandMap[p.brand] || p.brand || "";
         const text = (
           p.name + " " +
-          p.brand + " " +
+          (p.brand || "") + " " +
           realBrandName + " " +
           p.category + " " +
           (p.description || "")
