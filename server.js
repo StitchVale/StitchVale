@@ -140,26 +140,26 @@ app.post(
   upload.array("images", 8),
   async (req, res) => {
     const images = req.files ? req.files.map(f => f.filename) : [];
-
-    const { error } = await supabase.from("products").insert([
-      {
-        name: req.body.name,
-        brand: req.user.email,
-        category: req.body.category,
-        description: req.body.description,
-        price: Number(req.body.price),
-        images: images,
-        image: images[0] || "",
-        created_at: new Date().toISOString(),
-        created_by: req.user.email
-      }
-    ]);
-
-    if (error) return res.status(500).json(error);
-
-    res.json({ message: "Prodotto creato" });
+console.log("BODY:", req.body);
+console.log("IMAGES:", images);    
+   const { error } = await supabase.from("products").insert([
+  {
+    name: req.body.name || "",
+    brand: req.user.email,
+    category: req.body.category || "",
+    description: req.body.description || "",
+    price: Number(req.body.price) || 0,
+    images: images || [],
+    image: images?.[0] || "",
+    created_at: new Date().toISOString(),
+    created_by: req.user.email
   }
-);
+]);
+
+if (error) {
+  console.log("SUPABASE ERROR:", error);
+  return res.status(400).json(error);
+});
 
 /* ================= ORDERS ================= */
 app.get("/orders", auth, async (req, res) => {
