@@ -1,7 +1,5 @@
 <!DOCTYPE html>
-<html>
-
-<html>
+<html lang="it">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -9,232 +7,330 @@
 
   <style>
     body {
-  margin: 0;
-  font-family: Arial;
-  background: #0d0d0d;
-  color: white;
-}
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0d0d0d;
+      color: white;
+    }
 
-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 25px 35px;
-  background: black;
-  border-bottom: 1px solid #222;
-}
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 25px 35px;
+      background: black;
+      border-bottom: 1px solid #222;
+    }
 
-.logo img {
-  height: 80px;
-}
+    .logo img {
+      height: 80px;
+    }
 
-nav {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-}
+    nav {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
 
-nav a {
-  color: #aaa;
-  text-decoration: none;
-}
+    nav a {
+      color: #aaa;
+      text-decoration: none;
+    }
 
-nav a:hover {
-  color: white;
-}
+    nav a:hover {
+      color: white;
+    }
 
-.hero {
-  text-align: center;
-  padding: 50px 20px;
-}
+    .hero {
+      text-align: center;
+      padding: 50px 20px;
+    }
 
-.forms {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 30px;
-  max-width: 1000px;
-  margin: auto;
-}
+    /* Struttura a griglia con linea di separazione */
+    .forms-container {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 40px;
+      max-width: 1100px;
+      margin: auto;
+      padding: 0 20px;
+      align-items: start;
+    }
 
-.box {
-  background: #1a1a1a;
-  padding: 25px;
-  border-radius: 15px;
-}
+    /* Linea verticale divisoria */
+    .divider {
+      width: 1px;
+      background: linear-gradient(to bottom, transparent, #333, transparent);
+      height: 100%;
+      min-height: 400px;
+    }
 
-input, textarea, select, button {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 15px;
-  border-radius: 5px;
-  border: none;
-}
+    .box {
+      background: #1a1a1a;
+      padding: 30px;
+      border-radius: 15px;
+      border: 1px solid #222;
+    }
 
-button {
-  background: white;
-  color: black;
-  cursor: pointer;
-}
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 14px;
+      color: #aaa;
+    }
 
-.warning {
-  text-align: center;
-  margin: 30px;
-  color: orange;
-}
+    input, textarea, select, button {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      border: 1px solid #333;
+      background: #252525;
+      color: white;
+      box-sizing: border-box;
+    }
 
-@media(max-width: 800px){
-  .forms {
-    grid-template-columns: 1fr;
-  }
-}
+    input:focus, textarea:focus, select:focus {
+      outline: 1px solid white;
+    }
+
+    input[type="file"] {
+      background: transparent;
+      border: none;
+      padding: 5px 0;
+    }
+
+    button {
+      background: white;
+      color: black;
+      font-weight: bold;
+      cursor: pointer;
+      border: none;
+      transition: background 0.2s;
+    }
+
+    button:hover {
+      background: #e0e0e0;
+    }
+
+    /* Stile per i messaggi di stato */
+    .status-message {
+      text-align: center;
+      font-weight: bold;
+      margin-top: -10px;
+      margin-bottom: 15px;
+      font-size: 14px;
+    }
+    
+    .success {
+      color: #4cd137;
+    }
+
+    .warning {
+      text-align: center;
+      margin: 30px;
+      color: orange;
+    }
+
+    /* Responsive per Tablet e Smartphone */
+    @media(max-width: 900px){
+      .forms-container {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+      /* La linea da verticale diventa orizzontale */
+      .divider {
+        width: 100%;
+        height: 1px;
+        min-height: auto;
+        background: linear-gradient(to right, transparent, #333, transparent);
+        margin: 20px 0;
+      }
+    }
   </style>
-
-  
 </head>
 <body>
+
   <header>
-<div class="logo">
-<a href="home.html"><img src="logo3.jpg"></a>
-</div>
+    <div class="logo">
+      <a href="home.html"><img src="logo3.jpg" alt="Logo"></a>
+    </div>
+    <nav>
+      <a href="catalogo.html">Catalogo</a>
+      <a href="idee.html">Idee</a>
+      <a href="account.html">Account</a>
+    </nav>
+  </header>
 
-<nav>
-<a href="catalogo.html">Catalogo</a>
-<a href="idee.html">Idee</a>
-<a href="account.html">Account</a>
-</nav>
-</header>
+  <section class="hero">
+    <h1>Area Brand</h1>
+    <p>Gestisci il tuo brand e carica prodotti</p>
+  </section>
 
-<section class="hero">
-<h1>Area Brand</h1>
-<p>Gestisci il tuo brand e carica prodotti</p>
-</section>
+  <div id="accessMessage" class="warning"></div>
 
-<div id="accessMessage" class="warning"></div>
+  <div id="content" style="display:none;">
+    <div class="forms-container">
 
-<div id="content" style="display:none;">
+      <div class="box">
+        <h2>Profilo Brand</h2>
+        
+        <label for="brandName">Nome del Brand</label>
+        <input id="brandName" placeholder="Es. StitchVale Studio">
 
-<div class="forms">
+        <label for="brandBio">Biografia / Descrizione</label>
+        <textarea id="brandBio" placeholder="Racconta la storia del tuo brand..."></textarea>
 
-<!-- PROFILO -->
-<div class="box">
-<h2>Profilo Brand</h2>
+        <label for="brandStyle">Stile Principale</label>
+        <select id="brandStyle">
+          <option value="">Seleziona lo stile</option>
+          <option value="streetwear">Streetwear</option>
+          <option value="casual">Casual</option>
+          <option value="elegante">Elegante</option>
+          <option value="vintage">Vintage</option>
+          <option value="sportswear">Sportswear</option>
+        </select>
 
-<input id="brandName" placeholder="Nome brand">
-<textarea id="brandBio" placeholder="Descrizione brand"></textarea>
-<input type="file" id="brandLogo">
+        <label for="brandWebsite">Sito Web (Opzionale)</label>
+        <input id="brandWebsite" type="url" placeholder="https://tuosito.com">
 
-<button onclick="saveBrand()">Salva profilo</button>
+        <label for="brandInstagram">Instagram Username (Opzionale)</label>
+        <input id="brandInstagram" placeholder="@tuobrand">
 
-<p id="status"></p>
-</div>
+        <label for="brandLogo">Logo del Brand</label>
+        <input type="file" id="brandLogo">
 
-<!-- PRODOTTO -->
-<div class="box">
-<h2>Carica prodotto</h2>
+        <button onclick="saveBrand()">Salva profilo</button>
+        <div id="status" class="status-message"></div>
+      </div>
 
-<input id="name" placeholder="Nome prodotto">
+      <div class="divider"></div>
 
-<select id="category">
-<option value="">Categoria</option>
-<option value="felpa">Felpa</option>
-<option value="tshirt">T-shirt</option>
-<option value="pantaloni">Pantaloni</option>
-<option value="giacca">Giacche</option>
-<option value="scarpe">Scarpe</option>
-<option value="accessori">Accessori</option>
-</select>
+      <div class="box">
+        <h2>Carica prodotto</h2>
 
-<textarea id="description" placeholder="Descrizione prodotto"></textarea>
+        <label for="name">Nome prodotto</label>
+        <input id="name" placeholder="Es. Felpa Oversize Hoodie">
 
-<input id="price" placeholder="Prezzo">
+        <label for="category">Categoria</label>
+        <select id="category">
+          <option value="">Seleziona categoria</option>
+          <option value="felpa">Felpa</option>
+          <option value="tshirt">T-shirt</option>
+          <option value="pantaloni">Pantaloni</option>
+          <option value="giacca">Giacca</option>
+          <option value="scarpe">Scarpe</option>
+          <option value="accessori">Accessori</option>
+        </select>
 
-<input type="file" id="images" multiple>
+        <label for="description">Descrizione prodotto</label>
+        <textarea id="description" placeholder="Materiali, vestibilità, dettagli..."></textarea>
 
-<button onclick="uploadProduct()">Carica prodotto</button>
+        <label for="price">Prezzo (€)</label>
+        <input id="price" placeholder="Es. 49.99">
 
-</div>
+        <label for="images">Immagini del prodotto</label>
+        <input type="file" id="images" multiple>
 
-</div>
+        <button onclick="uploadProduct()">Carica prodotto</button>
+      </div>
 
-</div>
+    </div>
+  </div>
 
   <script>
     const API_URL = "https://stitchvale-api.onrender.com";
 
-function getToken() {
-  return localStorage.getItem("token");
-}
+    function getToken() {
+      return localStorage.getItem("token");
+    }
 
-function getRole() {
-  return localStorage.getItem("role");
-}
+    box_role = () => localStorage.getItem("role");
 
-function checkAccess() {
-  if (!getToken()) {
-    document.getElementById("accessMessage").innerText = "Devi fare login";
-    return;
-  }
+    function checkAccess() {
+      if (!getToken()) {
+        document.getElementById("accessMessage").innerText = "Devi fare login";
+        return;
+      }
 
-  if (getRole() !== "brand") {
-    document.getElementById("accessMessage").innerText = "Solo account brand";
-    return;
-  }
+      if (localStorage.getItem("role") !== "brand") {
+        document.getElementById("accessMessage").innerText = "Solo account brand";
+        return;
+      }
 
-  document.getElementById("content").style.display = "block";
-}
+      document.getElementById("content").style.display = "block";
+    }
 
-/* BRAND */
-async function saveBrand() {
-  const formData = new FormData();
+    /* SALVA BRAND */
+    async function saveBrand() {
+      const formData = new FormData();
 
-  formData.append("name", document.getElementById("brandName").value);
-  formData.append("bio", document.getElementById("brandBio").value);
+      formData.append("name", document.getElementById("brandName").value);
+      formData.append("bio", document.getElementById("brandBio").value);
+      
+      // Invio dei nuovi campi all'API
+      formData.append("style", document.getElementById("brandStyle").value);
+      formData.append("website", document.getElementById("brandWebsite").value);
+      formData.append("instagram", document.getElementById("brandInstagram").value);
 
-  const file = document.getElementById("brandLogo").files[0];
-  if (file) formData.append("logo", file);
+      const file = document.getElementById("brandLogo").files[0];
+      if (file) formData.append("logo", file);
 
-  const res = await fetch(API_URL + "/brands", {
-    method: "POST",
-    headers: {
-      "Authorization": "Bearer " + getToken()
-    },
-    body: formData
-  });
+      try {
+        const res = await fetch(API_URL + "/brands", {
+          method: "POST",
+          headers: {
+            "Authorization": "Bearer " + getToken()
+          },
+          body: formData
+        });
 
-  const data = await res.json();
-  document.getElementById("status").innerText = data.message;
-}
+        const data = await res.json();
+        
+        // Gestione feedback visivo "Profilo Aggiornato"
+        const statusDiv = document.getElementById("status");
+        statusDiv.className = "status-message success";
+        statusDiv.innerText = "✓ Profilo aggiornato con successo!";
+        
+        // Il messaggio scompare dopo 3 secondi
+        setTimeout(() => {
+          statusDiv.innerText = "";
+        }, 3000);
 
-/* PRODOTTI */
-async function uploadProduct() {
+      } catch (error) {
+        const statusDiv = document.getElementById("status");
+        statusDiv.style.color = "red";
+        statusDiv.innerText = "Errore durante il salvataggio.";
+      }
+    }
 
-  const formData = new FormData();
+    /* CARICA PRODOTTI */
+    async function uploadProduct() {
+      const formData = new FormData();
 
-  formData.append("name", document.getElementById("name").value);
-  formData.append("category", document.getElementById("category").value);
-  formData.append("description", document.getElementById("description").value);
-  formData.append("price", document.getElementById("price").value);
+      formData.append("name", document.getElementById("name").value);
+      formData.append("category", document.getElementById("category").value);
+      formData.append("description", document.getElementById("description").value);
+      formData.append("price", document.getElementById("price").value);
 
-  const files = document.getElementById("images").files;
+      const files = document.getElementById("images").files;
+      for (let i = 0; i < files.length; i++) {
+        formData.append("images", files[i]);
+      }
 
-  for (let i = 0; i < files.length; i++) {
-    formData.append("images", files[i]);
-  }
+      const res = await fetch(API_URL + "/products", {
+        method: "POST",
+        headers: {
+          "Authorization": "Bearer " + getToken()
+        },
+          body: formData
+      });
 
-  const res = await fetch(API_URL + "/products", {
-    method: "POST",
-    headers: {
-      "Authorization": "Bearer " + getToken()
-    },
-    body: formData
-  });
+      const data = await res.json();
+      alert(data.message);
+    }
 
-  const data = await res.json();
-
-  alert(data.message);
-}
-
-window.onload = checkAccess;
+    window.onload = checkAccess;
   </script>
 </body>
 </html>
