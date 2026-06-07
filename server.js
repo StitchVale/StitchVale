@@ -4,6 +4,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const Stripe = require("stripe");
 const multer = require("multer");
+const path = require("path"); // AGGIUNTO: Necessario per gestire le estensioni dei file
 const { createClient } = require("@supabase/supabase-js");
 
 const app = express();
@@ -23,8 +24,21 @@ const supabase = createClient(
 app.use(cors());
 app.use(express.json());
 app.use(express.static(__dirname));
+// AGGIUNTO: Permette al browser di accedere direttamente alle foto nella cartella uploads
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-const upload = multer({ dest: "uploads/" });
+// MODIFICATO: Configurazione di Multer per mantenere l'estensione originale (.jpg, .png, ecc.)
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads/");
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({ storage: storage });
 
 /* ================= AUTH ================= */
 function auth(req, res, next) {
