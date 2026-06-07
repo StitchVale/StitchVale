@@ -39,14 +39,16 @@ app.use("/uploads/:file", (req, res, next) => {
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// Configurazione Multer
+// Configurazione Multer Ottimizzata per prevenire sovrascritture di file
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "uploads/");
   },
   filename: function (req, file, cb) {
+    // Include il nome del campo (logo o images) + timestamp + numero casuale univoco
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1E9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
+    // Combina il fieldname originario con il suffisso e l'estensione del file originale (.jpg, .png, ecc.)
+    cb(null, file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname));
   }
 });
 
