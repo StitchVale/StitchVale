@@ -203,7 +203,8 @@ app.post("/brands", auth, upload.single("logo"), async (req, res) => {
     console.error(err);
     res.status(500).json({ message: "Errore interno del server" });
   }
-});    // Se è stato caricato un file per il logo, inseriamo il nome del file generato
+});    
+// Se è stato caricato un file per il logo, inseriamo il nome del file generato
     if (req.file) {
       brandData.logo = req.file.filename;
     }
