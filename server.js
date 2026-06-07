@@ -26,32 +26,20 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(__dirname));
 
-// Middleware di controllo per la cartella uploads per evitare crash se Render cancella le foto
-app.use("/uploads/:file", (req, res, next) => {
-  const filePath = path.join(__dirname, "uploads", req.params.file);
-  
-  if (fs.existsSync(filePath)) {
-    return next();
-  } else {
-    return res.redirect("https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=500&q=80");
+// Gestione delle immagini tramite Supabase Storage (Redirect Automatico)
+const SUPABASE_PROJECT_URL = process.env.SUPABASE_URL; 
+
+app.get("/uploads/:file", (req, res) => {
+  if (!SUPABASE_PROJECT_URL) {
+    return res.status(500).json({ message: "Variabile SUPABASE_URL non configurata sul server" });
   }
+  // Reindirizza il browser direttamente all'URL pubblico del file dentro il bucket di Supabase
+  const publicUrl = `${SUPABASE_PROJECT_URL}/storage/v1/object/public/uploads/${req.params.file}`;
+  return res.redirect(publicUrl);
 });
 
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-
-// Configurazione Multer Ottimizzata per prevenire sovrascritture di file
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "uploads/");
-  },
-  filename: function (req, file, cb) {
-    // Include il nome del campo (logo o images) + timestamp + numero casuale univoco
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1E9);
-    // Combina il fieldname originario con il suffisso e l'estensione del file originale (.jpg, .png, ecc.)
-    cb(null, file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname));
-  }
-});
-
+// Configurazione Multer in Memoria (I file non toccano il disco di Render, vanno direttamente a Supabase)
+const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 /* ================= AUTH MIDDLEWARE ================= */
@@ -164,7 +152,7 @@ app.post("/login", async (req, res) => {
   }
 });
 
-/* ================= BRANDS PROFILE (SALVATAGGIO) ================= */
+/* ================= BRANDS PROFILE (SALVATAGGIO SU SUPABASE STORAGE) ================= */
 app.post("/brands", auth, upload.single("logo"), async (req, res) => {
   try {
     const brandData = {
@@ -176,8 +164,24 @@ app.post("/brands", auth, upload.single("logo"), async (req, res) => {
       email: req.user.email 
     };
 
-    if (req.file && req.file.filename) {
-      brandData.logo = req.file.filename;
+    if (req.file) {
+      const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1E9);
+      const fileName = `logo-${uniqueSuffix}${path.extname(req.file.originalname)}`;
+
+      // Carica il logo direttamente dentro il bucket pubblico "uploads" su Supabase
+      const { error: uploadError } = await supabase.storage
+        .from("uploads")
+        .upload(fileName, req.file.buffer, {
+          contentType: req.file.mimetype,
+          upsert: true
+        });
+
+      if (uploadError) {
+        console.error("Errore upload logo Supabase Storage:", uploadError);
+        return res.status(500).json({ message: "Errore nel caricamento del logo su Storage" });
+      }
+
+      brandData.logo = fileName;
     }
 
     const { data: existingBrand, error: checkError } = await supabase
@@ -212,7 +216,7 @@ app.post("/brands", auth, upload.single("logo"), async (req, res) => {
   }
 });    
 
-/* ================= BRANDS LIST (RICHIESTA PUBBLICA PER IL CATALOGO) ================= */
+/* ================= BRANDS LIST ================= */
 app.get("/brands-list", async (req, res) => {
   try {
     const { data, error } = await supabase
@@ -251,7 +255,28 @@ app.get("/products", async (req, res) => {
 
 app.post("/products", auth, upload.array("images", 8), async (req, res) => {
   try {
-    const images = req.files ? req.files.map(f => f.filename) : [];
+    const images = [];
+
+    if (req.files && req.files.length > 0) {
+      for (const file of req.files) {
+        const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1E9);
+        const fileName = `product-${uniqueSuffix}${path.extname(file.originalname)}`;
+
+        // Carica ogni singola immagine del vestito dentro il bucket "uploads" di Supabase
+        const { error: uploadError } = await supabase.storage
+          .from("uploads")
+          .upload(fileName, file.buffer, {
+            contentType: file.mimetype,
+            upsert: true
+          });
+
+        if (!uploadError) {
+          images.push(fileName);
+        } else {
+          console.error("Errore upload immagine prodotto Supabase:", uploadError);
+        }
+      }
+    }
 
     const { error } = await supabase.from("products").insert([
       {
@@ -272,7 +297,7 @@ app.post("/products", auth, upload.array("images", 8), async (req, res) => {
       return res.status(400).json(error);
     }
 
-    res.json({ message: "Prodotto creato" });
+    res.json({ message: "Prodotto creato con successo!" });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Errore interno del server" });
