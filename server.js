@@ -71,7 +71,10 @@ app.post("/register", async (req, res) => {
     }
   ]);
 
-  if (error) return res.status(500).json(error);
+  if (error) {
+    console.log(error);
+    return res.status(500).json(error);
+  }
 
   res.json({
     message: role === "brand"
@@ -139,32 +142,39 @@ app.get("/products", async (req, res) => {
 
   res.json(data);
 });
+
 app.post(
   "/products",
   auth,
   upload.array("images", 8),
   async (req, res) => {
     const images = req.files ? req.files.map(f => f.filename) : [];
-console.log("BODY:", req.body);
-console.log("IMAGES:", images);    
-   const { error } = await supabase.from("products").insert([
-  {
-    name: req.body.name || "",
-    brand: req.user.email,
-    category: req.body.category || "",
-    description: req.body.description || "",
-    price: Number(req.body.price) || 0,
-    images: images || [],
-    image: images?.[0] || "",
-    created_at: new Date().toISOString(),
-    created_by: req.user.email
-  }
-]);
 
-if (error) {
-  console.log("SUPABASE ERROR:", error);
-  return res.status(400).json(error);
-});
+    console.log("BODY:", req.body);
+    console.log("IMAGES:", images);
+
+    const { error } = await supabase.from("products").insert([
+      {
+        name: req.body.name || "",
+        brand: req.user.email,
+        category: req.body.category || "",
+        description: req.body.description || "",
+        price: Number(req.body.price) || 0,
+        images: images || [],
+        image: images?.[0] || "",
+        created_at: new Date().toISOString(),
+        created_by: req.user.email
+      }
+    ]);
+
+    if (error) {
+      console.log("SUPABASE ERROR:", error);
+      return res.status(400).json(error);
+    }
+
+    res.json({ message: "Prodotto creato" });
+  }
+);
 
 /* ================= ORDERS ================= */
 app.get("/orders", auth, async (req, res) => {
@@ -176,7 +186,7 @@ app.get("/orders", auth, async (req, res) => {
   res.json(data);
 });
 
-/* ================= APPROVE BRAND (ADMIN) ================= */
+/* ================= ADMIN ================= */
 app.post("/approve-brand", async (req, res) => {
   const { password, email } = req.body;
 
@@ -194,7 +204,6 @@ app.post("/approve-brand", async (req, res) => {
   res.json({ message: "Brand approvato" });
 });
 
-/* ================= ADMIN USERS ================= */
 app.get("/admin-users", async (req, res) => {
   if (req.query.password !== "STITCHVALEADMIN") {
     return res.status(403).json({ message: "No access" });
@@ -204,7 +213,6 @@ app.get("/admin-users", async (req, res) => {
   res.json(data);
 });
 
-/* ================= ADMIN ORDERS ================= */
 app.get("/admin-orders", async (req, res) => {
   if (req.query.password !== "STITCHVALEADMIN") {
     return res.status(403).json({ message: "No access" });
