@@ -166,10 +166,44 @@ app.post("/brands", auth, upload.single("logo"), async (req, res) => {
       style: req.body.style || "",
       website: req.body.website || "",
       instagram: req.body.instagram || "",
-      email: req.user.email // Associa il profilo all'email del brand autenticato
+      email: req.user.email 
     };
 
-    // Se è stato caricato un file per il logo, inseriamo il nome del file generato
+    if (req.file && req.file.filename) {
+      brandData.logo = req.file.filename;
+    }
+
+    const { data: existingBrand, error: checkError } = await supabase
+      .from("brand")
+      .select("*")
+      .eq("email", req.user.email);
+
+    if (checkError) {
+      return res.status(400).json(checkError);
+    }
+
+    let result;
+    if (existingBrand && existingBrand.length > 0) {
+      result = await supabase
+        .from("brand")
+        .update(brandData)
+        .eq("email", req.user.email);
+    } else {
+      result = await supabase
+        .from("brand")
+        .insert([brandData]);
+    }
+
+    if (result.error) {
+      return res.status(400).json(result.error); // Corretto qui!
+    }
+
+    res.json({ message: "Profilo brand salvato con successo!" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Errore interno del server" });
+  }
+});    // Se è stato caricato un file per il logo, inseriamo il nome del file generato
     if (req.file) {
       brandData.logo = req.file.filename;
     }
