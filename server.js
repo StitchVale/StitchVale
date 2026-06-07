@@ -25,6 +25,21 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(__dirname));
 // Rende accessibili al browser i file caricati nella cartella uploads
+const fs = require("fs");
+
+// Middleware di controllo per la cartella uploads
+app.use("/uploads/:file", (req, res, next) => {
+  const filePath = path.join(__dirname, "uploads", req.params.file);
+  
+  // Controlla se il file esiste fisicamente sul server Render
+  if (fs.existsSync(filePath)) {
+    return next();
+  } else {
+    // Se il file è andato perduto nei riavvii di Render, mostra una pic elegante senza crashare
+    return res.redirect("https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=500&q=80");
+  }
+});
+
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Configurazione Multer: mantiene le estensioni originali dei file caricati
