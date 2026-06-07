@@ -152,7 +152,7 @@ app.post("/login", async (req, res) => {
   }
 });
 
-/* ================= BRANDS PROFILE (SALVATAGGIO SU SUPABASE STORAGE) ================= */
+/* ================= BRANDS PROFILE (SALVATAGGIO CORRETTO SU STORAGE + DB CON SELECT) ================= */
 app.post("/brands", auth, upload.single("logo"), async (req, res) => {
   try {
     const brandData = {
@@ -168,7 +168,7 @@ app.post("/brands", auth, upload.single("logo"), async (req, res) => {
       const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1E9);
       const fileName = `logo-${uniqueSuffix}${path.extname(req.file.originalname)}`;
 
-      // Carica il logo direttamente dentro il bucket pubblico "uploads" su Supabase
+      // Carica il logo dentro il bucket pubblico "uploads" su Supabase
       const { error: uploadError } = await supabase.storage
         .from("uploads")
         .upload(fileName, req.file.buffer, {
@@ -193,23 +193,32 @@ app.post("/brands", auth, upload.single("logo"), async (req, res) => {
       return res.status(400).json(checkError);
     }
 
-    let result;
+    let data, error;
     if (existingBrand && existingBrand.length > 0) {
-      result = await supabase
+      // CORREZIONE: Aggiunto .select() alla fine per forzare la restituzione dei dati
+      const res = await supabase
         .from("brand")
         .update(brandData)
-        .eq("email", req.user.email);
+        .eq("email", req.user.email)
+        .select();
+      data = res.data;
+      error = res.error;
     } else {
-      result = await supabase
+      // CORREZIONE: Aggiunto .select() alla fine per forzare la restituzione dei dati
+      const res = await supabase
         .from("brand")
-        .insert([brandData]);
+        .insert([brandData])
+        .select();
+      data = res.data;
+      error = res.error;
     }
 
-    if (result.error) {
-      return res.status(400).json(result.error);
+    if (error) {
+      console.error("Errore salvataggio DB:", error);
+      return res.status(400).json(error);
     }
 
-    res.json({ message: "Profilo brand salvato con successo!" });
+    res.json({ message: "Profilo brand salvato con successo!", brand: data?.[0] });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Errore interno del server" });
@@ -262,7 +271,7 @@ app.post("/products", auth, upload.array("images", 8), async (req, res) => {
         const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1E9);
         const fileName = `product-${uniqueSuffix}${path.extname(file.originalname)}`;
 
-        // Carica ogni singola immagine del vestito dentro il bucket "uploads" di Supabase
+        // Carica ogni singola immagine dentro il bucket "uploads" di Supabase
         const { error: uploadError } = await supabase.storage
           .from("uploads")
           .upload(fileName, file.buffer, {
@@ -278,26 +287,30 @@ app.post("/products", auth, upload.array("images", 8), async (req, res) => {
       }
     }
 
-    const { error } = await supabase.from("products").insert([
-      {
-        name: req.body.name || "",
-        brand: req.user.email,
-        category: req.body.category || "",
-        description: req.body.description || "",
-        price: Number(req.body.price) || 0,
-        images: images || [],
-        image: images?.[0] || "",
-        created_at: new Date().toISOString(),
-        created_by: req.user.email
-      }
-    ]);
+    // CORREZIONE: Aggiunto .select() alla fine dell'insert dei prodotti
+    const { data, error } = await supabase
+      .from("products")
+      .insert([
+        {
+          name: req.body.name || "",
+          brand: req.user.email,
+          category: req.body.category || "",
+          description: req.body.description || "",
+          price: Number(req.body.price) || 0,
+          images: images || [],
+          image: images?.[0] || "",
+          created_at: new Date().toISOString(),
+          created_by: req.user.email
+        }
+      ])
+      .select();
 
     if (error) {
       console.error("SUPABASE ERROR:", error);
       return res.status(400).json(error);
     }
 
-    res.json({ message: "Prodotto creato con successo!" });
+    res.json({ message: "Prodotto creato con successo!", product: data?.[0] });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Errore interno del server" });
