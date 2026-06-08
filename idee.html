@@ -99,92 +99,152 @@
       outline: 1px solid white;
     }
 
+    /* GRIGLIA E CARD STILE CATALOGO REALE */
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 25px;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
       padding: 40px;
       max-width: 1200px;
       margin: auto;
     }
 
     .card {
-      background: #1a1a1a;
-      border-radius: 14px;
+      background: #111111;
       overflow: hidden;
-      border: 1px solid #222;
       display: flex;
       flex-direction: column;
+      border: 1px solid #1a1a1a;
+    }
+
+    .image-container {
+      position: relative;
+      width: 100%;
+      height: 380px; /* Più verticale, simile ai tuoi prodotti */
+      background: #1c1c1c;
     }
 
     .card-main-img {
       width: 100%;
-      height: 260px;
+      height: 100%;
       object-fit: cover;
-      background: #222;
     }
 
     .thumbs {
       display: flex;
-      gap: 8px;
-      padding: 10px;
+      gap: 6px;
+      padding: 8px;
       overflow-x: auto;
-      background: #111;
+      background: #0b0b0b;
     }
 
     .thumbs img {
-      width: 58px;
-      height: 58px;
+      width: 45px;
+      height: 45px;
       object-fit: cover;
-      border-radius: 7px;
       cursor: pointer;
-      border: 2px solid transparent;
+      border: 1px solid #222;
+      opacity: 0.5;
     }
 
     .thumbs img.active {
+      opacity: 1;
       border-color: white;
     }
 
+    /* INFO CARD MINIMAL */
     .card-info {
-      padding: 18px;
+      padding: 20px;
       display: flex;
       flex-direction: column;
       flex-grow: 1;
     }
 
+    /* Box autore stile "AKM wrld" */
+    .author-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: bold;
+      color: #fff;
+      margin-bottom: 14px;
+    }
+
+    .author-badge .avatar-placeholder {
+      width: 16px;
+      height: 16px;
+      background: #444;
+      border-radius: 50%;
+    }
+
+    .style-category {
+      font-size: 11px;
+      text-transform: uppercase;
+      color: #888;
+      letter-spacing: 1px;
+      margin-bottom: 5px;
+    }
+
     .card-info h3 {
-      margin-top: 0;
-      margin-bottom: 8px;
+      margin: 0 0 8px 0;
+      font-size: 18px;
+      text-transform: uppercase;
+      font-weight: bold;
+      letter-spacing: 0.5px;
     }
 
     .description {
       color: #aaa;
-      font-size: 14px;
-      margin: 8px 0;
+      font-size: 13px;
+      margin: 0 0 12px 0;
       line-height: 1.4;
     }
 
-    .card-meta {
-      font-size: 13px;
-      color: #888;
-      margin: 4px 0;
+    .materials-spec {
+      font-size: 12px;
+      color: #777;
+      text-transform: uppercase;
+      margin-bottom: 15px;
+    }
+
+    /* RIGA PREZZO E BOTTONE DEL CATALOGO */
+    .card-bottom-row {
+      margin-top: auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 15px;
+    }
+
+    .price-display {
+      font-size: 18px;
+      font-weight: bold;
+      color: white;
+    }
+
+    .likes-count {
+      font-size: 11px;
+      color: #666;
+      margin-top: 2px;
     }
 
     .like-btn {
-      margin-top: auto;
-      background: white;
-      color: black;
-      border-radius: 25px;
-      padding: 12px;
+      background: #1a1a1a;
+      color: white;
+      border: 1px solid #333;
+      padding: 8px 16px;
       cursor: pointer;
-      border: none;
-      width: 100%;
       font-weight: bold;
-      transition: background 0.2s;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: background 0.2s, color 0.2s;
     }
 
     .like-btn:hover {
-      background: #e0e0e0;
+      background: white;
+      color: black;
     }
 
     /* Sezione Caricamento Separata */
@@ -252,7 +312,6 @@
       background: #e0e0e0;
     }
 
-    /* Messaggi di feedback */
     .status-message {
       text-align: center;
       font-weight: bold;
@@ -295,12 +354,12 @@
 
       .grid {
         grid-template-columns: repeat(2, 1fr);
-        padding: 25px;
-        gap: 18px;
+        padding: 20px;
+        gap: 15px;
       }
 
-      .card-main-img {
-        height: 230px;
+      .image-container {
+        height: 280px;
       }
     }
 
@@ -319,15 +378,11 @@
 
       .grid {
         grid-template-columns: 1fr;
-        padding: 18px;
+        padding: 15px;
       }
 
-      .card-main-img {
-        height: 330px;
-      }
-
-      .upload-box {
-        padding: 22px;
+      .image-container {
+        height: 380px;
       }
     }
   </style>
@@ -389,7 +444,7 @@
         <input id="targetPrice" name="targetPrice" placeholder="Es. 40-60">
 
         <label for="description">Descrizione dell'idea</label>
-        <textarea id="description" name="description" placeholder="Racconta il tuo concept nei dettagli..." required></textarea>
+        <textarea id="description" name="description" placeholder="Racconto il tuo concept nei dettagli..." required></textarea>
 
         <label for="contact">Tuo contatto (Instagram o Email)</label>
         <input id="contact" name="contact" placeholder="Es. @tuousername o email" required>
@@ -412,7 +467,7 @@
 
   <script>
     const API_URL = "https://stitchvale-api.onrender.com";
-   const STORAGE_BASE_URL = "https://khmpstufzrufxwatlpgj.supabase.co/storage/v1/object/public/uploads/";    
+    const STORAGE_BASE_URL = "https://khmpstufzrufxwatlpgj.supabase.co/storage/v1/object/public/uploads/";    
     let allIdeas = [];
 
     function isLoggedIn() {
@@ -459,7 +514,7 @@
     function showIdeas(ideas){
       const container = document.getElementById("ideas");
       if (ideas.length === 0) {
-        container.innerHTML = "<p style='padding:30px; grid-column: 1/-1; text-align:center;'>Nessuna idea trovata.</p>";
+        container.innerHTML = "<p style='padding:30px; grid-column: 1/-1; text-align:center; color: #555;'>Nessuna idea trovata.</p>";
         return;
       }
 
@@ -471,7 +526,9 @@
             ${
               imgs.length > 0
               ? `
-                <img id="main-${i.id}" class="card-main-img" src="${STORAGE_BASE_URL}${imgs[0]}" alt="${i.title}">
+                <div class="image-container">
+                  <img id="main-${i.id}" class="card-main-img" src="${STORAGE_BASE_URL}${imgs[0]}" alt="${i.title}">
+                </div>
                 ${
                   imgs.length > 1
                   ? `
@@ -492,19 +549,25 @@
             }
 
             <div class="card-info">
+              <div class="author-badge">
+                <div class="avatar-placeholder"></div>
+                ${i.contact}
+              </div>
+              
+              <div class="style-category">${i.styleTag || 'CONCEPT'}</div>
               <h3>${i.title}</h3>
-              <p class="description">${i.description || "Nessuna descrizione"}</p>
+              <p class="description">${i.description || "Nessuna descrizione fornita."}</p>
+              <div class="materials-spec">${i.materials || "Materiali non specificati"}</div>
               
-              ${i.styleTag ? `<div class="card-meta">✨ Stile: ${i.styleTag}</div>` : ''}
-              ${i.materials ? `<div class="card-meta">🧵 Materiali: ${i.materials}</div>` : ''}
-              ${i.targetPrice ? `<div class="card-meta">💶 Prezzo Ideal: €${i.targetPrice}</div>` : ''}
-              
-              <div class="card-meta" style="margin-top: 10px; color: white;">👤 ${i.contact}</div>
-              <p style="font-weight: bold; margin: 10px 0;">❤️ ${i.votes || 0} Like</p>
-
-              <button class="like-btn" onclick="likeIdea(${i.id})">
-                👍 Vota Idea
-              </button>
+              <div class="card-bottom-row">
+                <div>
+                  <div class="price-display">€${i.targetPrice || "--"}</div>
+                  <div class="likes-count">❤️ ${i.votes || 0} Voti</div>
+                </div>
+                <button class="like-btn" onclick="likeIdea(${i.id})">
+                  Vota
+                </button>
+              </div>
             </div>
           </div>
         `;
@@ -540,7 +603,8 @@
         });
 
         if (res.ok) {
-          loadIdeas();
+          alert("Grazie per aver votato!");
+          await loadIdeas();
         } else {
           const data = await res.json();
           alert(data.message || "Errore like");
@@ -550,7 +614,6 @@
       }
     }
 
-    /* GESTIONE INVIO FORMATO CON MESSAGGIO SU SCHERMO */
     document.getElementById("ideaForm").addEventListener("submit", async (e) => {
       e.preventDefault();
 
