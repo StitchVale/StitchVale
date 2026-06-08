@@ -1,100 +1,223 @@
 <!DOCTYPE html>
-<html>
-
-<html>
+<html lang="it">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Novità - StitchVale</title>
+  <title>Novità — StitchVale</title>
 
   <style>
+    :root {
+      --bg-color: #0a0a0a;
+      --card-bg: #121212;
+      --accent-color: #ffffff;
+      --text-main: #ffffff;
+      --text-muted: #707070;
+      --border-color: #1a1a1a;
+      --badge-color: #00ffcc;
+    }
+
     body {
-  margin: 0;
-  font-family: Arial;
-  background: #0d0d0d;
-  color: white;
-}
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg-color);
+      color: var(--text-main);
+      -webkit-font-smoothing: antialiased;
+    }
 
-header {
-  display: flex;
-  justify-content: space-between;
-  padding: 30px;
-  background: black;
-  border-bottom: 1px solid #222;
-}
+    /* Header Minimal Blurry */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 40px;
+      background: rgba(10, 10, 10, 0.8);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
 
-.logo img {
-  height: 80px;
-}
+    .logo img {
+      height: 50px;
+      object-fit: contain;
+      filter: grayscale(1) brightness(1.2);
+    }
 
-nav a {
-  color: #aaa;
-  margin-left: 20px;
-  text-decoration: none;
-}
+    nav a {
+      color: var(--text-muted);
+      margin-left: 25px;
+      text-decoration: none;
+      font-size: 13px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      transition: color 0.2s ease;
+    }
 
-nav a:hover {
-  color: white;
-}
+    nav a:hover {
+      color: var(--text-main);
+    }
 
-.title {
-  text-align: center;
-  padding: 40px;
-}
+    /* Title Section */
+    .title-section {
+      text-align: center;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 80px 20px 40px 20px;
+    }
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill,minmax(250px,1fr));
-  gap: 25px;
-  padding: 20px 40px 60px;
-}
+    .title-section h1 {
+      font-size: 48px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      margin-bottom: 12px;
+    }
 
-.card {
-  background: #1a1a1a;
-  border-radius: 10px;
-  overflow: hidden;
-}
+    .title-section p {
+      color: var(--text-muted);
+      font-size: 16px;
+      margin: 0 auto;
+      line-height: 1.5;
+    }
 
-.card img {
-  width: 100%;
-  height: 250px;
-  object-fit: cover;
-}
+    /* Grid & Cards Section */
+    .main-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 40px 80px 40px;
+    }
 
-.card-info {
-  padding: 15px;
-}
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 30px;
+    }
 
-.badge {
-  color: #00ffcc;
-  font-size: 13px;
-  font-weight: bold;
-}
+    /* Card Prodotto Estetica */
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      transition: border-color 0.3s ease, transform 0.3s ease;
+    }
 
-.description {
-  color: #aaa;
-  font-size: 14px;
-}
+    .card:hover {
+      border-color: #333333;
+      transform: translateY(-4px);
+    }
 
-.price {
-  font-weight: bold;
-  margin-top: 10px;
-}
+    .image-container {
+      width: 100%;
+      height: 340px;
+      overflow: hidden;
+      background: #161616;
+    }
 
-footer {
-  padding: 30px;
-  text-align: center;
-  border-top: 1px solid #222;
-  color: #aaa;
-}
+    .card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+
+    .card:hover .image-container img {
+      transform: scale(1.03);
+    }
+
+    .card-info {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+    }
+
+    .badge {
+      color: var(--badge-color);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .card-info h3 {
+      margin: 0 0 4px 0;
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+
+    .brand-name {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 12px;
+    }
+
+    .description {
+      color: #8a8a8a;
+      font-size: 13px;
+      line-height: 1.4;
+      margin-bottom: 20px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .card-footer {
+      margin-top: auto;
+      padding-top: 15px;
+      border-top: 1px solid rgba(255,255,255,0.03);
+    }
+
+    .price {
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    /* Footer Sottile */
+    footer {
+      padding: 60px 40px;
+      text-align: center;
+      border-top: 1px solid var(--border-color);
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    footer h3 {
+      color: var(--text-main);
+      font-size: 16px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 15px;
+    }
+
+    footer p {
+      margin: 5px 0;
+    }
+
+    /* Responsive mobile */
+    @media (max-width: 768px) {
+      header { padding: 20px; }
+      nav { display: none; }
+      .title-section h1 { font-size: 36px; }
+      .main-content { padding: 20px; }
+    }
   </style>
-
-  
 </head>
 <body>
-  <header>
+
+<header>
   <div class="logo">
-    <a href="home.html"><img src="logo3.jpg"></a>
+    <a href="home.html">
+      <img src="logo3.jpg" alt="StitchVale Logo">
+    </a>
   </div>
 
   <nav>
@@ -103,15 +226,18 @@ footer {
     <a href="account.html">Account</a>
     <a href="catalogo.html">Catalogo</a>
     <a href="idee.html">Idee</a>
+    <a href="outfit.html">AI Outfit</a>
   </nav>
 </header>
 
-<div class="title">
-  <h1>🔥 Nuovi Arrivi</h1>
-  <p>Scopri gli ultimi prodotti caricati dai brand</p>
+<div class="title-section">
+  <h1>Nuovi Arrivi</h1>
+  <p>Scopri gli ultimi drop e le novità esclusive caricate dai brand di StitchVale.</p>
 </div>
 
-<div id="products" class="grid"></div>
+<div class="main-content">
+  <div id="products" class="grid"></div>
+</div>
 
 <footer>
   <h3>StitchVale</h3>
@@ -119,32 +245,42 @@ footer {
   <p>Instagram: @stitchvale</p>
 </footer>
 
-  <script>
-    const API_URL = "https://stitchvale-api.onrender.com";
+<script>
+  const API_URL = "https://stitchvale-api.onrender.com";
 
-async function loadRecentProducts(){
-  const res = await fetch(API_URL + "/products");
-  const products = await res.json();
+  async function loadRecentProducts(){
+    try {
+      const res = await fetch(API_URL + "/products");
+      const products = await res.json();
 
-  // prende solo i primi (già ordinati dal server)
-  const recent = products.slice(0, 6);
+      // Prende solo i primi 6 (già ordinati dal server dal più recente)
+      const recent = products.slice(0, 6);
 
-  document.getElementById("products").innerHTML = recent.map(p => `
-    <div class="card">
-      ${p.image ? `<img src="${API_URL}/uploads/${p.image}">` : ""}
+      document.getElementById("products").innerHTML = recent.map(p => `
+        <div class="card">
+          <div class="image-container">
+            ${p.image ? `<img src="${API_URL}/uploads/${p.image}" alt="${p.name}">` : `<div style="padding:40px; color:#444;">Nessuna immagine</div>`}
+          </div>
 
-      <div class="card-info">
-        <div class="badge">NUOVO</div>
-        <h3>${p.name}</h3>
-        <p>${p.brand}</p>
-        <p class="description">${p.description || ""}</p>
-        <p class="price">€${p.price}</p>
-      </div>
-    </div>
-  `).join("");
-}
+          <div class="card-info">
+            <div class="badge">Nuovo</div>
+            <h3>${p.name}</h3>
+            <span class="brand-name">${p.brand}</span>
+            <p class="description">${p.description || "Nessuna descrizione disponibile per questo capo."}</p>
+            
+            <div class="card-footer">
+              <span class="price">€${p.price}</span>
+            </div>
+          </div>
+        </div>
+      `).join("");
+      
+    } catch (err) {
+      console.error("Errore caricamento novità:", err);
+    }
+  }
 
-window.onload = loadRecentProducts;
-  </script>
+  window.onload = loadRecentProducts;
+</script>
 </body>
 </html>
