@@ -120,7 +120,7 @@
     .image-container {
       position: relative;
       width: 100%;
-      height: 380px; /* Più verticale, simile ai tuoi prodotti */
+      height: 380px;
       background: #1c1c1c;
     }
 
@@ -160,7 +160,6 @@
       flex-grow: 1;
     }
 
-    /* Box autore stile "AKM wrld" */
     .author-badge {
       display: flex;
       align-items: center;
@@ -514,7 +513,7 @@
     function showIdeas(ideas){
       const container = document.getElementById("ideas");
       if (ideas.length === 0) {
-        container.innerHTML = "<p style='padding:30px; grid-column: 1/-1; text-align:center; color: #555;'>Nessuna idea trovata.</p>";
+        container.innerHTML = "<p style='padding:30px; grid-column: 1/-1; text-align:center; color: #555;'>Nessuna idea trouvata.</p>";
         return;
       }
 
@@ -591,6 +590,7 @@
       showIdeas(results);
     }
 
+    // MODIFICATA: Questa versione aggiorna lo schermo all'istante!
     async function likeIdea(id){
       if (!requireLogin()) return;
 
@@ -604,7 +604,25 @@
 
         if (res.ok) {
           alert("Grazie per aver votato!");
-          await loadIdeas();
+          
+          // Trova gli elementi della card specifica e incrementa subito a schermo
+          const cardBtn = document.querySelector(`button[onclick="likeIdea(${id})"]`);
+          if (cardBtn) {
+            const votesDiv = cardBtn.parentElement.querySelector(".likes-count");
+            if (votesDiv) {
+              const currentVotes = parseInt(votesDiv.innerText.replace(/[^0-9]/g, '')) || 0;
+              votesDiv.innerHTML = `❤️ ${currentVotes + 1} Voti`;
+            }
+            cardBtn.disabled = true;
+            cardBtn.style.opacity = "0.5";
+            cardBtn.innerText = "VOTATO";
+          }
+
+          // Rinfresca i dati reali dal database dopo 1 secondo
+          setTimeout(async () => {
+            await loadIdeas();
+          }, 1000);
+
         } else {
           const data = await res.json();
           alert(data.message || "Errore like");
