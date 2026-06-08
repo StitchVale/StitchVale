@@ -487,11 +487,12 @@ app.post("/ideas", auth, upload.array("images", 8), async (req, res) => {
   }
 });
 
-/* ================= ROTTA LIKE (OTTIMIZZATA E FIXATA) ================= */
+/* ================= ROTTA LIKE (VERSIONE DIRECT AGGIORNATA) ================= */
 app.post("/like/:id", auth, async (req, res) => {
   const ideaId = req.params.id;
 
   try {
+    // 1. Recupera i voti attuali
     const { data: idea, error: fetchError } = await supabase
       .from("idee")
       .select("votes")
@@ -505,25 +506,24 @@ app.post("/like/:id", auth, async (req, res) => {
 
     const nuoviVoti = (Number(idea.votes) || 0) + 1;
 
-    // Aggiorna forzando Supabase a salvare ed emettere l'array modificato (.select())
+    // 2. Aggiorna in modo diretto senza forzare il .select() finale
     const { error: updateError } = await supabase
       .from("idee")
       .update({ votes: nuoviVoti })
-      .eq("id", ideaId)
-      .select();
+      .eq("id", ideaId);
 
     if (updateError) {
       console.error("Errore aggiornamento voti database:", updateError);
       return res.status(500).json({ message: "Errore durante il salvataggio del voto" });
     }
 
+    // 3. Rispondi al frontend con il numero corretto
     return res.json({ message: "Voto registrato con successo!", votes: nuoviVoti });
   } catch (err) {
     console.error("Errore interno rotta like:", err);
     return res.status(500).json({ message: "Errore interno del server" });
   }
 });
-
 /* ================= START ================= */
 app.listen(PORT, () => {
   console.log("Server Supabase attivo su porta " + PORT);
