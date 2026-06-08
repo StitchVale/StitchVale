@@ -381,7 +381,7 @@ app.get("/admin-orders", async (req, res) => {
   }
 });
 
-/* ================= STRIPE ================= */
+/* ================= STRIPE (FIXATO) ================= */
 app.post("/create-checkout-session", async (req, res) => {
   try {
     const { name, price } = req.body;
@@ -403,6 +403,9 @@ app.post("/create-checkout-session", async (req, res) => {
       cancel_url: "https://www.stitchvale.com/cancel.html"
     });
 
+    // FIX: Restituisce l'ID sessione a Stripe per non mandare in blocco il caricamento
+    return res.json({ id: session.id });
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Errore durante la creazione della sessione Stripe" });
@@ -411,7 +414,6 @@ app.post("/create-checkout-session", async (req, res) => {
 
 /* ================= IDEE ================= */
 
-// 1. Ottenere tutte le idee caricate
 app.get("/ideas", async (req, res) => {
   try {
     const { data, error } = await supabase
@@ -431,7 +433,6 @@ app.get("/ideas", async (req, res) => {
   }
 });
 
-// 2. Creare una nuova idea con immagini
 app.post("/ideas", auth, upload.array("images", 8), async (req, res) => {
   try {
     const images = [];
@@ -486,12 +487,11 @@ app.post("/ideas", auth, upload.array("images", 8), async (req, res) => {
   }
 });
 
-// 3. Rotta Like Ottimizzata (Risolve il problema dei 0 voti e bypassa i vecchi vincoli di colonna)
+/* ================= ROTTA LIKE (OTTIMIZZATA E FIXATA) ================= */
 app.post("/like/:id", auth, async (req, res) => {
   const ideaId = req.params.id;
 
   try {
-    // Recupera l'idea dal database
     const { data: idea, error: fetchError } = await supabase
       .from("idee")
       .select("votes")
@@ -505,21 +505,22 @@ app.post("/like/:id", auth, async (req, res) => {
 
     const nuoviVoti = (Number(idea.votes) || 0) + 1;
 
-    // Aggiorna escludendo controlli rigidi
+    // Aggiorna forzando Supabase a salvare ed emettere l'array modificato (.select())
     const { error: updateError } = await supabase
       .from("idee")
       .update({ votes: nuoviVoti })
-      .eq("id", ideaId);
+      .eq("id", ideaId)
+      .select();
 
     if (updateError) {
       console.error("Errore aggiornamento voti database:", updateError);
       return res.status(500).json({ message: "Errore durante il salvataggio del voto" });
     }
 
-    res.json({ message: "Voto registrato con successo!", votes: nuoviVoti });
+    return res.json({ message: "Voto registrato con successo!", votes: nuoviVoti });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Errore interno del server" });
+    console.error("Errore interno rotta like:", err);
+    return res.status(500).json({ message: "Errore interno del server" });
   }
 });
 
