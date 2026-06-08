@@ -487,7 +487,7 @@ app.post("/ideas", auth, upload.array("images", 8), async (req, res) => {
   }
 });
 
-/* ================= ROTTA LIKE (VERSIONE DIRECT AGGIORNATA) ================= */
+/* ================= ROTTA LIKE (DIAGNOSTICA ATTIVA) ================= */
 app.post("/like/:id", auth, async (req, res) => {
   const ideaId = req.params.id;
 
@@ -501,12 +501,12 @@ app.post("/like/:id", auth, async (req, res) => {
 
     if (fetchError || !idea) {
       console.error("Errore recupero idea per like:", fetchError);
-      return res.status(404).json({ message: "Idea non trovata" });
+      return res.status(404).json({ message: "Idea non trovata nel DB", error: fetchError });
     }
 
     const nuoviVoti = (Number(idea.votes) || 0) + 1;
 
-    // 2. Aggiorna in modo diretto senza forzare il .select() finale
+    // 2. Aggiorna in modo diretto
     const { error: updateError } = await supabase
       .from("idee")
       .update({ votes: nuoviVoti })
@@ -514,17 +514,17 @@ app.post("/like/:id", auth, async (req, res) => {
 
     if (updateError) {
       console.error("Errore aggiornamento voti database:", updateError);
-      return res.status(500).json({ message: "Errore durante il salvataggio del voto" });
+      // Ti rimanda l'errore esatto del database direttamente sul browser
+      return res.status(500).json({ message: "Errore DB Supabase: " + updateError.message, detail: updateError });
     }
 
-    // 3. Rispondi al frontend con il numero corretto
+    // 3. Rispondi al frontend con successo
     return res.json({ message: "Voto registrato con successo!", votes: nuoviVoti });
   } catch (err) {
     console.error("Errore interno rotta like:", err);
-    return res.status(500).json({ message: "Errore interno del server" });
+    return res.status(500).json({ message: "Errore interno del server Render", error: err.message });
   }
-});
-/* ================= START ================= */
+});/* ================= START ================= */
 app.listen(PORT, () => {
   console.log("Server Supabase attivo su porta " + PORT);
 });
