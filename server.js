@@ -414,7 +414,60 @@ app.post("/create-checkout-session", async (req, res) => {
     res.status(500).json({ message: "Errore durante la creazione della sessione Stripe" });
   }
 });
+/* ================= IDEE (SPAZIO PER LE IDEE) ================= */
 
+// 1. Endpoint per ottenere tutte le idee caricate (da mostrare nel frontend)
+app.get("/ideas", async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from("idee") // Punta alla tabella 'idee' che hai appena creato
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Errore recupero idee:", error);
+      return res.status(500).json(error);
+    }
+
+    res.json(data);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Errore interno del server" });
+  }
+});
+
+// 2. Endpoint per creare una nuova idea (richiede login)
+app.post("/ideas", auth, async (req, res) => {
+  try {
+    const { title, description } = req.body;
+
+    if (!title || !description) {
+      return res.status(400).json({ message: "Titolo e descrizione sono obbligatori" });
+    }
+
+    const { data, error } = await supabase
+      .from("idee")
+      .insert([
+        {
+          title: title,
+          description: description,
+          brand: req.user.email, // Associa automaticamente l'email di chi è loggato
+          created_at: new Date().toISOString()
+        }
+      ])
+      .select(); // Forza la restituzione dei dati appena salvati
+
+    if (error) {
+      console.error("Errore salvataggio idea:", error);
+      return res.status(400).json(error);
+    }
+
+    res.json({ message: "Idea condivisa con successo!", idea: data?.[0] });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Errore interno del server" });
+  }
+});
 /* ================= START ================= */
 app.listen(PORT, () => {
   console.log("Server Supabase attivo su porta " + PORT);
