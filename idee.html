@@ -412,6 +412,9 @@
 
   <script>
     const API_URL = "https://stitchvale-api.onrender.com";
+    // ⚠️ SOSTITUISCI [IL_TUO_PROJECT_ID] CON LE LETTERE/NUMERI DEL TUO URL DI SUPABASE
+    const STORAGE_BASE_URL = "https://[IL_TUO_PROJECT_ID].supabase.co/storage/v1/object/public/uploads/";
+    
     let allIdeas = [];
 
     function isLoggedIn() {
@@ -438,7 +441,7 @@
     }
 
     function changeIdeaImage(id, image, element) {
-      document.getElementById("main-" + id).src = API_URL + "/uploads/" + image;
+      document.getElementById("main-" + id).src = STORAGE_BASE_URL + image;
       element.parentElement.querySelectorAll("img").forEach(img => {
         img.classList.remove("active");
       });
@@ -470,14 +473,14 @@
             ${
               imgs.length > 0
               ? `
-                <img id="main-${i.id}" class="card-main-img" src="${API_URL}/uploads/${imgs[0]}" alt="${i.title}">
+                <img id="main-${i.id}" class="card-main-img" src="${STORAGE_BASE_URL}${imgs[0]}" alt="${i.title}">
                 ${
                   imgs.length > 1
                   ? `
                     <div class="thumbs">
                       ${imgs.map((img, index) => `
                         <img 
-                          src="${API_URL}/uploads/${img}" 
+                          src="${STORAGE_BASE_URL}${img}" 
                           class="${index === 0 ? "active" : ""}"
                           onclick="changeIdeaImage(${i.id}, '${img}', this)"
                         >
@@ -499,7 +502,7 @@
               ${i.targetPrice ? `<div class="card-meta">💶 Prezzo Ideal: €${i.targetPrice}</div>` : ''}
               
               <div class="card-meta" style="margin-top: 10px; color: white;">👤 ${i.contact}</div>
-              <p style="font-weight: bold; margin: 10px 0;">❤️ ${i.likes || 0} Like</p>
+              <p style="font-weight: bold; margin: 10px 0;">❤️ ${i.votes || 0} Like</p>
 
               <button class="like-btn" onclick="likeIdea(${i.id})">
                 👍 Vota Idea
@@ -559,25 +562,21 @@
       const statusDiv = document.getElementById("uploadStatus");
 
       try {
-        // CAMBIATO: Ora punta a /ideas invece che a /upload
         const res = await fetch(API_URL + "/ideas", {
           method: "POST",
           headers: {
             "Authorization": "Bearer " + getToken()
-            // Nota: Non serve mettere "Content-Type", FormData imposta tutto da solo includendo le immagini!
           },
           body: formData
         });
 
         if (res.ok) {
-          // Successo: mostra il messaggio di conferma fluido
           statusDiv.className = "status-message success";
           statusDiv.innerText = "✓ Idea caricata con successo nella community!";
           
           e.target.reset();
-          loadIdeas(); // Ricarica la griglia per mostrare la nuova idea subito!
+          loadIdeas();
 
-          // Rimuove il messaggio dopo 4 secondi
           setTimeout(() => {
             statusDiv.innerText = "";
           }, 4000);
