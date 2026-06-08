@@ -152,7 +152,7 @@ app.post("/login", async (req, res) => {
   }
 });
 
-/* ================= BRANDS PROFILE (SALVATAGGIO CORRETTO SU STORAGE + DB CON SELECT) ================= */
+/* ================= BRANDS PROFILE ================= */
 app.post("/brands", auth, upload.single("logo"), async (req, res) => {
   try {
     const brandData = {
@@ -168,7 +168,6 @@ app.post("/brands", auth, upload.single("logo"), async (req, res) => {
       const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1E9);
       const fileName = `logo-${uniqueSuffix}${path.extname(req.file.originalname)}`;
 
-      // Carica il logo dentro il bucket pubblico "uploads" su Supabase
       const { error: uploadError } = await supabase.storage
         .from("uploads")
         .upload(fileName, req.file.buffer, {
@@ -195,7 +194,6 @@ app.post("/brands", auth, upload.single("logo"), async (req, res) => {
 
     let data, error;
     if (existingBrand && existingBrand.length > 0) {
-      // CORREZIONE: Aggiunto .select() alla fine per forzare la restituzione dei dati
       const res = await supabase
         .from("brand")
         .update(brandData)
@@ -204,7 +202,6 @@ app.post("/brands", auth, upload.single("logo"), async (req, res) => {
       data = res.data;
       error = res.error;
     } else {
-      // CORREZIONE: Aggiunto .select() alla fine per forzare la restituzione dei dati
       const res = await supabase
         .from("brand")
         .insert([brandData])
@@ -271,7 +268,6 @@ app.post("/products", auth, upload.array("images", 8), async (req, res) => {
         const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1E9);
         const fileName = `product-${uniqueSuffix}${path.extname(file.originalname)}`;
 
-        // Carica ogni singola immagine dentro il bucket "uploads" di Supabase
         const { error: uploadError } = await supabase.storage
           .from("uploads")
           .upload(fileName, file.buffer, {
@@ -287,7 +283,6 @@ app.post("/products", auth, upload.array("images", 8), async (req, res) => {
       }
     }
 
-    // CORREZIONE: Aggiunto .select() alla fine dell'insert dei prodotti
     const { data, error } = await supabase
       .from("products")
       .insert([
@@ -408,12 +403,12 @@ app.post("/create-checkout-session", async (req, res) => {
       cancel_url: "https://www.stitchvale.com/cancel.html"
     });
 
-    res.json({ url: session.url });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Errore durante la creazione della sessione Stripe" });
   }
 });
+
 /* ================= IDEE (VERSIONE AVANZATA CON IMMAGINI) ================= */
 
 // 1. Ottenere tutte le idee caricate
@@ -441,7 +436,6 @@ app.post("/ideas", auth, upload.array("images", 8), async (req, res) => {
   try {
     const images = [];
 
-    // Se ci sono immagini caricate nel form, le spostiamo su Supabase Storage
     if (req.files && req.files.length > 0) {
       for (const file of req.files) {
         const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1E9);
@@ -462,7 +456,6 @@ app.post("/ideas", auth, upload.array("images", 8), async (req, res) => {
       }
     }
 
-    // Salvataggio nel database con tutti i campi del tuo HTML
     const { data, error } = await supabase
       .from("idee")
       .insert([
@@ -473,8 +466,9 @@ app.post("/ideas", auth, upload.array("images", 8), async (req, res) => {
           targetPrice: req.body.targetPrice || "",
           description: req.body.description || "",
           contact: req.body.contact || "",
-          images: images, // Array di stringhe con i nomi dei file
+          images: images, 
           brand: req.user.email,
+          votes: 0, // Imposta i voti a zero di default anziché lasciarli null!
           created_at: new Date().toISOString()
         }
       ])
@@ -490,7 +484,47 @@ app.post("/ideas", auth, upload.array("images", 8), async (req, res) => {
     console.error(err);
     res.status(500).json({ message: "Errore interno del server" });
   }
-});/* ================= START ================= */
+});
+
+// 3. AGGIUNTO: Rotta per registrare il Voto (Like) all'idea su colonna 'votes'
+app.post("/like/:id", auth, async (req, res) => {
+  const ideaId = req.params.id;
+
+  try {
+    // Recupera l'idea dal database per leggere i voti attuali
+    const { data: idea, error: fetchError } = await supabase
+      .from("idee")
+      .select("votes")
+      .eq("id", ideaId)
+      .single();
+
+    if (fetchError || !idea) {
+      console.error("Errore recupero idea per like:", fetchError);
+      return res.status(404).json({ message: "Idea non trovata" });
+    }
+
+    // Calcola il incremento gestendo eventuali valori null preesistenti
+    const nuoviVoti = (idea.votes || 0) + 1;
+
+    // Aggiorna la colonna 'votes' su Supabase
+    const { error: updateError } = await supabase
+      .from("idee")
+      .update({ votes: nuoviVoti })
+      .eq("id", ideaId);
+
+    if (updateError) {
+      console.error("Errore aggiornamento voti database:", updateError);
+      return res.status(500).json({ message: "Errore durante il salvataggio del voto" });
+    }
+
+    res.json({ message: "Voto registrato con successo!", votes: nuoviVoti });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Errore interno del server" });
+  }
+});
+
+/* ================= START ================= */
 app.listen(PORT, () => {
   console.log("Server Supabase attivo su porta " + PORT);
 });
