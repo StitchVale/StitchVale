@@ -559,10 +559,12 @@
       const statusDiv = document.getElementById("uploadStatus");
 
       try {
-        const res = await fetch(API_URL + "/upload", {
+        // CAMBIATO: Ora punta a /ideas invece che a /upload
+        const res = await fetch(API_URL + "/ideas", {
           method: "POST",
           headers: {
             "Authorization": "Bearer " + getToken()
+            // Nota: Non serve mettere "Content-Type", FormData imposta tutto da solo includendo le immagini!
           },
           body: formData
         });
@@ -573,7 +575,7 @@
           statusDiv.innerText = "✓ Idea caricata con successo nella community!";
           
           e.target.reset();
-          loadIdeas();
+          loadIdeas(); // Ricarica la griglia per mostrare la nuova idea subito!
 
           // Rimuove il messaggio dopo 4 secondi
           setTimeout(() => {
