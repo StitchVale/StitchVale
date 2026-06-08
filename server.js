@@ -414,13 +414,13 @@ app.post("/create-checkout-session", async (req, res) => {
     res.status(500).json({ message: "Errore durante la creazione della sessione Stripe" });
   }
 });
-/* ================= IDEE (SPAZIO PER LE IDEE) ================= */
+/* ================= IDEE (VERSIONE AVANZATA CON IMMAGINI) ================= */
 
-// 1. Endpoint per ottenere tutte le idee caricate (da mostrare nel frontend)
+// 1. Ottenere tutte le idee caricate
 app.get("/ideas", async (req, res) => {
   try {
     const { data, error } = await supabase
-      .from("idee") // Punta alla tabella 'idee' che hai appena creato
+      .from("idee")
       .select("*")
       .order("created_at", { ascending: false });
 
@@ -436,29 +436,52 @@ app.get("/ideas", async (req, res) => {
   }
 });
 
-// 2. Endpoint per creare una nuova idea (richiede login)
-app.post("/ideas", auth, async (req, res) => {
+// 2. Creare una nuova idea con immagini (Accetta Form-Data)
+app.post("/ideas", auth, upload.array("images", 8), async (req, res) => {
   try {
-    const { title, description } = req.body;
+    const images = [];
 
-    if (!title || !description) {
-      return res.status(400).json({ message: "Titolo e descrizione sono obbligatori" });
+    // Se ci sono immagini caricate nel form, le spostiamo su Supabase Storage
+    if (req.files && req.files.length > 0) {
+      for (const file of req.files) {
+        const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1E9);
+        const fileName = `idea-${uniqueSuffix}${path.extname(file.originalname)}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from("uploads")
+          .upload(fileName, file.buffer, {
+            contentType: file.mimetype,
+            upsert: true
+          });
+
+        if (!uploadError) {
+          images.push(fileName);
+        } else {
+          console.error("Errore upload immagine idea:", uploadError);
+        }
+      }
     }
 
+    // Salvataggio nel database con tutti i campi del tuo HTML
     const { data, error } = await supabase
       .from("idee")
       .insert([
         {
-          title: title,
-          description: description,
-          brand: req.user.email, // Associa automaticamente l'email di chi è loggato
+          title: req.body.title || "",
+          styleTag: req.body.styleTag || "",
+          materials: req.body.materials || "",
+          targetPrice: req.body.targetPrice || "",
+          description: req.body.description || "",
+          contact: req.body.contact || "",
+          images: images, // Array di stringhe con i nomi dei file
+          brand: req.user.email,
           created_at: new Date().toISOString()
         }
       ])
-      .select(); // Forza la restituzione dei dati appena salvati
+      .select();
 
     if (error) {
-      console.error("Errore salvataggio idea:", error);
+      console.error("Errore database idee:", error);
       return res.status(400).json(error);
     }
 
@@ -467,8 +490,7 @@ app.post("/ideas", auth, async (req, res) => {
     console.error(err);
     res.status(500).json({ message: "Errore interno del server" });
   }
-});
-/* ================= START ================= */
+});/* ================= START ================= */
 app.listen(PORT, () => {
   console.log("Server Supabase attivo su porta " + PORT);
 });
