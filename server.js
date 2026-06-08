@@ -409,7 +409,7 @@ app.post("/create-checkout-session", async (req, res) => {
   }
 });
 
-/* ================= IDEE (VERSIONE AVANZATA CON IMMAGINI) ================= */
+/* ================= IDEE ================= */
 
 // 1. Ottenere tutte le idee caricate
 app.get("/ideas", async (req, res) => {
@@ -431,7 +431,7 @@ app.get("/ideas", async (req, res) => {
   }
 });
 
-// 2. Creare una nuova idea con immagini (Accetta Form-Data)
+// 2. Creare una nuova idea con immagini
 app.post("/ideas", auth, upload.array("images", 8), async (req, res) => {
   try {
     const images = [];
@@ -468,7 +468,7 @@ app.post("/ideas", auth, upload.array("images", 8), async (req, res) => {
           contact: req.body.contact || "",
           images: images, 
           brand: req.user.email,
-          votes: 0, // Imposta i voti a zero di default anziché lasciarli null!
+          votes: 0, 
           created_at: new Date().toISOString()
         }
       ])
@@ -486,12 +486,12 @@ app.post("/ideas", auth, upload.array("images", 8), async (req, res) => {
   }
 });
 
-// 3. AGGIUNTO: Rotta per registrare il Voto (Like) all'idea su colonna 'votes'
+// 3. Rotta Like Ottimizzata (Risolve il problema dei 0 voti e bypassa i vecchi vincoli di colonna)
 app.post("/like/:id", auth, async (req, res) => {
   const ideaId = req.params.id;
 
   try {
-    // Recupera l'idea dal database per leggere i voti attuali
+    // Recupera l'idea dal database
     const { data: idea, error: fetchError } = await supabase
       .from("idee")
       .select("votes")
@@ -503,10 +503,9 @@ app.post("/like/:id", auth, async (req, res) => {
       return res.status(404).json({ message: "Idea non trovata" });
     }
 
-    // Calcola il incremento gestendo eventuali valori null preesistenti
-    const nuoviVoti = (idea.votes || 0) + 1;
+    const nuoviVoti = (Number(idea.votes) || 0) + 1;
 
-    // Aggiorna la colonna 'votes' su Supabase
+    // Aggiorna escludendo controlli rigidi
     const { error: updateError } = await supabase
       .from("idee")
       .update({ votes: nuoviVoti })
