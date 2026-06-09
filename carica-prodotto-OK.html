@@ -1,7 +1,5 @@
 <!DOCTYPE html>
-<html>
-
-<html>
+<html lang="it">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -206,11 +204,10 @@
       .header-title { flex-direction: column; gap: 15px; }
     }
   </style>
-
-  
 </head>
 <body>
-  <header>
+
+<header>
   <div class="logo">
     <a href="home.html"><img src="logo3.jpg" alt="StitchVale"></a>
   </div>
@@ -278,10 +275,9 @@
 
 </div>
 
-  <script>
-    const API_URL = "https://stitchvale-api.onrender.com";
+<script>
+  const API_URL = "https://stitchvale-api.onrender.com";
 
-  // Cambia il testo del box di upload quando viene scelta una foto
   function updateFileName() {
     const input = document.getElementById("prodImage");
     const label = document.getElementById("fileLabel");
@@ -291,7 +287,6 @@
     }
   }
 
-  // Funzione per inviare il prodotto al server (Render + Supabase)
   async function publishProduct(event) {
     event.preventDefault();
     const btn = document.getElementById("btnSubmit");
@@ -303,12 +298,10 @@
     const description = document.getElementById("prodDescription").value;
     const imageFile = document.getElementById("prodImage").files[0];
 
-    // Effetto loading sul pulsante
     btn.innerText = "Pubblicazione in corso...";
     btn.disabled = true;
     btn.style.opacity = "0.7";
 
-    // Usiamo FormData perché dobbiamo inviare un file fisico (l'immagine)
     const formData = new FormData();
     formData.append("name", name);
     formData.append("brand", brand);
@@ -320,7 +313,6 @@
     try {
       const res = await fetch(API_URL + "/products", {
         method: "POST",
-        // Nota: Con FormData non bisogna impostare l'header "Content-Type", ci pensa il browser automaticamente
         body: formData
       });
 
@@ -337,12 +329,11 @@
       console.error(err);
       alert("Impossibile connettersi al server Render. Verifica la connessione.");
     } finally {
-      // Ripristina il pulsante originale
       btn.innerText = "Pubblica nel Drop";
       btn.disabled = false;
       btn.style.opacity = "1";
     }
   }
-  </script>
+</script>
 </body>
 </html>
