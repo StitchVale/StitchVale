@@ -144,7 +144,7 @@
       resize: none;
     }
 
-    /* Stile per l'upload dei file */
+    /* Upload file wrapper */
     .file-input-wrapper {
       position: relative;
       background: var(--input-bg);
@@ -234,16 +234,11 @@
         </div>
 
         <div class="form-group">
-          <label for="prodBrand">Seleziona il tuo Brand</label>
-          <input type="text" id="prodBrand" placeholder="Es: StitchVale Studio" required>
-        </div>
-
-        <div class="form-group">
           <label for="prodPrice">Prezzo (€)</label>
           <input type="number" id="prodPrice" step="0.01" placeholder="Es: 65.00" required>
         </div>
 
-        <div class="form-group">
+        <div class="form-group full-width">
           <label for="prodCategory">Categoria</label>
           <select id="prodCategory">
             <option value="felpe">Felpe / Hoodie</option>
@@ -255,7 +250,7 @@
 
         <div class="form-group full-width">
           <label for="prodDescription">Descrizione del Prodotto</label>
-          <textarea id="prodDescription" placeholder="Dettagli sul fit, composizione del tessuto (es. 100% cotone 400gsm), dettagli sulla stampa o ricamo..."></textarea>
+          <textarea id="prodDescription" placeholder="Dettagli sul fit, composizione del tessuto (es. 100% cotone 400gsm)..."></textarea>
         </div>
 
         <div class="form-group full-width">
@@ -292,38 +287,38 @@
     const btn = document.getElementById("btnSubmit");
 
     const name = document.getElementById("prodName").value;
-    const brand = document.getElementById("prodBrand").value;
     const price = document.getElementById("prodPrice").value;
     const category = document.getElementById("prodCategory").value;
     const description = document.getElementById("prodDescription").value;
     const imageFile = document.getElementById("prodImage").files[0];
 
+    // Recupera il JWT token salvato durante il login
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      alert("Sessione scaduta o non valida. Effettua nuovamente il login per pubblicare prodotti.");
+      return;
+    }
+
     btn.innerText = "Pubblicazione in corso...";
     btn.disabled = true;
     btn.style.opacity = "0.7";
 
-    // Recuperiamo il token di autenticazione salvato nel browser
-    const token = localStorage.getItem("token") || localStorage.getItem("supabase.auth.token");
-
     const formData = new FormData();
     formData.append("name", name);
-    formData.append("brand", brand);
     formData.append("price", price);
     formData.append("category", category);
     formData.append("description", description);
-    formData.append("image", imageFile);
     
-    // Inseriamo il token nel modulo nel caso in cui il server lo legga da qui
-    if (token) {
-      formData.append("token", token);
-    }
+    // IMPORTANTE: Cambiato in "images" per allinearsi a upload.array("images", 8) del backend
+    formData.append("images", imageFile);
 
     try {
       const res = await fetch(API_URL + "/products", {
         method: "POST",
         headers: {
-          // Inseriamo il token negli Headers nel caso in cui il server lo legga da qui
-          "Authorization": token ? `Bearer ${token}` : ""
+          // Passiamo il token esattamente come richiesto dal middleware auth del server.js
+          "Authorization": `Bearer ${token}`
         },
         body: formData
       });
@@ -335,7 +330,7 @@
         document.getElementById("fileLabel").style.color = "var(--text-muted)";
       } else {
         const errorData = await res.json();
-        alert("Errore durante la pubblicazione: " + (errorData.message || "Risposta negativa dal server."));
+        alert("Errore durante la pubblicazione: " + (errorData.message || "Errore di autenticazione o dati non validi."));
       }
     } catch (err) {
       console.error(err);
