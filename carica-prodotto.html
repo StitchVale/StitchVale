@@ -1,7 +1,5 @@
 <!DOCTYPE html>
-<html>
-
-<html>
+<html lang="it">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -146,7 +144,7 @@
       resize: none;
     }
 
-    /* Stile personalizzato per l'upload dei file */
+    /* Stile per l'upload dei file */
     .file-input-wrapper {
       position: relative;
       background: var(--input-bg);
@@ -206,11 +204,10 @@
       .header-title { flex-direction: column; gap: 15px; }
     }
   </style>
-
-  
 </head>
 <body>
-  <header>
+
+<header>
   <div class="logo">
     <a href="home.html"><img src="logo3.jpg" alt="StitchVale"></a>
   </div>
@@ -223,7 +220,7 @@
       <h1>Nuovo Capo</h1>
       <p>Inserisci i dettagli del prodotto per pubblicarlo nel catalogo di StitchVale.</p>
     </div>
-    <a href="brand.html" class="btn-back">← Torna all'Area Brand</a>
+    <a href="brand-page" class="btn-back">← Torna all'Area Brand</a>
   </div>
 
   <div class="form-box">
@@ -278,10 +275,9 @@
 
 </div>
 
-  <script>
-    const API_URL = "https://stitchvale-api.onrender.com";
+<script>
+  const API_URL = "https://stitchvale-api.onrender.com";
 
-  // Cambia il testo del box di upload quando viene scelta una foto
   function updateFileName() {
     const input = document.getElementById("prodImage");
     const label = document.getElementById("fileLabel");
@@ -291,7 +287,6 @@
     }
   }
 
-  // Funzione per inviare il prodotto al server (Render + Supabase)
   async function publishProduct(event) {
     event.preventDefault();
     const btn = document.getElementById("btnSubmit");
@@ -303,12 +298,13 @@
     const description = document.getElementById("prodDescription").value;
     const imageFile = document.getElementById("prodImage").files[0];
 
-    // Effetto loading sul pulsante
     btn.innerText = "Pubblicazione in corso...";
     btn.disabled = true;
     btn.style.opacity = "0.7";
 
-    // Usiamo FormData perché dobbiamo inviare un file fisico (l'immagine)
+    // Recuperiamo il token di autenticazione salvato nel browser
+    const token = localStorage.getItem("token") || localStorage.getItem("supabase.auth.token");
+
     const formData = new FormData();
     formData.append("name", name);
     formData.append("brand", brand);
@@ -316,11 +312,19 @@
     formData.append("category", category);
     formData.append("description", description);
     formData.append("image", imageFile);
+    
+    // Inseriamo il token nel modulo nel caso in cui il server lo legga da qui
+    if (token) {
+      formData.append("token", token);
+    }
 
     try {
       const res = await fetch(API_URL + "/products", {
         method: "POST",
-        // Nota: Con FormData non bisogna impostare l'header "Content-Type", ci pensa il browser automaticamente
+        headers: {
+          // Inseriamo il token negli Headers nel caso in cui il server lo legga da qui
+          "Authorization": token ? `Bearer ${token}` : ""
+        },
         body: formData
       });
 
@@ -337,12 +341,11 @@
       console.error(err);
       alert("Impossibile connettersi al server Render. Verifica la connessione.");
     } finally {
-      // Ripristina il pulsante originale
       btn.innerText = "Pubblica nel Drop";
       btn.disabled = false;
       btn.style.opacity = "1";
     }
   }
-  </script>
+</script>
 </body>
 </html>
