@@ -113,6 +113,7 @@
 
     input[type="text"], 
     input[type="url"], 
+    input[type="file"],
     select, 
     textarea {
       width: 100%;
@@ -126,6 +127,11 @@
       font-size: 14px;
       outline: none;
       transition: border-color 0.2s ease;
+    }
+
+    input[type="file"] {
+      padding: 10px;
+      cursor: pointer;
     }
 
     input:focus, select:focus, textarea:focus {
@@ -221,8 +227,16 @@
           <input type="text" id="brandName" placeholder="Es: StitchVale Studio" required>
         </div>
         <div class="form-group">
-          <label for="brandSlug">Slogan / Payoff Breve</label>
-          <input type="text" id="brandSlug" placeholder="Es: Luxury Streetwear Core">
+          <label for="brandSlogan">Slogan / Payoff Breve</label>
+          <input type="text" id="brandSlogan" placeholder="Es: Luxury Streetwear Core">
+        </div>
+        <div class="form-group">
+          <label for="brandSlug">Custom Link / Slug URL</label>
+          <input type="text" id="brandSlug" placeholder="Es: stitchvale-studio (senza spazi)">
+        </div>
+        <div class="form-group">
+          <label for="brandLocation">Città / Sede Operativa</label>
+          <input type="text" id="brandLocation" placeholder="Es: Milano, Italia">
         </div>
         <div class="form-group full-width">
           <label for="brandBio">Biografia / Storia del Marchio</label>
@@ -235,12 +249,8 @@
       <h2>2. Visual & Estetica</h2>
       <div class="form-grid">
         <div class="form-group">
-          <label for="brandLogo">URL Logo Ufficiale (1:1)</label>
-          <input type="url" id="brandLogo" placeholder="https://esempio.com/logo.jpg">
-        </div>
-        <div class="form-group">
-          <label for="brandCover">URL Immagine di Copertina / Banner</label>
-          <input type="url" id="brandCover" placeholder="https://esempio.com/banner.jpg">
+          <label for="brandLogo">Carica Logo Ufficiale (File Immagine)</label>
+          <input type="file" id="brandLogo" accept="image/*">
         </div>
         <div class="form-group">
           <label for="brandStyle">Stile Principale del Brand</label>
@@ -250,10 +260,6 @@
             <option value="vintage">Y2K / Vintage Retro</option>
             <option value="luxury">Luxury / High-End</option>
           </select>
-        </div>
-        <div class="form-group">
-          <label for="brandLocation">Città / Sede Operativa</label>
-          <input type="text" id="brandLocation" placeholder="Es: Milano, Italia">
         </div>
       </div>
     </div>
@@ -299,45 +305,53 @@
 
     if (!token || role !== "brand") {
       alert("ACCESSO NEGATO: Questa sezione è riservata esclusivamente ai profili Brand approvati.");
-      window.location.href = "account.html"; // Spedito istantaneamente ai moduli
+      window.location.href = "account.html";
     } else {
-      // Se passa il controllo, mostriamo la pagina
       document.getElementById("mainContent").style.display = "block";
     }
   });
 
-  // 2. INVIO REALE DEI DATI A SUPABASE TRAMITE SERVER RENDER
+  // 2. INVIO REALE DEI DATI AL SERVER UTILIZZANDO FORMDATA PER IL FILE MULTIPART
   async function handleFormSubmit(event) {
     event.preventDefault();
     const btn = document.getElementById("saveBtn");
     const token = localStorage.getItem("token");
     
-    const brandData = {
-      name: document.getElementById("brandName").value,
-      bio: document.getElementById("brandBio").value,
-      style: document.getElementById("brandStyle").value,
-      website: document.getElementById("brandWebsite").value,
-      instagram: document.getElementById("brandInstagram").value
-      // Nota: Il tuo server.js al momento mappa questi 5 campi nella tabella "brand"
-    };
-
     btn.innerText = "Salvataggio...";
     btn.disabled = true;
+
+    // Usiamo FormData per poter inviare il file immagine reale binario
+    const formData = new FormData();
+    formData.append("name", document.getElementById("brandName").value);
+    formData.append("slogan", document.getElementById("brandSlogan").value);
+    formData.append("slug", document.getElementById("brandSlug").value);
+    formData.append("location", document.getElementById("brandLocation").value);
+    formData.append("bio", document.getElementById("brandBio").value);
+    formData.append("style", document.getElementById("brandStyle").value);
+    formData.append("instagram", document.getElementById("brandInstagram").value);
+    formData.append("tiktok", document.getElementById("brandTikTok").value);
+    formData.append("website", document.getElementById("brandWebsite").value);
+
+    // Controlla e allega il file del logo se è stato selezionato
+    const logoFileInput = document.getElementById("brandLogo");
+    if (logoFileInput.files.length > 0) {
+      formData.append("logo", logoFileInput.files[0]);
+    }
 
     try {
       const res = await fetch(API_URL + "/brands", {
         method: "POST",
         headers: { 
-          "Content-Type": "application/json",
-          "Authorization": "Bearer " + token // Passiamo il JWT per validare chi scrive nel DB
+          // NOTA: Con FormData non bisogna impostare il "Content-Type", lo fa il browser automaticamente includendo il boundary
+          "Authorization": "Bearer " + token 
         },
-        body: JSON.stringify(brandData)
+        body: formData
       });
 
       const data = await res.json();
 
       if (res.ok) {
-        alert("Profilo Brand salvato con successo su Supabase!");
+        alert("Profilo Brand e Logo salvati con successo!");
       } else {
         alert("Errore: " + (data.message || "Impossibile salvare i dati."));
       }
