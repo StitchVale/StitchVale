@@ -119,6 +119,7 @@ app.post("/register", async (req, res) => {
     res.status(500).json({ message: "Errore interno del server" });
   }
 });
+
 /* ================= LOGIN ================= */
 app.post("/login", async (req, res) => {
   try {
@@ -170,7 +171,8 @@ app.post("/login", async (req, res) => {
     res.status(500).json({ message: "Errore interno del server" });
   }
 });
-/* ================= BRANDS PROFILE ================= */
+
+/* ================= BRANDS PROFILE (FIXATO) ================= */
 app.post("/brands", auth, upload.single("logo"), async (req, res) => {
   try {
     const brandData = {
@@ -179,6 +181,11 @@ app.post("/brands", auth, upload.single("logo"), async (req, res) => {
       style: req.body.style || "",
       website: req.body.website || "",
       instagram: req.body.instagram || "",
+      // Mappatura completa e sicura dei campi visibili da screenshot:
+      location: req.body.location || req.body.brandLocation || "",
+      tiktok: req.body.tiktok || req.body.brandTikTok || "",
+      slogan: req.body.slogan || req.body.brandSlogan || "",
+      slug: req.body.slug || req.body.brandSlug || "",
       email: req.user.email 
     };
 
@@ -212,20 +219,20 @@ app.post("/brands", auth, upload.single("logo"), async (req, res) => {
 
     let data, error;
     if (existingBrand && existingBrand.length > 0) {
-      const res = await supabase
+      const resUpdate = await supabase
         .from("brand")
         .update(brandData)
         .eq("email", req.user.email)
         .select();
-      data = res.data;
-      error = res.error;
+      data = resUpdate.data;
+      error = resUpdate.error;
     } else {
-      const res = await supabase
+      const resInsert = await supabase
         .from("brand")
         .insert([brandData])
         .select();
-      data = res.data;
-      error = res.error;
+      data = resInsert.data;
+      error = resInsert.error;
     }
 
     if (error) {
@@ -240,12 +247,13 @@ app.post("/brands", auth, upload.single("logo"), async (req, res) => {
   }
 });    
 
-/* ================= BRANDS LIST ================= */
+/* ================= BRANDS LIST (FIXATO) ================= */
 app.get("/brands-list", async (req, res) => {
   try {
     const { data, error } = await supabase
       .from("brand")
-      .select("email, name, logo, bio, style, instagram, website");
+      // Recupera esplicitamente anche tutte le nuove colonne per mostrarle nella lista pubblica
+      .select("email, name, logo, bio, style, instagram, website, location, tiktok, slogan, slug");
 
     if (error) {
       return res.status(400).json(error);
@@ -260,7 +268,7 @@ app.get("/brands-list", async (req, res) => {
 /* ================= PRODUCTS ================= */
 app.get("/products", async (req, res) => {
   try {
-    const { data, error } = await supabase
+    const { data, error = null } = await supabase
       .from("products")
       .select("*")
       .order("created_at", { ascending: false });
@@ -421,7 +429,6 @@ app.post("/create-checkout-session", async (req, res) => {
       cancel_url: "https://www.stitchvale.com/cancel.html"
     });
 
-    // FIX: Restituisce l'ID sessione a Stripe per non mandare in blocco il caricamento
     return res.json({ id: session.id });
 
   } catch (err) {
@@ -431,7 +438,6 @@ app.post("/create-checkout-session", async (req, res) => {
 });
 
 /* ================= IDEE ================= */
-
 app.get("/ideas", async (req, res) => {
   try {
     const { data, error } = await supabase
@@ -504,6 +510,7 @@ app.post("/ideas", auth, upload.array("images", 8), async (req, res) => {
     res.status(500).json({ message: "Errore interno del server" });
   }
 });
+
 /* ================= ROTTA LIKE (CORRETTA) ================= */
 app.post("/like/:id", auth, async (req, res) => {
   const ideaId = req.params.id;
@@ -514,7 +521,7 @@ app.post("/like/:id", auth, async (req, res) => {
       .from("idee")
       .select("votes")
       .eq("id", ideaId)
-      .maybeSingle(); // Più sicuro rispetto a .single() se ci sono anomalie
+      .maybeSingle();
 
     if (fetchError || !idea) {
       console.error("Errore recupero idea per like:", fetchError);
@@ -528,7 +535,7 @@ app.post("/like/:id", auth, async (req, res) => {
       .from("idee")
       .update({ votes: nuoviVoti })
       .eq("id", ideaId)
-      .select(); // <--- FONDAMENTALE per rendere effettiva la scrittura su Supabase
+      .select();
 
     if (updateError || !updatedData || updatedData.length === 0) {
       console.error("Errore aggiornamento voti database:", updateError);
@@ -538,7 +545,6 @@ app.post("/like/:id", auth, async (req, res) => {
       });
     }
 
-    // 3. Rispondi al frontend con il valore REALE salvato nel database
     return res.json({ 
       message: "Voto registrato con successo!", 
       votes: updatedData[0].votes 
@@ -549,6 +555,7 @@ app.post("/like/:id", auth, async (req, res) => {
     return res.status(500).json({ message: "Errore interno del server Render", error: err.message });
   }
 });
+
 /* ================= START ================= */
 app.listen(PORT, () => {
   console.log("Server Supabase attivo su porta " + PORT);
