@@ -504,8 +504,7 @@ app.post("/ideas", auth, upload.array("images", 8), async (req, res) => {
     res.status(500).json({ message: "Errore interno del server" });
   }
 });
-
-/* ================= ROTTA LIKE (DIAGNOSTICA ATTIVA) ================= */
+/* ================= ROTTA LIKE (CORRETTA) ================= */
 app.post("/like/:id", auth, async (req, res) => {
   const ideaId = req.params.id;
 
@@ -515,7 +514,7 @@ app.post("/like/:id", auth, async (req, res) => {
       .from("idee")
       .select("votes")
       .eq("id", ideaId)
-      .single();
+      .maybeSingle(); // Più sicuro rispetto a .single() se ci sono anomalie
 
     if (fetchError || !idea) {
       console.error("Errore recupero idea per like:", fetchError);
@@ -524,25 +523,33 @@ app.post("/like/:id", auth, async (req, res) => {
 
     const nuoviVoti = (Number(idea.votes) || 0) + 1;
 
-    // 2. Aggiorna in modo diretto
-    const { error: updateError } = await supabase
+    // 2. Aggiorna con il modificatore .select() per forzare la scrittura sul DB
+    const { data: updatedData, error: updateError } = await supabase
       .from("idee")
       .update({ votes: nuoviVoti })
-      .eq("id", ideaId);
+      .eq("id", ideaId)
+      .select(); // <--- FONDAMENTALE per rendere effettiva la scrittura su Supabase
 
-    if (updateError) {
+    if (updateError || !updatedData || updatedData.length === 0) {
       console.error("Errore aggiornamento voti database:", updateError);
-      // Ti rimanda l'errore esatto del database direttamente sul browser
-      return res.status(500).json({ message: "Errore DB Supabase: " + updateError.message, detail: updateError });
+      return res.status(500).json({ 
+        message: "Errore DB Supabase o violazione policy RLS", 
+        detail: updateError 
+      });
     }
 
-    // 3. Rispondi al frontend con successo
-    return res.json({ message: "Voto registrato con successo!", votes: nuoviVoti });
+    // 3. Rispondi al frontend con il valore REALE salvato nel database
+    return res.json({ 
+      message: "Voto registrato con successo!", 
+      votes: updatedData[0].votes 
+    });
+
   } catch (err) {
     console.error("Errore interno rotta like:", err);
     return res.status(500).json({ message: "Errore interno del server Render", error: err.message });
   }
-});/* ================= START ================= */
+});
+/* ================= START ================= */
 app.listen(PORT, () => {
   console.log("Server Supabase attivo su porta " + PORT);
 });
