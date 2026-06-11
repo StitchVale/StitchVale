@@ -67,7 +67,7 @@
     /* WRAPPER & CONTAINER */
     .wrapper {
       max-width: 500px;
-      margin: 100px auto;
+      margin: 80px auto;
       padding: 0 25px;
     }
 
@@ -115,6 +115,39 @@
       font-weight: 700;
     }
 
+    /* SELETTORE RUOLO PARTICOLARE */
+    .role-selector {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .role-option {
+      background: var(--input-bg);
+      border: 1px solid var(--border-color);
+      color: #666;
+      padding: 14px;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .role-option:hover {
+      border-color: #333;
+      color: #aaa;
+    }
+
+    .role-option.active {
+      background: var(--accent-color);
+      color: #000000;
+      border-color: var(--accent-color);
+    }
+
     input[type="text"], 
     input[type="email"], 
     input[type="password"] {
@@ -123,7 +156,7 @@
       background: var(--input-bg);
       border: 1px solid var(--border-color);
       padding: 16px;
-      border-radius: 0px; /* Taglio netto coerente con la home */
+      border-radius: 0px;
       color: var(--text-main);
       font-family: inherit;
       font-size: 14px;
@@ -243,6 +276,14 @@
   <div class="form-box">
     <form id="accountForm" onsubmit="handleAuth(event)">
       
+      <div class="form-group" id="roleGroup">
+        <label>Tipo di account</label>
+        <div class="role-selector">
+          <div class="role-option active" id="roleUser" onclick="selectRole('user')">Utente</div>
+          <div class="role-option" id="roleBrand" onclick="selectRole('brand')">Brand</div>
+        </div>
+      </div>
+
       <div class="form-group" id="usernameGroup">
         <label for="userUsername">Username</label>
         <input type="text" id="userUsername" placeholder="Es: stitch_creator" required>
@@ -270,8 +311,22 @@
 </div>
 
 <script>
-  // Stato iniziale della pagina: "register" o "login"
   let isRegisterMode = true;
+  let selectedRole = 'user'; // Valore di default
+
+  function selectRole(role) {
+    selectedRole = role;
+    const userBtn = document.getElementById("roleUser");
+    const brandBtn = document.getElementById("roleBrand");
+
+    if (role === 'user') {
+      userBtn.classList.add("active");
+      brandBtn.classList.remove("active");
+    } else {
+      brandBtn.classList.add("active");
+      userBtn.classList.remove("active");
+    }
+  }
 
   function toggleMode(e) {
     e.preventDefault();
@@ -279,6 +334,7 @@
 
     const pageTitle = document.getElementById("pageTitle");
     const pageSubtitle = document.getElementById("pageSubtitle");
+    const roleGroup = document.getElementById("roleGroup");
     const usernameGroup = document.getElementById("usernameGroup");
     const usernameInput = document.getElementById("userUsername");
     const btnAuth = document.getElementById("btnAuth");
@@ -287,6 +343,7 @@
     if (isRegisterMode) {
       pageTitle.innerText = "Join us";
       pageSubtitle.innerText = "Crea il tuo profilo StitchVale per accedere all'hub.";
+      roleGroup.style.display = "flex";
       usernameGroup.style.display = "flex";
       usernameInput.required = true;
       btnAuth.innerText = "Registrati";
@@ -294,8 +351,9 @@
     } else {
       pageTitle.innerText = "Welcome back";
       pageSubtitle.innerText = "Inserisci le tue credenziali per entrare nel tuo spazio.";
+      roleGroup.style.display = "none";
       usernameGroup.style.display = "none";
-      usernameInput.required = false; // Non serve per il login
+      usernameInput.required = false;
       btnAuth.innerText = "Accedi";
       switchContainer.innerHTML = 'Nuovo su StitchVale? <a href="#" onclick="toggleMode(event)">Crea un account</a>';
     }
@@ -308,31 +366,29 @@
     const email = document.getElementById("userEmail").value;
     const password = document.getElementById("userPassword").value;
     
-    // Raccoglie lo username solo se siamo in modalità registrazione
     let username = null;
+    let role = null;
+    
     if (isRegisterMode) {
       username = document.getElementById("userUsername").value;
+      role = selectedRole; // Sarà 'user' o 'brand'
     }
 
     btn.innerText = isRegisterMode ? "Registrazione..." : "Accesso in corso...";
     btn.disabled = true;
     btn.style.opacity = "0.7";
 
-    // Qui andrai a inserire la chiamata alle tue API collegate a Supabase
-    // Esempio logico di trasmissione dati:
     try {
-      const endpoint = isRegisterMode ? "/api/register" : "/api/login";
-      
       const payload = { email, password };
       if (isRegisterMode) {
-        payload.username = username; // Passa l'username estratto alla tabella Supabase
+        payload.username = username;
+        payload.role = role; // Questo è il campo da mappare su Supabase
       }
 
-      console.log("Inviando dati a Supabase:", payload);
+      console.log("Dati pronti per il backend / Supabase:", payload);
       
-      // Simulazione risposta positiva per non bloccare i test locali
       setTimeout(() => {
-        alert(isRegisterMode ? "Registrazione completata!" : "Accesso eseguito!");
+        alert(isRegisterMode ? `Registrazione completata come ${role.toUpperCase()}!` : "Accesso eseguito!");
         btn.innerText = isRegisterMode ? "Registrati" : "Accedi";
         btn.disabled = false;
         btn.style.opacity = "1";
