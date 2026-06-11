@@ -292,11 +292,15 @@
     const description = document.getElementById("prodDescription").value;
     const imageFile = document.getElementById("prodImage").files[0];
 
-    // Recupera il JWT token salvato durante il login
     const token = localStorage.getItem("token");
 
     if (!token) {
-      alert("Sessione scaduta o non valida. Effettua nuovamente il login per pubblicare prodotti.");
+      alert("Sessione scaduta. Effettua nuovamente il login.");
+      return;
+    }
+
+    if (!imageFile) {
+      alert("Seleziona un file d'immagine valido prima di procedere.");
       return;
     }
 
@@ -309,15 +313,12 @@
     formData.append("price", price);
     formData.append("category", category);
     formData.append("description", description);
-    
-    // IMPORTANTE: Cambiato in "images" per allinearsi a upload.array("images", 8) del backend
     formData.append("images", imageFile);
 
     try {
       const res = await fetch(API_URL + "/products", {
         method: "POST",
         headers: {
-          // Passiamo il token esattamente come richiesto dal middleware auth del server.js
           "Authorization": `Bearer ${token}`
         },
         body: formData
@@ -330,7 +331,7 @@
         document.getElementById("fileLabel").style.color = "var(--text-muted)";
       } else {
         const errorData = await res.json();
-        alert("Errore durante la pubblicazione: " + (errorData.message || "Errore di autenticazione o dati non validi."));
+        alert("Errore durante la pubblicazione: " + (errorData.message || "Verifica i dati inseriti."));
       }
     } catch (err) {
       console.error(err);
