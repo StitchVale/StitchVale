@@ -249,10 +249,14 @@
       <h2>2. Visual & Estetica</h2>
       <div class="form-grid">
         <div class="form-group">
-          <label for="brandLogo">Carica Logo Ufficiale (File Immagine)</label>
+          <label for="brandLogo">Carica Logo Ufficiale (1:1)</label>
           <input type="file" id="brandLogo" accept="image/*">
         </div>
         <div class="form-group">
+          <label for="brandCover">Carica Immagine di Copertina / Sfondo</label>
+          <input type="file" id="brandCover" accept="image/*">
+        </div>
+        <div class="form-group full-width">
           <label for="brandStyle">Stile Principale del Brand</label>
           <select id="brandStyle">
             <option value="streetwear">Streetwear / Oversize</option>
@@ -298,7 +302,6 @@
 <script>
   const API_URL = "https://stitchvale-api.onrender.com";
 
-  // 1. ROUTE GUARD: BLOCCO SICUREZZA ISTANTANEO
   window.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem("token");
     const role = localStorage.getItem("role");
@@ -311,7 +314,6 @@
     }
   });
 
-  // 2. INVIO REALE DEI DATI AL SERVER UTILIZZANDO FORMDATA PER IL FILE MULTIPART
   async function handleFormSubmit(event) {
     event.preventDefault();
     const btn = document.getElementById("saveBtn");
@@ -320,7 +322,6 @@
     btn.innerText = "Salvataggio...";
     btn.disabled = true;
 
-    // Usiamo FormData per poter inviare il file immagine reale binario
     const formData = new FormData();
     formData.append("name", document.getElementById("brandName").value);
     formData.append("slogan", document.getElementById("brandSlogan").value);
@@ -332,17 +333,22 @@
     formData.append("tiktok", document.getElementById("brandTikTok").value);
     formData.append("website", document.getElementById("brandWebsite").value);
 
-    // Controlla e allega il file del logo se è stato selezionato
-    const logoFileInput = document.getElementById("brandLogo");
-    if (logoFileInput.files.length > 0) {
-      formData.append("logo", logoFileInput.files[0]);
+    // Gestione LOGO
+    const logoInput = document.getElementById("brandLogo");
+    if (logoInput.files.length > 0) {
+      formData.append("logo", logoInput.files[0]);
+    }
+
+    // Gestione COPERTINA / SFONDO
+    const coverInput = document.getElementById("brandCover");
+    if (coverInput.files.length > 0) {
+      formData.append("cover", coverInput.files[0]);
     }
 
     try {
       const res = await fetch(API_URL + "/brands", {
         method: "POST",
         headers: { 
-          // NOTA: Con FormData non bisogna impostare il "Content-Type", lo fa il browser automaticamente includendo il boundary
           "Authorization": "Bearer " + token 
         },
         body: formData
@@ -351,7 +357,7 @@
       const data = await res.json();
 
       if (res.ok) {
-        alert("Profilo Brand e Logo salvati con successo!");
+        alert("Profilo Brand, Logo e Sfondo salvati con successo!");
       } else {
         alert("Errore: " + (data.message || "Impossibile salvare i dati."));
       }
