@@ -63,9 +63,12 @@ function auth(req, res, next) {
 /* ================= REGISTER ================= */
 app.post("/register", async (req, res) => {
   try {
-    const { email, password, role } = req.body;
+    // Aggiunto "username" estratto dal corpo della richiesta (req.body)
+    const { email, password, role, username } = req.body;
     const cleanEmail = email.toLowerCase().trim();
+    const cleanUsername = username ? username.trim() : null;
 
+    // 1. Controllo se l'email esiste già
     const { data: existing } = await supabase
       .from("users")
       .select("*")
@@ -75,11 +78,25 @@ app.post("/register", async (req, res) => {
       return res.status(400).json({ message: "Utente già registrato" });
     }
 
+    // 2. Controllo opzionale: se è una registrazione, verifichiamo che l'username non sia già preso
+    if (cleanUsername) {
+      const { data: existingUser } = await supabase
+        .from("users")
+        .select("*")
+        .eq("username", cleanUsername);
+
+      if (existingUser && existingUser.length > 0) {
+        return res.status(400).json({ message: "Questo username è già in uso" });
+      }
+    }
+
     const hashed = await bcrypt.hash(password, 10);
 
+    // 3. Inserimento nel database con il nuovo campo username
     const { error } = await supabase.from("users").insert([
       {
         email: cleanEmail,
+        username: cleanUsername, // Colonna mappata su Supabase
         password: hashed,
         role: role === "brand" ? "brand" : "user",
         approved: role === "brand" ? false : true,
@@ -102,7 +119,6 @@ app.post("/register", async (req, res) => {
     res.status(500).json({ message: "Errore interno del server" });
   }
 });
-
 /* ================= LOGIN ================= */
 app.post("/login", async (req, res) => {
   try {
@@ -130,10 +146,12 @@ app.post("/login", async (req, res) => {
       return res.status(403).json({ message: "Brand non approvato" });
     }
 
+    // Ora inseriamo anche l'username dentro il token JWT criptato
     const token = jwt.sign(
       {
         id: user.id,
         email: user.email,
+        username: user.username, // Inserito nel token
         role: user.role,
         approved: user.approved
       },
@@ -144,6 +162,7 @@ app.post("/login", async (req, res) => {
     res.json({
       token,
       email: user.email,
+      username: user.username, // Restituito al frontend per comodità
       role: user.role
     });
   } catch (err) {
@@ -151,7 +170,6 @@ app.post("/login", async (req, res) => {
     res.status(500).json({ message: "Errore interno del server" });
   }
 });
-
 /* ================= BRANDS PROFILE ================= */
 app.post("/brands", auth, upload.single("logo"), async (req, res) => {
   try {
