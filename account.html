@@ -1,217 +1,222 @@
 <!DOCTYPE html>
-<html>
-
-<html>
+<html lang="it">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Account - StitchVale</title>
+  <title>Account — StitchVale</title>
 
   <style>
+    :root {
+      --bg-color: #000000;
+      --card-bg: #0a0a0a;
+      --input-bg: #111111;
+      --accent-color: #ffffff;
+      --text-main: #ffffff;
+      --text-muted: #555555;
+      --border-color: #151515;
+      --focus-border: #333333;
+    }
+
     body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #0d0d0d;
-  color: white;
-}
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", Roboto, sans-serif;
+      background: var(--bg-color);
+      color: var(--text-main);
+      -webkit-font-smoothing: antialiased;
+    }
 
-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 25px 35px;
-  background: black;
-  border-bottom: 1px solid #222;
-}
+    /* HEADER */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 30px 40px;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
 
-.logo img {
-  height: 80px;
-}
+    .logo img {
+      height: 40px;
+      filter: grayscale(1) brightness(1.5);
+    }
 
-nav {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-}
+    nav {
+      display: flex;
+      gap: 32px;
+    }
 
-nav a {
-  color: #aaa;
-  text-decoration: none;
-  font-size: 15px;
-}
+    nav a {
+      color: #888888;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      transition: color 0.3s, transform 0.2s;
+    }
 
-nav a:hover {
-  color: white;
-}
+    nav a:hover {
+      color: var(--text-main);
+    }
 
-.hero {
-  text-align: center;
-  padding: 55px 20px 30px;
-  background: radial-gradient(circle at top, #1f1f1f, #0d0d0d 65%);
-}
+    /* WRAPPER & CONTAINER */
+    .wrapper {
+      max-width: 500px;
+      margin: 100px auto;
+      padding: 0 25px;
+    }
 
-.hero h1 {
-  font-size: 42px;
-  margin-bottom: 10px;
-}
+    .header-title {
+      text-align: left;
+      margin-bottom: 45px;
+    }
 
-.hero p {
-  color: #aaa;
-}
+    .header-title h1 {
+      font-size: 48px;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      text-transform: uppercase;
+      margin: 0 0 10px 0;
+      background: linear-gradient(180deg, #fff 0%, #555 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
 
-.section {
-  padding: 45px 20px;
-  text-align: center;
-}
+    .header-title p {
+      color: #888;
+      font-size: 15px;
+      margin: 0;
+    }
 
-.account-layout {
-  display: grid;
-  grid-template-columns: 420px 1fr;
-  gap: 28px;
-  max-width: 1150px;
-  margin: auto;
-  align-items: start;
-}
+    /* FORM BOX BRUTALISTA */
+    .form-box {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      padding: 40px;
+    }
 
-.account-box,
-.profile-card,
-.order-card {
-  background: #1a1a1a;
-  padding: 25px;
-  border-radius: 16px;
-  border: 1px solid #222;
-}
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 25px;
+    }
 
-input, select, button {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 12px;
-  border-radius: 7px;
-  border: none;
-  margin-bottom: 15px;
-  font-family: Arial, sans-serif;
-}
+    label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
 
-button {
-  background: white;
-  color: black;
-  cursor: pointer;
-  font-weight: bold;
-}
+    input[type="text"], 
+    input[type="email"], 
+    input[type="password"] {
+      width: 100%;
+      box-sizing: border-box;
+      background: var(--input-bg);
+      border: 1px solid var(--border-color);
+      padding: 16px;
+      border-radius: 0px; /* Taglio netto coerente con la home */
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
 
-.profile-card {
-  display: none;
-  margin-top: 20px;
-}
+    input:focus {
+      border-color: var(--focus-border);
+    }
 
-.status {
-  color: #aaa;
-}
+    /* BOTTONI ACCESSO / REGISTRAZIONE */
+    .btn-submit {
+      width: 100%;
+      background: var(--accent-color);
+      color: #000000;
+      border: 1px solid var(--accent-color);
+      padding: 16px;
+      border-radius: 0px;
+      font-weight: 700;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      margin-top: 15px;
+      transition: all 0.2s ease;
+    }
 
-.orders-section {
-  text-align: left;
-}
+    .btn-submit:hover {
+      background: transparent;
+      color: var(--text-main);
+    }
 
-.orders-section h2 {
-  text-align: center;
-  margin-top: 0;
-}
+    .btn-submit:active {
+      transform: scale(0.99);
+    }
 
-.order-card {
-  margin-bottom: 18px;
-}
+    .switch-mode {
+      text-align: center;
+      margin-top: 25px;
+      font-size: 13px;
+      color: #666;
+    }
 
-.order-card h3 {
-  margin-top: 0;
-}
+    .switch-mode a {
+      color: var(--text-main);
+      text-decoration: none;
+      font-weight: 600;
+    }
 
-.order-card p {
-  color: #aaa;
-}
+    .switch-mode a:hover {
+      text-decoration: underline;
+    }
 
-.order-item {
-  border-top: 1px solid #333;
-  padding: 10px 0;
-}
+    /* RESPONSIVE */
+    @media (max-width: 640px) {
+      header {
+        padding: 20px;
+        flex-direction: column;
+        gap: 20px;
+        align-items: flex-start;
+      }
 
-.order-item p {
-  margin: 5px 0;
-}
+      nav {
+        width: 100%;
+        overflow-x: auto;
+        white-space: nowrap;
+        padding-bottom: 5px;
+        gap: 20px;
+      }
+      
+      nav::-webkit-scrollbar {
+        display: none;
+      }
 
-.empty-orders {
-  text-align: center;
-  color: #aaa;
-  background: #1a1a1a;
-  border: 1px solid #222;
-  padding: 25px;
-  border-radius: 16px;
-}
+      nav a {
+        font-size: 12px;
+        display: inline-block;
+      }
 
-footer {
-  margin-top: 50px;
-  padding: 35px 20px;
-  text-align: center;
-  border-top: 1px solid #222;
-  color: #aaa;
-}
+      .wrapper {
+        margin: 50px auto;
+      }
 
-/* MOBILE */
-@media (max-width: 900px) {
-  header {
-    flex-direction: column;
-    gap: 18px;
-    padding: 22px 15px;
-  }
-
-  .logo img {
-    height: 70px;
-  }
-
-  nav {
-    justify-content: center;
-    gap: 14px;
-  }
-
-  nav a {
-    font-size: 14px;
-  }
-
-  .hero h1 {
-    font-size: 34px;
-  }
-
-  .account-layout {
-    grid-template-columns: 1fr;
-    padding: 0 10px;
-  }
-
-  .section {
-    padding: 35px 15px;
-  }
-}
-
-@media (max-width: 560px) {
-  .hero {
-    padding: 48px 16px 30px;
-  }
-
-  .hero h1 {
-    font-size: 30px;
-  }
-
-  .account-box,
-  .profile-card,
-  .order-card,
-  .empty-orders {
-    padding: 22px;
-  }
-}
+      .form-box {
+        padding: 30px 20px;
+      }
+    }
   </style>
-
-  
 </head>
 <body>
-  <header>
+
+<header>
   <div class="logo">
     <a href="home.html">
       <img src="logo3.jpg" alt="StitchVale Logo">
@@ -220,207 +225,126 @@ footer {
 
   <nav>
     <a href="novita.html">Novità</a>
-    <a href="brand.html">Brand</a>
-    <a href="account.html">Account</a>
     <a href="catalogo.html">Catalogo</a>
+    <a href="brand.html">Brand</a>
     <a href="idee.html">Idee</a>
     <a href="outfit.html">AI Outfit</a>
+    <a href="account.html">Account</a>
   </nav>
 </header>
 
-<section class="hero">
-  <h1>Account StitchVale</h1>
-  <p>Accedi, gestisci il profilo e controlla lo storico dei tuoi ordini.</p>
-</section>
-
-<section class="section">
-  <div class="account-layout">
-
-    <div>
-      <div class="account-box" id="loginBox">
-        <h2>Registrazione / Login</h2>
-
-        <input id="email" placeholder="Email">
-        <input id="password" type="password" placeholder="Password">
-
-        <select id="role">
-          <option value="user">Utente normale</option>
-          <option value="brand">Brand</option>
-        </select>
-
-        <button onclick="register()">Registrati</button>
-        <button onclick="login()">Login</button>
-
-        <p id="status" class="status"></p>
-      </div>
-
-      <div class="profile-card" id="profileCard">
-        <h2>Profilo</h2>
-        <p id="profileEmail"></p>
-        <p id="profileRole"></p>
-
-        <button onclick="logout()">Logout</button>
-      </div>
-    </div>
-
-    <div class="orders-section">
-      <h2>I tuoi ordini</h2>
-      <div id="orders"></div>
-    </div>
-
+<div class="wrapper">
+  
+  <div class="header-title">
+    <h1 id="pageTitle">Join us</h1>
+    <p id="pageSubtitle">Crea il tuo profilo StitchVale per accedere all'hub.</p>
   </div>
-</section>
 
-<footer>
-  <h3>StitchVale</h3>
-  <p>Email: stitchvale1@gmail.com</p>
-  <p>Instagram: @stitchvale</p>
-</footer>
+  <div class="form-box">
+    <form id="accountForm" onsubmit="handleAuth(event)">
+      
+      <div class="form-group" id="usernameGroup">
+        <label for="userUsername">Username</label>
+        <input type="text" id="userUsername" placeholder="Es: stitch_creator" required>
+      </div>
 
-  <script>
-    const API_URL = "https://stitchvale-api.onrender.com";
+      <div class="form-group">
+        <label for="userEmail">Email</label>
+        <input type="email" id="userEmail" placeholder="Es: nome@esempio.com" required>
+      </div>
 
-function getToken() {
-  return localStorage.getItem("token");
-}
+      <div class="form-group">
+        <label for="userPassword">Password</label>
+        <input type="password" id="userPassword" placeholder="••••••••" required>
+      </div>
 
-async function register() {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-  const role = document.getElementById("role").value;
+      <button type="submit" id="btnAuth" class="btn-submit">Registrati</button>
 
-  if (!email || !password) {
-    alert("Inserisci email e password");
-    return;
-  }
+      <div class="switch-mode" id="switchContainer">
+        Hai già un account? <a href="#" onclick="toggleMode(event)">Accedi ora</a>
+      </div>
 
-  const res = await fetch(API_URL + "/register", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      email: email,
-      password: password,
-      role: role
-    })
-  });
+    </form>
+  </div>
 
-  const data = await res.json();
-  document.getElementById("status").innerText = data.message || "Errore";
-}
+</div>
 
-async function login() {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
+<script>
+  // Stato iniziale della pagina: "register" o "login"
+  let isRegisterMode = true;
 
-  if (!email || !password) {
-    alert("Inserisci email e password");
-    return;
-  }
+  function toggleMode(e) {
+    e.preventDefault();
+    isRegisterMode = !isRegisterMode;
 
-  const res = await fetch(API_URL + "/login", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      email: email,
-      password: password
-    })
-  });
+    const pageTitle = document.getElementById("pageTitle");
+    const pageSubtitle = document.getElementById("pageSubtitle");
+    const usernameGroup = document.getElementById("usernameGroup");
+    const usernameInput = document.getElementById("userUsername");
+    const btnAuth = document.getElementById("btnAuth");
+    const switchContainer = document.getElementById("switchContainer");
 
-  const data = await res.json();
-
-  if (data.token) {
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("email", data.email);
-    localStorage.setItem("role", data.role);
-
-    document.getElementById("status").innerText = "Login effettuato!";
-    showProfile();
-    loadOrders();
-  } else {
-    document.getElementById("status").innerText = data.message || "Errore login";
-  }
-}
-
-function showProfile() {
-  const token = localStorage.getItem("token");
-  const email = localStorage.getItem("email");
-  const role = localStorage.getItem("role");
-
-  if (token) {
-    document.getElementById("profileCard").style.display = "block";
-    document.getElementById("profileEmail").innerText = "Email: " + email;
-    document.getElementById("profileRole").innerText = "Tipo account: " + role;
-  }
-}
-
-function logout() {
-  localStorage.removeItem("token");
-  localStorage.removeItem("email");
-  localStorage.removeItem("role");
-
-  document.getElementById("profileCard").style.display = "none";
-  document.getElementById("orders").innerHTML =
-    "<div class='empty-orders'>Accedi per vedere i tuoi ordini.</div>";
-  document.getElementById("status").innerText = "Logout effettuato";
-}
-
-async function loadOrders() {
-  const token = getToken();
-
-  if (!token) {
-    document.getElementById("orders").innerHTML =
-      "<div class='empty-orders'>Accedi per vedere i tuoi ordini.</div>";
-    return;
-  }
-
-  const res = await fetch(API_URL + "/orders", {
-    headers: {
-      "Authorization": "Bearer " + token
+    if (isRegisterMode) {
+      pageTitle.innerText = "Join us";
+      pageSubtitle.innerText = "Crea il tuo profilo StitchVale per accedere all'hub.";
+      usernameGroup.style.display = "flex";
+      usernameInput.required = true;
+      btnAuth.innerText = "Registrati";
+      switchContainer.innerHTML = 'Hai già un account? <a href="#" onclick="toggleMode(event)">Accedi ora</a>';
+    } else {
+      pageTitle.innerText = "Welcome back";
+      pageSubtitle.innerText = "Inserisci le tue credenziali per entrare nel tuo spazio.";
+      usernameGroup.style.display = "none";
+      usernameInput.required = false; // Non serve per il login
+      btnAuth.innerText = "Accedi";
+      switchContainer.innerHTML = 'Nuovo su StitchVale? <a href="#" onclick="toggleMode(event)">Crea un account</a>';
     }
-  });
-
-  const orders = await res.json();
-
-  if (!res.ok) {
-    document.getElementById("orders").innerHTML =
-      "<div class='empty-orders'>Errore nel caricamento ordini.</div>";
-    return;
   }
 
-  if (orders.length === 0) {
-    document.getElementById("orders").innerHTML =
-      "<div class='empty-orders'>Non hai ancora ordini.</div>";
-    return;
+  async function handleAuth(event) {
+    event.preventDefault();
+    const btn = document.getElementById("btnAuth");
+
+    const email = document.getElementById("userEmail").value;
+    const password = document.getElementById("userPassword").value;
+    
+    // Raccoglie lo username solo se siamo in modalità registrazione
+    let username = null;
+    if (isRegisterMode) {
+      username = document.getElementById("userUsername").value;
+    }
+
+    btn.innerText = isRegisterMode ? "Registrazione..." : "Accesso in corso...";
+    btn.disabled = true;
+    btn.style.opacity = "0.7";
+
+    // Qui andrai a inserire la chiamata alle tue API collegate a Supabase
+    // Esempio logico di trasmissione dati:
+    try {
+      const endpoint = isRegisterMode ? "/api/register" : "/api/login";
+      
+      const payload = { email, password };
+      if (isRegisterMode) {
+        payload.username = username; // Passa l'username estratto alla tabella Supabase
+      }
+
+      console.log("Inviando dati a Supabase:", payload);
+      
+      // Simulazione risposta positiva per non bloccare i test locali
+      setTimeout(() => {
+        alert(isRegisterMode ? "Registrazione completata!" : "Accesso eseguito!");
+        btn.innerText = isRegisterMode ? "Registrati" : "Accedi";
+        btn.disabled = false;
+        btn.style.opacity = "1";
+      }, 1000);
+
+    } catch (err) {
+      console.error(err);
+      alert("Errore di connessione durante l'autenticazione.");
+      btn.disabled = false;
+      btn.style.opacity = "1";
+    }
   }
-
-  document.getElementById("orders").innerHTML = orders.map(order => `
-    <div class="order-card">
-      <h3>Ordine #${order.id}</h3>
-      <p>Data: ${new Date(order.createdAt).toLocaleString()}</p>
-      <p>Totale: €${order.total}</p>
-      <p>Pagamento: ${order.paymentMethod}</p>
-
-      <h4>Prodotti:</h4>
-      ${order.items.map(item => `
-        <div class="order-item">
-          <strong>${item.name}</strong>
-          <p>Brand: ${item.brand}</p>
-          <p>Quantità: ${item.quantity}</p>
-          <p>Prezzo: €${item.price}</p>
-        </div>
-      `).join("")}
-    </div>
-  `).join("");
-}
-
-window.onload = function() {
-  showProfile();
-  loadOrders();
-};
-  </script>
+</script>
 </body>
 </html>
