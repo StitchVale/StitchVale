@@ -246,6 +246,13 @@
       color: black;
     }
 
+    .like-btn:disabled {
+      background: #222;
+      color: #555;
+      border-color: #222;
+      cursor: not-allowed;
+    }
+
     /* Sezione Caricamento Separata */
     .section {
       padding: 60px 20px;
@@ -513,7 +520,7 @@
     function showIdeas(ideas){
       const container = document.getElementById("ideas");
       if (ideas.length === 0) {
-        container.innerHTML = "<p style='padding:30px; grid-column: 1/-1; text-align:center; color: #555;'>Nessuna idea trouvata.</p>";
+        container.innerHTML = "<p style='padding:30px; grid-column: 1/-1; text-align:center; color: #555;'>Nessuna idea trovata.</p>";
         return;
       }
 
@@ -561,9 +568,9 @@
               <div class="card-bottom-row">
                 <div>
                   <div class="price-display">€${i.targetPrice || "--"}</div>
-                  <div class="likes-count">❤️ ${i.votes || 0} Voti</div>
+                  <div class="likes-count" id="voti-display-${i.id}">❤️ ${i.votes || 0} Voti</div>
                 </div>
-                <button class="like-btn" onclick="likeIdea(${i.id})">
+                <button class="like-btn" id="like-btn-${i.id}" onclick="likeIdea(${i.id})">
                   Vota
                 </button>
               </div>
@@ -590,45 +597,66 @@
       showIdeas(results);
     }
 
-    // MODIFICATA: Questa versione aggiorna lo schermo all'istante!
+    // RISOLTO: Ora gestisce i voti in modo permanente senza glitch grafici!
     async function likeIdea(id){
       if (!requireLogin()) return;
+
+      const cardBtn = document.getElementById(`like-btn-${id}`);
+      const votesDiv = document.getElementById(`voti-display-${id}`);
+      
+      // 1. Aggiornamento ottimistico istantaneo sulla pagina
+      let currentVotes = 0;
+      if (votesDiv) {
+        currentVotes = parseInt(votesDiv.innerText.replace(/[^0-9]/g, '')) || 0;
+        votesDiv.innerHTML = `❤️ ${currentVotes + 1} Voti`;
+      }
+      
+      if (cardBtn) {
+        cardBtn.disabled = true;
+        cardBtn.style.opacity = "0.5";
+        cardBtn.innerText = "VOTATO";
+      }
 
       try {
         const res = await fetch(API_URL + "/like/" + id, {
           method: "POST",
           headers: {
-            "Authorization": "Bearer " + getToken()
+            "Authorization": "Bearer " + getToken(),
+            "Content-Type": "application/json"
           }
         });
 
+        const data = await res.json();
+
         if (res.ok) {
-          alert("Grazie per aver votato!");
-          
-          // Trova gli elementi della card specifica e incrementa subito a schermo
-          const cardBtn = document.querySelector(`button[onclick="likeIdea(${id})"]`);
-          if (cardBtn) {
-            const votesDiv = cardBtn.parentElement.querySelector(".likes-count");
-            if (votesDiv) {
-              const currentVotes = parseInt(votesDiv.innerText.replace(/[^0-9]/g, '')) || 0;
-              votesDiv.innerHTML = `❤️ ${currentVotes + 1} Voti`;
-            }
-            cardBtn.disabled = true;
-            cardBtn.style.opacity = "0.5";
-            cardBtn.innerText = "VOTATO";
+          // 2. Se il server risponde correttamente, allineiamo l'array locale in memoria
+          // in modo che se l'utente usa la barra di ricerca, i dati rimangano aggiornati
+          const ideaInList = allIdeas.find(item => item.id === id);
+          if (ideaInList) {
+            ideaInList.votes = data.votes || (currentVotes + 1);
+            // Aggiorna ulteriormente il display con il numero esatto restituito dal server
+            if (votesDiv) votesDiv.innerHTML = `❤️ ${ideaInList.votes} Voti`;
           }
-
-          // Rinfresca i dati reali dal database dopo 1 secondo
-          setTimeout(async () => {
-            await loadIdeas();
-          }, 1000);
-
         } else {
-          const data = await res.json();
-          alert(data.message || "Errore like");
+          // Rollback in caso di errore del server (es. ha già votato)
+          alert(data.message || "Errore durante il voto.");
+          if (votesDiv) votesDiv.innerHTML = `❤️ ${currentVotes} Voti`;
+          if (cardBtn) {
+            cardBtn.disabled = false;
+            cardBtn.style.opacity = "1";
+            cardBtn.innerText = "Vota";
+          }
         }
       } catch (err) {
+        console.error(err);
         alert("Errore di connessione.");
+        // Rollback in caso di crash della rete
+        if (votesDiv) votesDiv.innerHTML = `❤️ ${currentVotes} Voti`;
+        if (cardBtn) {
+          cardBtn.disabled = false;
+          cardBtn.style.opacity = "1";
+          cardBtn.innerText = "Vota";
+        }
       }
     }
 
