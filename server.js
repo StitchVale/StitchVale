@@ -63,7 +63,6 @@ function auth(req, res, next) {
 /* ================= REGISTER ================= */
 app.post("/register", async (req, res) => {
   try {
-    // Aggiunto "username" estratto dal corpo della richiesta (req.body)
     const { email, password, role, username } = req.body;
     const cleanEmail = email.toLowerCase().trim();
     const cleanUsername = username ? username.trim() : null;
@@ -78,7 +77,7 @@ app.post("/register", async (req, res) => {
       return res.status(400).json({ message: "Utente già registrato" });
     }
 
-    // 2. Controllo opzionale: se è una registrazione, verifichiamo che l'username non sia già preso
+    // 2. Controllo opzionale: verifichiamo che l'username non sia già preso
     if (cleanUsername) {
       const { data: existingUser } = await supabase
         .from("users")
@@ -96,7 +95,7 @@ app.post("/register", async (req, res) => {
     const { error } = await supabase.from("users").insert([
       {
         email: cleanEmail,
-        username: cleanUsername, // Colonna mappata su Supabase
+        username: cleanUsername,
         password: hashed,
         role: role === "brand" ? "brand" : "user",
         approved: role === "brand" ? false : true,
@@ -147,12 +146,11 @@ app.post("/login", async (req, res) => {
       return res.status(403).json({ message: "Brand non approvato" });
     }
 
-    // Ora inseriamo anche l'username dentro il token JWT criptato
     const token = jwt.sign(
       {
         id: user.id,
         email: user.email,
-        username: user.username, // Inserito nel token
+        username: user.username,
         role: user.role,
         approved: user.approved
       },
@@ -163,7 +161,7 @@ app.post("/login", async (req, res) => {
     res.json({
       token,
       email: user.email,
-      username: user.username, // Restituito al frontend per comodità
+      username: user.username,
       role: user.role
     });
   } catch (err) {
@@ -172,8 +170,8 @@ app.post("/login", async (req, res) => {
   }
 });
 
-/* ================= BRANDS PROFILE (FIXATO) ================= */
-app.post("/brands", auth, upload.single("logo"), async (req, res) => {
+/* ================= BRANDS PROFILE (LOGO + COPERTINA COIL MODALITÀ MULTIPART) ================= */
+app.post("/brands", auth, upload.fields([{ name: "logo", maxCount: 1 }, { name: "cover", maxCount: 1 }]), async (req, res) => {
   try {
     const brandData = {
       name: req.body.name || "",
@@ -181,7 +179,6 @@ app.post("/brands", auth, upload.single("logo"), async (req, res) => {
       style: req.body.style || "",
       website: req.body.website || "",
       instagram: req.body.instagram || "",
-      // Mappatura completa e sicura dei campi visibili da screenshot:
       location: req.body.location || req.body.brandLocation || "",
       tiktok: req.body.tiktok || req.body.brandTikTok || "",
       slogan: req.body.slogan || req.body.brandSlogan || "",
@@ -189,23 +186,44 @@ app.post("/brands", auth, upload.single("logo"), async (req, res) => {
       email: req.user.email 
     };
 
-    if (req.file) {
-      const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1E9);
-      const fileName = `logo-${uniqueSuffix}${path.extname(req.file.originalname)}`;
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1E9);
 
-      const { error: uploadError } = await supabase.storage
+    // 1. Elaborazione e Upload del LOGO se inviato
+    if (req.files && req.files["logo"] && req.files["logo"][0]) {
+      const logoFile = req.files["logo"][0];
+      const logoName = `logo-${uniqueSuffix}${path.extname(logoFile.originalname)}`;
+
+      const { error: logoError } = await supabase.storage
         .from("uploads")
-        .upload(fileName, req.file.buffer, {
-          contentType: req.file.mimetype,
+        .upload(logoName, logoFile.buffer, {
+          contentType: logoFile.mimetype,
           upsert: true
         });
 
-      if (uploadError) {
-        console.error("Errore upload logo Supabase Storage:", uploadError);
-        return res.status(500).json({ message: "Errore nel caricamento del logo su Storage" });
+      if (!logoError) {
+        brandData.logo = logoName;
+      } else {
+        console.error("Errore upload logo Supabase Storage:", logoError);
       }
+    }
 
-      brandData.logo = fileName;
+    // 2. Elaborazione e Upload dello SFONDO (cover) se inviato
+    if (req.files && req.files["cover"] && req.files["cover"][0]) {
+      const coverFile = req.files["cover"][0];
+      const coverName = `cover-${uniqueSuffix}${path.extname(coverFile.originalname)}`;
+
+      const { error: coverError } = await supabase.storage
+        .from("uploads")
+        .upload(coverName, coverFile.buffer, {
+          contentType: coverFile.mimetype,
+          upsert: true
+        });
+
+      if (!coverError) {
+        brandData.cover = coverName;
+      } else {
+        console.error("Errore upload cover Supabase Storage:", coverError);
+      }
     }
 
     const { data: existingBrand, error: checkError } = await supabase
@@ -247,13 +265,12 @@ app.post("/brands", auth, upload.single("logo"), async (req, res) => {
   }
 });    
 
-/* ================= BRANDS LIST (FIXATO) ================= */
+/* ================= BRANDS LIST ================= */
 app.get("/brands-list", async (req, res) => {
   try {
     const { data, error } = await supabase
       .from("brand")
-      // Recupera esplicitamente anche tutte le nuove colonne per mostrarle nella lista pubblica
-      .select("email, name, logo, bio, style, instagram, website, location, tiktok, slogan, slug");
+      .select("email, name, logo, cover, bio, style, instagram, website, location, tiktok, slogan, slug");
 
     if (error) {
       return res.status(400).json(error);
@@ -407,7 +424,7 @@ app.get("/admin-orders", async (req, res) => {
   }
 });
 
-/* ================= STRIPE (FIXATO) ================= */
+/* ================= STRIPE ================= */
 app.post("/create-checkout-session", async (req, res) => {
   try {
     const { name, price } = req.body;
@@ -511,12 +528,11 @@ app.post("/ideas", auth, upload.array("images", 8), async (req, res) => {
   }
 });
 
-/* ================= ROTTA LIKE (CORRETTA) ================= */
+/* ================= ROTTA LIKE ================= */
 app.post("/like/:id", auth, async (req, res) => {
   const ideaId = req.params.id;
 
   try {
-    // 1. Recupera i voti attuali
     const { data: idea, error: fetchError } = await supabase
       .from("idee")
       .select("votes")
@@ -530,7 +546,6 @@ app.post("/like/:id", auth, async (req, res) => {
 
     const nuoviVoti = (Number(idea.votes) || 0) + 1;
 
-    // 2. Aggiorna con il modificatore .select() per forzare la scrittura sul DB
     const { data: updatedData, error: updateError } = await supabase
       .from("idee")
       .update({ votes: nuoviVoti })
