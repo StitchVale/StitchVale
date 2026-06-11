@@ -66,7 +66,6 @@
       margin: 0;
     }
 
-    /* Sezioni del Form */
     .section-box {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
@@ -143,7 +142,6 @@
       resize: none;
     }
 
-    /* Pulsante Salva Profilo */
     .btn-save {
       background: var(--accent-color);
       color: #000000;
@@ -160,7 +158,6 @@
       opacity: 0.9;
     }
 
-    /* Area Footer di Navigazione */
     .navigation-zone {
       margin-top: 50px;
       padding-top: 30px;
@@ -333,13 +330,13 @@
     formData.append("tiktok", document.getElementById("brandTikTok").value);
     formData.append("website", document.getElementById("brandWebsite").value);
 
-    // Gestione LOGO
+    // Allegato LOGO
     const logoInput = document.getElementById("brandLogo");
     if (logoInput.files.length > 0) {
       formData.append("logo", logoInput.files[0]);
     }
 
-    // Gestione COPERTINA / SFONDO
+    // Allegato COPERTINA SFONDO
     const coverInput = document.getElementById("brandCover");
     if (coverInput.files.length > 0) {
       formData.append("cover", coverInput.files[0]);
@@ -357,7 +354,7 @@
       const data = await res.json();
 
       if (res.ok) {
-        alert("Profilo Brand, Logo e Sfondo salvati con successo!");
+        alert("Profilo Brand salvato con successo (Inclusi Logo e Sfondo)!");
       } else {
         alert("Errore: " + (data.message || "Impossibile salvare i dati."));
       }
