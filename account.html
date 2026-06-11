@@ -25,7 +25,7 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    /* HEADER */
+    /* HEADER - COERENTE CON HOME.HTML */
     header {
       display: flex;
       justify-content: space-between;
@@ -57,23 +57,22 @@
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.1em;
-      transition: color 0.3s, transform 0.2s;
     }
 
     nav a:hover {
       color: var(--text-main);
     }
 
-    /* WRAPPER & CONTAINER */
+    /* WRAPPER */
     .wrapper {
-      max-width: 500px;
+      max-width: 450px;
       margin: 80px auto;
       padding: 0 25px;
     }
 
     .header-title {
       text-align: left;
-      margin-bottom: 45px;
+      margin-bottom: 40px;
     }
 
     .header-title h1 {
@@ -89,11 +88,11 @@
 
     .header-title p {
       color: #888;
-      font-size: 15px;
+      font-size: 14px;
       margin: 0;
     }
 
-    /* FORM BOX BRUTALISTA */
+    /* FORM BOX */
     .form-box {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
@@ -107,45 +106,39 @@
     }
 
     label {
-      font-size: 11px;
+      font-size: 10px;
       text-transform: uppercase;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.12em;
       color: var(--text-muted);
       margin-bottom: 10px;
-      font-weight: 700;
+      font-weight: 800;
     }
 
-    /* SELETTORE RUOLO PARTICOLARE */
-    .role-selector {
+    /* SELETTORE RUOLO (BRAND / UTENTE) */
+    .role-selection {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 10px;
+      gap: 1px;
+      background: var(--border-color);
+      border: 1px solid var(--border-color);
       margin-bottom: 10px;
     }
 
-    .role-option {
+    .role-btn {
       background: var(--input-bg);
-      border: 1px solid var(--border-color);
-      color: #666;
-      padding: 14px;
-      text-align: center;
-      font-size: 12px;
-      font-weight: 700;
+      color: #555;
+      border: none;
+      padding: 15px;
+      font-size: 11px;
+      font-weight: 800;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
       cursor: pointer;
       transition: all 0.2s ease;
     }
 
-    .role-option:hover {
-      border-color: #333;
-      color: #aaa;
-    }
-
-    .role-option.active {
+    .role-btn.active {
       background: var(--accent-color);
-      color: #000000;
-      border-color: var(--accent-color);
+      color: #000;
     }
 
     input[type="text"], 
@@ -161,27 +154,25 @@
       font-family: inherit;
       font-size: 14px;
       outline: none;
-      transition: border-color 0.2s ease;
     }
 
     input:focus {
       border-color: var(--focus-border);
     }
 
-    /* BOTTONI ACCESSO / REGISTRAZIONE */
+    /* SUBMIT */
     .btn-submit {
       width: 100%;
       background: var(--accent-color);
       color: #000000;
       border: 1px solid var(--accent-color);
       padding: 16px;
-      border-radius: 0px;
-      font-weight: 700;
+      font-weight: 800;
       font-size: 13px;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.1em;
       cursor: pointer;
-      margin-top: 15px;
+      margin-top: 10px;
       transition: all 0.2s ease;
     }
 
@@ -190,60 +181,28 @@
       color: var(--text-main);
     }
 
-    .btn-submit:active {
-      transform: scale(0.99);
-    }
-
     .switch-mode {
       text-align: center;
-      margin-top: 25px;
-      font-size: 13px;
-      color: #666;
+      margin-top: 30px;
+      font-size: 12px;
+      color: #555;
     }
 
     .switch-mode a {
       color: var(--text-main);
       text-decoration: none;
-      font-weight: 600;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-left: 5px;
     }
 
-    .switch-mode a:hover {
-      text-decoration: underline;
-    }
-
-    /* RESPONSIVE */
+    /* MOBILE */
     @media (max-width: 640px) {
-      header {
-        padding: 20px;
-        flex-direction: column;
-        gap: 20px;
-        align-items: flex-start;
-      }
-
-      nav {
-        width: 100%;
-        overflow-x: auto;
-        white-space: nowrap;
-        padding-bottom: 5px;
-        gap: 20px;
-      }
-      
-      nav::-webkit-scrollbar {
-        display: none;
-      }
-
-      nav a {
-        font-size: 12px;
-        display: inline-block;
-      }
-
-      .wrapper {
-        margin: 50px auto;
-      }
-
-      .form-box {
-        padding: 30px 20px;
-      }
+      header { padding: 20px; flex-direction: column; align-items: flex-start; gap: 20px; }
+      nav { width: 100%; overflow-x: auto; white-space: nowrap; gap: 20px; padding-bottom: 5px; }
+      nav::-webkit-scrollbar { display: none; }
+      .wrapper { margin: 40px auto; }
+      .form-box { padding: 30px 20px; }
     }
   </style>
 </head>
@@ -251,11 +210,8 @@
 
 <header>
   <div class="logo">
-    <a href="home.html">
-      <img src="logo3.jpg" alt="StitchVale Logo">
-    </a>
+    <a href="home.html"><img src="logo3.jpg" alt="StitchVale Logo"></a>
   </div>
-
   <nav>
     <a href="novita.html">Novità</a>
     <a href="catalogo.html">Catalogo</a>
@@ -267,139 +223,100 @@
 </header>
 
 <div class="wrapper">
-  
   <div class="header-title">
-    <h1 id="pageTitle">Join us</h1>
-    <p id="pageSubtitle">Crea il tuo profilo StitchVale per accedere all'hub.</p>
+    <h1 id="mainTitle">Join the culture</h1>
+    <p id="mainDesc">Crea il tuo profilo per accedere all'hub di StitchVale.</p>
   </div>
 
   <div class="form-box">
-    <form id="accountForm" onsubmit="handleAuth(event)">
+    <form id="authForm" onsubmit="handleAuth(event)">
       
       <div class="form-group" id="roleGroup">
-        <label>Tipo di account</label>
-        <div class="role-selector">
-          <div class="role-option active" id="roleUser" onclick="selectRole('user')">Utente</div>
-          <div class="role-option" id="roleBrand" onclick="selectRole('brand')">Brand</div>
+        <label>Sei un Brand o un Creativo?</label>
+        <div class="role-selection">
+          <button type="button" class="role-btn active" id="btnUser" onclick="setRole('user')">Utente</button>
+          <button type="button" class="role-btn" id="btnBrand" onclick="setRole('brand')">Brand</button>
         </div>
       </div>
 
       <div class="form-group" id="usernameGroup">
-        <label for="userUsername">Username</label>
-        <input type="text" id="userUsername" placeholder="Es: stitch_creator" required>
+        <label for="regUsername">Username</label>
+        <input type="text" id="regUsername" placeholder="Es: valestitch_99" required>
       </div>
 
       <div class="form-group">
-        <label for="userEmail">Email</label>
-        <input type="email" id="userEmail" placeholder="Es: nome@esempio.com" required>
+        <label for="regEmail">Email</label>
+        <input type="email" id="regEmail" placeholder="Es: nome@esempio.com" required>
       </div>
 
       <div class="form-group">
-        <label for="userPassword">Password</label>
-        <input type="password" id="userPassword" placeholder="••••••••" required>
+        <label for="regPass">Password</label>
+        <input type="password" id="regPass" placeholder="••••••••" required>
       </div>
 
-      <button type="submit" id="btnAuth" class="btn-submit">Registrati</button>
+      <button type="submit" id="submitBtn" class="btn-submit">Registrati</button>
 
-      <div class="switch-mode" id="switchContainer">
-        Hai già un account? <a href="#" onclick="toggleMode(event)">Accedi ora</a>
+      <div class="switch-mode" id="toggleText">
+        Hai già un account? <a href="#" onclick="toggleMode(event)">Accedi</a>
       </div>
-
     </form>
   </div>
-
 </div>
 
 <script>
-  let isRegisterMode = true;
-  let selectedRole = 'user'; // Valore di default
+  let isRegister = true;
+  let currentRole = 'user';
 
-  function selectRole(role) {
-    selectedRole = role;
-    const userBtn = document.getElementById("roleUser");
-    const brandBtn = document.getElementById("roleBrand");
-
-    if (role === 'user') {
-      userBtn.classList.add("active");
-      brandBtn.classList.remove("active");
-    } else {
-      brandBtn.classList.add("active");
-      userBtn.classList.remove("active");
-    }
+  function setRole(role) {
+    currentRole = role;
+    document.getElementById('btnUser').classList.toggle('active', role === 'user');
+    document.getElementById('btnBrand').classList.toggle('active', role === 'brand');
   }
 
   function toggleMode(e) {
     e.preventDefault();
-    isRegisterMode = !isRegisterMode;
+    isRegister = !isRegister;
+    
+    const title = document.getElementById('mainTitle');
+    const desc = document.getElementById('mainDesc');
+    const roleGroup = document.getElementById('roleGroup');
+    const usernameGroup = document.getElementById('usernameGroup');
+    const submitBtn = document.getElementById('submitBtn');
+    const toggleText = document.getElementById('toggleText');
 
-    const pageTitle = document.getElementById("pageTitle");
-    const pageSubtitle = document.getElementById("pageSubtitle");
-    const roleGroup = document.getElementById("roleGroup");
-    const usernameGroup = document.getElementById("usernameGroup");
-    const usernameInput = document.getElementById("userUsername");
-    const btnAuth = document.getElementById("btnAuth");
-    const switchContainer = document.getElementById("switchContainer");
-
-    if (isRegisterMode) {
-      pageTitle.innerText = "Join us";
-      pageSubtitle.innerText = "Crea il tuo profilo StitchVale per accedere all'hub.";
+    if (isRegister) {
+      title.innerText = "Join the culture";
+      desc.innerText = "Crea il tuo profilo per accedere all'hub di StitchVale.";
       roleGroup.style.display = "flex";
       usernameGroup.style.display = "flex";
-      usernameInput.required = true;
-      btnAuth.innerText = "Registrati";
-      switchContainer.innerHTML = 'Hai già un account? <a href="#" onclick="toggleMode(event)">Accedi ora</a>';
+      submitBtn.innerText = "Registrati";
+      toggleText.innerHTML = 'Hai già un account? <a href="#" onclick="toggleMode(event)">Accedi</a>';
     } else {
-      pageTitle.innerText = "Welcome back";
-      pageSubtitle.innerText = "Inserisci le tue credenziali per entrare nel tuo spazio.";
+      title.innerText = "Welcome back";
+      desc.innerText = "Bentornato. Inserisci le tue credenziali.";
       roleGroup.style.display = "none";
       usernameGroup.style.display = "none";
-      usernameInput.required = false;
-      btnAuth.innerText = "Accedi";
-      switchContainer.innerHTML = 'Nuovo su StitchVale? <a href="#" onclick="toggleMode(event)">Crea un account</a>';
+      submitBtn.innerText = "Accedi";
+      toggleText.innerHTML = 'Nuovo su StitchVale? <a href="#" onclick="toggleMode(event)">Registrati</a>';
     }
   }
 
-  async function handleAuth(event) {
-    event.preventDefault();
-    const btn = document.getElementById("btnAuth");
+  async function handleAuth(e) {
+    e.preventDefault();
+    const email = document.getElementById('regEmail').value;
+    const password = document.getElementById('regPass').value;
+    const username = document.getElementById('regUsername').value;
 
-    const email = document.getElementById("userEmail").value;
-    const password = document.getElementById("userPassword").value;
-    
-    let username = null;
-    let role = null;
-    
-    if (isRegisterMode) {
-      username = document.getElementById("userUsername").value;
-      role = selectedRole; // Sarà 'user' o 'brand'
-    }
+    const payload = {
+      email,
+      password,
+      role: isRegister ? currentRole : null,
+      username: isRegister ? username : null
+    };
 
-    btn.innerText = isRegisterMode ? "Registrazione..." : "Accesso in corso...";
-    btn.disabled = true;
-    btn.style.opacity = "0.7";
-
-    try {
-      const payload = { email, password };
-      if (isRegisterMode) {
-        payload.username = username;
-        payload.role = role; // Questo è il campo da mappare su Supabase
-      }
-
-      console.log("Dati pronti per il backend / Supabase:", payload);
-      
-      setTimeout(() => {
-        alert(isRegisterMode ? `Registrazione completata come ${role.toUpperCase()}!` : "Accesso eseguito!");
-        btn.innerText = isRegisterMode ? "Registrati" : "Accedi";
-        btn.disabled = false;
-        btn.style.opacity = "1";
-      }, 1000);
-
-    } catch (err) {
-      console.error(err);
-      alert("Errore di connessione durante l'autenticazione.");
-      btn.disabled = false;
-      btn.style.opacity = "1";
-    }
+    console.log("Dati inviati:", payload);
+    alert(isRegister ? "Registrazione inviata come " + currentRole : "Accesso in corso...");
+    // Qui aggiungi il tuo fetch() verso Supabase
   }
 </script>
 </body>
