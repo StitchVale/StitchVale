@@ -25,7 +25,7 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    /* HEADER - COERENTE CON HOME.HTML */
+    /* HEADER */
     header {
       display: flex;
       justify-content: space-between;
@@ -114,7 +114,7 @@
       font-weight: 800;
     }
 
-    /* SELETTORE RUOLO (BRAND / UTENTE) */
+    /* SELETTORE RUOLO */
     .role-selection {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -289,6 +289,8 @@
       desc.innerText = "Crea il tuo profilo per accedere all'hub di StitchVale.";
       roleGroup.style.display = "flex";
       usernameGroup.style.display = "flex";
+      // Rimette l'obbligatorietà in modalità registrazione
+      document.getElementById('regUsername').required = true;
       submitBtn.innerText = "Registrati";
       toggleText.innerHTML = 'Hai già un account? <a href="#" onclick="toggleMode(event)">Accedi</a>';
     } else {
@@ -296,13 +298,18 @@
       desc.innerText = "Bentornato. Inserisci le tue credenziali.";
       roleGroup.style.display = "none";
       usernameGroup.style.display = "none";
+      // Toglie l'obbligatorietà dello username in modalità login
+      document.getElementById('regUsername').required = false;
       submitBtn.innerText = "Accedi";
       toggleText.innerHTML = 'Nuovo su StitchVale? <a href="#" onclick="toggleMode(event)">Registrati</a>';
     }
   }
 
+  /* === QUESTA È LA PARTE COLLEGATA AL TUO SERVER SU RENDER === */
   async function handleAuth(e) {
     e.preventDefault();
+    const btn = document.getElementById('submitBtn');
+
     const email = document.getElementById('regEmail').value;
     const password = document.getElementById('regPass').value;
     const username = document.getElementById('regUsername').value;
@@ -314,9 +321,38 @@
       username: isRegister ? username : null
     };
 
-    console.log("Dati inviati:", payload);
-    alert(isRegister ? "Registrazione inviata come " + currentRole : "Accesso in corso...");
-    // Qui aggiungi il tuo fetch() verso Supabase
+    btn.innerText = isRegister ? "Registrazione..." : "Accesso in corso...";
+    btn.disabled = true;
+    btn.style.opacity = "0.7";
+
+    try {
+      const endpoint = isRegister ? "/register" : "/login";
+      
+      const res = await fetch("https://stitchvale-api.onrender.com" + endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        if (!isRegister && data.token) {
+          localStorage.setItem("token", data.token);
+        }
+        alert(isRegister ? "Account creato con successo!" : "Accesso eseguito!");
+        window.location.href = "home.html";
+      } else {
+        alert("Errore: " + (data.message || "Impossibile completare l'operazione."));
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Errore di connessione con il server.");
+    } finally {
+      btn.innerText = isRegister ? "Registrati" : "Accedi";
+      btn.disabled = false;
+      btn.style.opacity = "1";
+    }
   }
 </script>
 </body>
