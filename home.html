@@ -1,207 +1,359 @@
 <!DOCTYPE html>
-<html>
-
-<html>
+<html lang="it">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>StitchVale</title>
+  <title>StitchVale — Underground Streetwear Hub</title>
 
   <style>
+    :root {
+      --bg-color: #000000;
+      --card-bg: #0a0a0a;
+      --accent-color: #ffffff;
+      --text-main: #ffffff;
+      --text-muted: #555555;
+      --border-color: #151515;
+      --glow-color: #222222;
+    }
+
     body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #0d0d0d;
-  color: white;
-}
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", Roboto, sans-serif;
+      background: var(--bg-color);
+      color: var(--text-main);
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
 
-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 25px 35px;
-  background: black;
-  border-bottom: 1px solid #222;
-}
+    /* HEADER */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 30px 40px;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
 
-.logo img {
-  height: 80px;
-}
+    .logo img {
+      height: 40px;
+      filter: grayscale(1) brightness(1.5);
+    }
 
-nav {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-}
+    nav {
+      display: flex;
+      gap: 32px;
+    }
 
-nav a {
-  color: #aaa;
-  text-decoration: none;
-  font-size: 15px;
-}
+    nav a {
+      color: #888888;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      transition: color 0.3s, transform 0.2s;
+    }
 
-nav a:hover {
-  color: white;
-}
+    nav a:hover {
+      color: var(--text-main);
+      transform: translateY(-1px);
+    }
 
-.hero {
-  text-align: center;
-  padding: 90px 25px;
-  background: radial-gradient(circle at top, #1f1f1f, #0d0d0d 65%);
-}
+    /* HERO SECTION - PARTICOLARE */
+    .hero {
+      position: relative;
+      text-align: left;
+      padding: 160px 40px 120px 40px;
+      max-width: 1200px;
+      margin: 0 auto;
+      border-bottom: 1px solid var(--border-color);
+    }
 
-.hero h1 {
-  font-size: 54px;
-  margin-bottom: 20px;
-}
+    .ticker-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: #111;
+      border: 1px solid #222;
+      padding: 6px 14px;
+      border-radius: 30px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #aaa;
+      margin-bottom: 30px;
+    }
 
-.hero p {
-  color: #ccc;
-  font-size: 18px;
-  max-width: 780px;
-  margin: auto;
-  line-height: 1.6;
-}
+    .ticker-badge span {
+      width: 6px;
+      height: 6px;
+      background: #00ff66;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #00ff66;
+    }
 
-.buttons {
-  margin-top: 35px;
-}
+    .hero h1 {
+      font-size: 72px;
+      font-weight: 900;
+      letter-spacing: -0.05em;
+      line-height: 0.95;
+      margin: 0 0 30px 0;
+      text-transform: uppercase;
+      background: linear-gradient(180deg, #fff 0%, #444 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
 
-.buttons a {
-  display: inline-block;
-  margin: 8px;
-  padding: 14px 26px;
-  border-radius: 30px;
-  text-decoration: none;
-  font-weight: bold;
-}
+    .hero p {
+      color: #888;
+      font-size: 20px;
+      max-width: 580px;
+      margin: 0 0 45px 0;
+      line-height: 1.5;
+    }
 
-.primary {
-  background: white;
-  color: black;
-}
+    .buttons {
+      display: flex;
+      gap: 16px;
+    }
 
-.secondary {
-  border: 1px solid white;
-  color: white;
-}
+    .buttons a {
+      display: inline-block;
+      padding: 16px 36px;
+      border-radius: 0px; /* Taglio netto, molto più alternativo */
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      transition: all 0.2s ease;
+    }
 
-.section {
-  padding: 65px 25px;
-  text-align: center;
-}
+    .primary {
+      background: var(--accent-color);
+      color: #000000;
+      border: 1px solid var(--accent-color);
+    }
 
-.section h2 {
-  font-size: 34px;
-  margin-bottom: 10px;
-}
+    .primary:hover {
+      background: transparent;
+      color: var(--text-main);
+    }
 
-.section p {
-  color: #aaa;
-  max-width: 700px;
-  margin: auto;
-  line-height: 1.5;
-}
+    .secondary {
+      background: transparent;
+      border: 1px solid #333;
+      color: var(--text-main);
+    }
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 22px;
-  max-width: 1150px;
-  margin: 35px auto 0;
-}
+    .secondary:hover {
+      border-color: var(--accent-color);
+    }
 
-.card {
-  background: #1a1a1a;
-  padding: 28px 20px;
-  border-radius: 18px;
-  border: 1px solid #222;
-}
+    /* GRID COSA PUOI FARE */
+    .section {
+      padding: 100px 40px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
 
-.card h3 {
-  margin-bottom: 10px;
-}
+    .section-header {
+      margin-bottom: 70px;
+    }
 
-.card p {
-  font-size: 14px;
-}
+    .section h2 {
+      font-size: 40px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      text-transform: uppercase;
+      margin: 0 0 15px 0;
+    }
 
-.highlight {
-  background: linear-gradient(135deg, #111, #1f1f1f, #000);
-  border-top: 1px solid #222;
-  border-bottom: 1px solid #222;
-}
+    .section-header p {
+      color: var(--text-muted);
+      font-size: 16px;
+      margin: 0;
+    }
 
-footer {
-  padding: 40px 20px;
-  text-align: center;
-  border-top: 1px solid #222;
-  color: #aaa;
-}
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
 
-/* MOBILE */
-@media (max-width: 900px) {
-  header {
-    flex-direction: column;
-    gap: 18px;
-    padding: 22px 15px;
-  }
+    .card {
+      background: var(--card-bg);
+      padding: 40px 30px;
+      border: 1px solid var(--border-color);
+      position: relative;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
 
-  .logo img {
-    height: 70px;
-  }
+    .card:hover {
+      border-color: #333;
+      transform: translateY(-4px);
+      box-shadow: 0 10px 30px rgba(255,255,255,0.02);
+    }
 
-  nav {
-    justify-content: center;
-    gap: 14px;
-  }
+    .card-num {
+      font-size: 12px;
+      color: #333;
+      font-weight: 700;
+      margin-bottom: 30px;
+      display: block;
+    }
 
-  nav a {
-    font-size: 14px;
-  }
+    .card h3 {
+      margin: 0 0 15px 0;
+      font-size: 20px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
+    }
 
-  .hero {
-    padding: 70px 20px;
-  }
+    .card p {
+      margin: 0;
+      font-size: 14px;
+      color: #777;
+      line-height: 1.6;
+    }
 
-  .hero h1 {
-    font-size: 40px;
-  }
+    /* BOX HIGHLIGHT PARTICOLARE ASIMMETRICO */
+    .highlight-section {
+      background: #0a0a0a;
+      border-top: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-color);
+      padding: 100px 40px;
+    }
 
-  .hero p {
-    font-size: 16px;
-  }
+    .highlight-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 40px;
+    }
 
-  .grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
+    .highlight-container h2 {
+      font-size: 48px;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      text-transform: uppercase;
+      margin: 0;
+      line-height: 1;
+    }
 
-@media (max-width: 560px) {
-  .hero h1 {
-    font-size: 34px;
-  }
+    /* FOOTER */
+    footer {
+      padding: 80px 40px;
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-top: 1px solid var(--border-color);
+    }
 
-  .buttons a {
-    display: block;
-    margin: 12px auto;
-    max-width: 260px;
-  }
+    .footer-brand h3 {
+      font-size: 18px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin: 0 0 15px 0;
+    }
 
-  .grid {
-    grid-template-columns: 1fr;
-  }
+    .footer-brand p {
+      color: #444;
+      font-size: 13px;
+      margin: 0;
+    }
 
-  .section h2 {
-    font-size: 28px;
-  }
-}
+    .footer-links p {
+      margin: 8px 0;
+      font-size: 14px;
+      color: #777;
+    }
+
+    /* MOBILE & PARTICOLARITÀ CATEGORIE IN ALTO */
+    @media (max-width: 960px) {
+      .grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .hero h1 {
+        font-size: 52px;
+      }
+      .highlight-container {
+        flex-direction: column;
+        text-align: center;
+      }
+    }
+
+    @media (max-width: 640px) {
+      header {
+        padding: 20px;
+        flex-direction: column;
+        gap: 20px;
+        align-items: flex-start;
+      }
+
+      /* AGGIUSTAMENTO 1: Le categorie sopra rimangono, visibili a scorrimento orizzontale su Mobile */
+      nav {
+        width: 100%;
+        overflow-x: auto;
+        white-space: nowrap;
+        padding-bottom: 5px;
+        gap: 20px;
+      }
+      
+      nav::-webkit-scrollbar {
+        display: none; /* Nasconde la barra di scorrimento brutta */
+      }
+
+      nav a {
+        font-size: 12px;
+        display: inline-block;
+      }
+
+      .hero {
+        padding: 100px 20px 60px 20px;
+      }
+
+      .hero h1 {
+        font-size: 40px;
+      }
+
+      .buttons {
+        flex-direction: column;
+      }
+
+      .buttons a {
+        text-align: center;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      footer {
+        flex-direction: column;
+        gap: 40px;
+        padding: 60px 20px;
+      }
+    }
   </style>
-
-  
 </head>
 <body>
-  <header>
+
+<header>
   <div class="logo">
     <a href="home.html">
       <img src="logo3.jpg" alt="StitchVale Logo">
@@ -219,13 +371,13 @@ footer {
 </header>
 
 <section class="hero">
-  <h1>Il futuro dello streetwear emergente parte da qui</h1>
-
+  <div class="ticker-badge">
+    <span></span> Next Drop: 15 Giugno
+  </div>
+  <h1>Il futuro dello<br>streetwear emergente</h1>
   <p>
-    StitchVale connette brand emergenti, creativi e appassionati di moda.
-    Scopri capi originali, carica le tue idee, trova nuovi brand e crea il prossimo trend.
+    StitchVale taglia gli intermediari. Connette direttamente brand indipendenti, designer visionari e la community. Scopri, vota e indossa i trend di domani.
   </p>
-
   <div class="buttons">
     <a href="catalogo.html" class="primary">Esplora catalogo</a>
     <a href="idee.html" class="secondary">Carica la tua idea</a>
@@ -233,50 +385,61 @@ footer {
 </section>
 
 <section class="section">
-  <h2>🔥 Cosa puoi fare</h2>
-  <p>Una piattaforma pensata per scoprire, creare e vendere streetwear indipendente.</p>
+  <div class="section-header">
+    <h2>Ecosistema</h2>
+    <p>Strumenti crudi per l'evoluzione della moda underground.</p>
+  </div>
 
   <div class="grid">
     <div class="card">
+      <span class="card-num">// 01</span>
       <h3>Scopri prodotti</h3>
-      <p>Esplora capi caricati da brand emergenti e trova il tuo stile.</p>
+      <p>Pezzi unici fuori dai radar commerciali. Caricati solo da brand selezionati.</p>
     </div>
 
     <div class="card">
+      <span class="card-num">// 02</span>
       <h3>Carica idee</h3>
-      <p>Condividi concept, bozze e design con la community.</p>
+      <p>Esponi i tuoi mock-up o bozze grafiche. Ricevi l'approvazione del pubblico prima di produrre.</p>
     </div>
 
     <div class="card">
+      <span class="card-num">// 03</span>
       <h3>Diventa brand</h3>
-      <p>Crea il tuo profilo, carica prodotti e costruisci il tuo pubblico.</p>
+      <p>Prendi il controllo. Gestisci il tuo store interno, analizza i feedback e lancia i drop.</p>
     </div>
 
     <div class="card">
+      <span class="card-num">// 04</span>
       <h3>AI Outfit</h3>
-      <p>Descrivi lo stile che cerchi e ricevi suggerimenti dal catalogo.</p>
+      <p>Un algoritmo neurale che scansiona l'underground per comporre il tuo look ideale.</p>
     </div>
   </div>
 </section>
 
-<section class="section highlight">
-  <h2>🚀 Inizia ora</h2>
-  <p>Scopri nuovi prodotti, crea un account o pubblica il tuo brand su StitchVale.</p>
-
-  <div class="buttons">
-    <a href="account.html" class="primary">Crea account</a>
-    <a href="brand.html" class="secondary">Area brand</a>
+<section class="highlight-section">
+  <div class="highlight-container">
+    <div>
+      <h2>Fai parte<br>della cultura.</h2>
+    </div>
+    <div class="buttons">
+      <a href="account.html" class="primary">Crea account</a>
+      <a href="brand.html" class="secondary">Area brand</a>
+    </div>
   </div>
 </section>
 
 <footer>
-  <h3>StitchVale</h3>
-  <p>Email: stitchvale1@gmail.com</p>
-  <p>Instagram: @stitchvale</p>
+  <div class="footer-brand">
+    <h3>StitchVale</h3>
+    <p>© 2026 STITCHVALE. ALL RIGHTS RESERVED.</p>
+  </div>
+  <div class="footer-links">
+    <p><strong>Contatti</strong></p>
+    <p>Email: stitchvale1@gmail.com</p>
+    <p>Instagram: @stitchvale</p>
+  </div>
 </footer>
 
-  <script>
-    
-  </script>
 </body>
 </html>
