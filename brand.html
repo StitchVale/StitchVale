@@ -154,7 +154,7 @@
       opacity: 0.9;
     }
 
-    /* Area Footer di Navigazione (Link alla pubblicazione prodotti) */
+    /* Area Footer di Navigazione */
     .navigation-zone {
       margin-top: 50px;
       padding-top: 30px;
@@ -204,7 +204,7 @@
   </div>
 </header>
 
-<div class="wrapper">
+<div class="wrapper" id="mainContent" style="display: none;">
   
   <div class="header-title">
     <h1>Identity Brand</h1>
@@ -277,7 +277,7 @@
     </div>
 
     <div style="text-align: right; margin-bottom: 40px;">
-      <button type="submit" class="btn-save">Salva Configurazione Brand</button>
+      <button type="submit" id="saveBtn" class="btn-save">Salva Configurazione Brand</button>
     </div>
 
   </form>
@@ -292,33 +292,62 @@
 <script>
   const API_URL = "https://stitchvale-api.onrender.com";
 
-  // Gestione dell'invio dei dati del profilo
+  // 1. ROUTE GUARD: BLOCCO SICUREZZA ISTANTANEO
+  window.addEventListener('DOMContentLoaded', () => {
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+
+    if (!token || role !== "brand") {
+      alert("ACCESSO NEGATO: Questa sezione è riservata esclusivamente ai profili Brand approvati.");
+      window.location.href = "account.html"; // Spedito istantaneamente ai moduli
+    } else {
+      // Se passa il controllo, mostriamo la pagina
+      document.getElementById("mainContent").style.display = "block";
+    }
+  });
+
+  // 2. INVIO REALE DEI DATI A SUPABASE TRAMITE SERVER RENDER
   async function handleFormSubmit(event) {
     event.preventDefault();
+    const btn = document.getElementById("saveBtn");
+    const token = localStorage.getItem("token");
     
     const brandData = {
       name: document.getElementById("brandName").value,
-      slug: document.getElementById("brandSlug").value,
       bio: document.getElementById("brandBio").value,
-      logo: document.getElementById("brandLogo").value,
-      cover: document.getElementById("brandCover").value,
       style: document.getElementById("brandStyle").value,
-      location: document.getElementById("brandLocation").value,
-      instagram: document.getElementById("brandInstagram").value,
-      tiktok: document.getElementById("brandTikTok").value,
-      website: document.getElementById("brandWebsite").value
+      website: document.getElementById("brandWebsite").value,
+      instagram: document.getElementById("brandInstagram").value
+      // Nota: Il tuo server.js al momento mappa questi 5 campi nella tabella "brand"
     };
 
-    console.log("Dati pronti per Supabase:", brandData);
-    alert(`Profilo del Brand "${brandData.name}" aggiornato con successo!`);
-    
-    /* Nota per il backend futuro:
-    await fetch(API_URL + "/api/brand/update", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(brandData)
-    });
-    */
+    btn.innerText = "Salvataggio...";
+    btn.disabled = true;
+
+    try {
+      const res = await fetch(API_URL + "/brands", {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + token // Passiamo il JWT per validare chi scrive nel DB
+        },
+        body: JSON.stringify(brandData)
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        alert("Profilo Brand salvato con successo su Supabase!");
+      } else {
+        alert("Errore: " + (data.message || "Impossibile salvare i dati."));
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Errore di rete durante la comunicazione con il database.");
+    } finally {
+      btn.innerText = "Salva Configurazione Brand";
+      btn.disabled = false;
+    }
   }
 </script>
 
