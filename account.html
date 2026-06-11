@@ -92,7 +92,7 @@
       margin: 0;
     }
 
-    /* FORM BOX */
+    /* FORM BOX / PROFILE BOX */
     .form-box {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
@@ -160,8 +160,8 @@
       border-color: var(--focus-border);
     }
 
-    /* SUBMIT */
-    .btn-submit {
+    /* BUTTONS */
+    .btn-submit, .btn-action {
       width: 100%;
       background: var(--accent-color);
       color: #000000;
@@ -173,12 +173,29 @@
       letter-spacing: 0.1em;
       cursor: pointer;
       margin-top: 10px;
+      display: block;
+      text-align: center;
+      text-decoration: none;
+      box-sizing: border-box;
       transition: all 0.2s ease;
     }
 
-    .btn-submit:hover {
+    .btn-submit:hover, .btn-action:hover {
       background: transparent;
       color: var(--text-main);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: #ff3b30;
+      border: 1px solid #1a0505;
+      margin-top: 15px;
+    }
+
+    .btn-secondary:hover {
+      background: #1a0505;
+      color: #ff453a;
+      border-color: #ff453a;
     }
 
     .switch-mode {
@@ -194,6 +211,27 @@
       font-weight: 700;
       text-transform: uppercase;
       margin-left: 5px;
+    }
+
+    /* INFO LOGGED PROFILE */
+    .profile-info-item {
+      border-bottom: 1px solid var(--border-color);
+      padding: 15px 0;
+    }
+    .profile-info-item:first-child { padding-top: 0; }
+    .profile-info-item:last-child { border: none; }
+    
+    .profile-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 5px;
+    }
+    .profile-value {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
     }
 
     /* MOBILE */
@@ -223,12 +261,14 @@
 </header>
 
 <div class="wrapper">
+  
   <div class="header-title">
     <h1 id="mainTitle">Join the culture</h1>
     <p id="mainDesc">Crea il tuo profilo per accedere all'hub di StitchVale.</p>
   </div>
 
   <div class="form-box">
+    
     <form id="authForm" onsubmit="handleAuth(event)">
       
       <div class="form-group" id="roleGroup">
@@ -260,12 +300,68 @@
         Hai già un account? <a href="#" onclick="toggleMode(event)">Accedi</a>
       </div>
     </form>
+
+    <div id="profileBox" style="display: none;">
+      <div class="profile-info-item">
+        <div class="profile-label">Username</div>
+        <div class="profile-value" id="profUsername">@username</div>
+      </div>
+      <div class="profile-info-item">
+        <div class="profile-label">Email dell'account</div>
+        <div class="profile-value" id="profEmail">user@example.com</div>
+      </div>
+      <div class="profile-info-item">
+        <div class="profile-label">Livello Accesso</div>
+        <div class="profile-value" id="profRole" style="text-transform: uppercase;">USER</div>
+      </div>
+
+      <a href="brand.html" id="brandAreaBtn" class="btn-action" style="margin-top: 30px; display: none;">Gestisci il tuo Brand</a>
+      <button onclick="handleLogout()" class="btn-submit btn-secondary">Disconnetti Account</button>
+    </div>
+
   </div>
 </div>
 
 <script>
   let isRegister = true;
   let currentRole = 'user';
+
+  // CONTROLLO DI SESSIONE AUTOMATICO ALL'APERTURA DELLA PAGINA
+  window.addEventListener('DOMContentLoaded', () => {
+    checkSession();
+  });
+
+  function checkSession() {
+    const token = localStorage.getItem("token");
+    
+    // Se c'è un token, l'utente è loggato!
+    if (token) {
+      document.getElementById("authForm").style.display = "none";
+      document.getElementById("profileBox").style.display = "block";
+      
+      // Cambiamo i titoli della pagina
+      document.getElementById("mainTitle").innerText = "Il tuo Hub";
+      document.getElementById("mainDesc").innerText = "Gestisci la tua identità e i tuoi progetti all'interno di StitchVale.";
+
+      // Recuperiamo i dati che abbiamo salvato nel localStorage al login (fatto sotto)
+      const savedEmail = localStorage.getItem("email") || "Non disponibile";
+      const savedUsername = localStorage.getItem("username") || "Nessun username";
+      const savedRole = localStorage.getItem("role") || "user";
+
+      document.getElementById("profEmail").innerText = savedEmail;
+      document.getElementById("profUsername").innerText = `@${savedUsername}`;
+      document.getElementById("profRole").innerText = savedRole;
+
+      // Se l'account è un brand, gli mostriamo il tasto rapido per andare a caricare prodotti/brand
+      if (savedRole === "brand") {
+        document.getElementById("brandAreaBtn").style.display = "block";
+      }
+    } else {
+      // Se non c'è il token, mostra il classico form di login/registrazione
+      document.getElementById("authForm").style.display = "block";
+      document.getElementById("profileBox").style.display = "none";
+    }
+  }
 
   function setRole(role) {
     currentRole = role;
@@ -289,7 +385,6 @@
       desc.innerText = "Crea il tuo profilo per accedere all'hub di StitchVale.";
       roleGroup.style.display = "flex";
       usernameGroup.style.display = "flex";
-      // Rimette l'obbligatorietà in modalità registrazione
       document.getElementById('regUsername').required = true;
       submitBtn.innerText = "Registrati";
       toggleText.innerHTML = 'Hai già un account? <a href="#" onclick="toggleMode(event)">Accedi</a>';
@@ -298,14 +393,12 @@
       desc.innerText = "Bentornato. Inserisci le tue credenziali.";
       roleGroup.style.display = "none";
       usernameGroup.style.display = "none";
-      // Toglie l'obbligatorietà dello username in modalità login
       document.getElementById('regUsername').required = false;
       submitBtn.innerText = "Accedi";
       toggleText.innerHTML = 'Nuovo su StitchVale? <a href="#" onclick="toggleMode(event)">Registrati</a>';
     }
   }
 
-  /* === QUESTA È LA PARTE COLLEGATA AL TUO SERVER SU RENDER === */
   async function handleAuth(e) {
     e.preventDefault();
     const btn = document.getElementById('submitBtn');
@@ -338,10 +431,20 @@
 
       if (res.ok) {
         if (!isRegister && data.token) {
+          // SALVIAMO I DATI RICEVUTI NEL BROWSER PER LEGGERE LA SESSIONE
           localStorage.setItem("token", data.token);
+          localStorage.setItem("email", data.email);
+          localStorage.setItem("username", data.username || "user");
+          localStorage.setItem("role", data.role || "user");
         }
-        alert(isRegister ? "Account creato con successo!" : "Accesso eseguito!");
-        window.location.href = "home.html";
+        
+        alert(isRegister ? "Account creato! Ora puoi effettuare l'accesso." : "Accesso eseguito!");
+        
+        if (isRegister) {
+          toggleMode(e); // Se si è appena registrato, lo porta alla schermata di Accedi
+        } else {
+          checkSession(); // Se ha fatto il login, ricarica la grafica mostrando il profilo
+        }
       } else {
         alert("Errore: " + (data.message || "Impossibile completare l'operazione."));
       }
@@ -353,6 +456,13 @@
       btn.disabled = false;
       btn.style.opacity = "1";
     }
+  }
+
+  // FUNZIONE DI LOGOUT
+  function handleLogout() {
+    localStorage.clear(); // Cancella token, email, username e ruolo dal computer dell'utente
+    alert("Sessione chiusa.");
+    window.location.reload(); // Ricarica la pagina tornando al form vuoto
   }
 </script>
 </body>
