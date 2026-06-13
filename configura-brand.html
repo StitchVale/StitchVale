@@ -1,11 +1,9 @@
 <!DOCTYPE html>
-<html>
-
-<html>
+<html lang="it">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Carica Prodotto — StitchVale</title>
+  <title>Configurazione Brand — StitchVale</title>
 
   <style>
     :root {
@@ -46,7 +44,7 @@
     }
 
     .wrapper {
-      max-width: 650px;
+      max-width: 850px;
       margin: 60px auto;
       padding: 0 25px;
     }
@@ -55,7 +53,7 @@
       margin-bottom: 40px;
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
+      align-items: flex-end;
     }
 
     .header-title h1 {
@@ -73,26 +71,36 @@
 
     .btn-back {
       background: transparent;
-      color: var(--text-muted);
       border: 1px solid var(--border-color);
-      padding: 10px 18px;
-      border-radius: 20px;
-      font-size: 13px;
+      color: var(--text-main);
+      padding: 10px 20px;
+      border-radius: 8px;
       text-decoration: none;
-      transition: color 0.2s, border-color 0.2s;
+      font-size: 13px;
+      transition: background 0.2s;
     }
 
     .btn-back:hover {
-      color: var(--text-main);
-      border-color: #444;
+      background: #111111;
     }
 
-    /* Box del Form */
-    .form-box {
+    .section-box {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
       border-radius: 16px;
       padding: 35px;
+      margin-bottom: 30px;
+    }
+
+    .section-box h2 {
+      font-size: 18px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin: 0 0 25px 0;
+      color: var(--text-main);
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 12px;
     }
 
     .form-grid {
@@ -121,7 +129,8 @@
     }
 
     input[type="text"], 
-    input[type="number"], 
+    input[type="url"], 
+    input[type="file"],
     select, 
     textarea {
       width: 100%;
@@ -137,6 +146,11 @@
       transition: border-color 0.2s ease;
     }
 
+    input[type="file"] {
+      padding: 10px;
+      cursor: pointer;
+    }
+
     input:focus, select:focus, textarea:focus {
       border-color: var(--focus-border);
     }
@@ -146,203 +160,258 @@
       resize: none;
     }
 
-    /* Stile personalizzato per l'upload dei file */
-    .file-input-wrapper {
-      position: relative;
-      background: var(--input-bg);
-      border: 1px dashed var(--border-color);
-      padding: 20px;
-      border-radius: 10px;
-      text-align: center;
-      cursor: pointer;
-      transition: border-color 0.2s;
-    }
-
-    .file-input-wrapper:hover {
-      border-color: #444;
-    }
-
-    .file-input-wrapper input[type="file"] {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      opacity: 0;
-      cursor: pointer;
-    }
-
-    .file-input-text {
-      font-size: 14px;
-      color: var(--text-muted);
-    }
-
-    /* Bottone Pubblica */
-    .btn-submit {
-      width: 100%;
+    .btn-save {
       background: var(--accent-color);
       color: #000000;
       border: none;
-      padding: 16px;
+      padding: 15px 35px;
       border-radius: 10px;
       font-weight: 600;
-      font-size: 15px;
+      font-size: 14px;
       cursor: pointer;
-      margin-top: 10px;
-      transition: opacity 0.2s, transform 0.1s;
+      transition: opacity 0.2s;
     }
 
-    .btn-submit:hover {
+    .btn-save:hover {
       opacity: 0.9;
     }
 
-    .btn-submit:active {
-      transform: scale(0.99);
+    .navigation-zone {
+      margin-top: 50px;
+      padding-top: 30px;
+      border-top: 1px solid var(--border-color);
+      text-align: center;
+    }
+
+    .navigation-zone p {
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+
+    .btn-next-step {
+      display: inline-block;
+      background: transparent;
+      color: var(--text-main);
+      border: 1px solid #262626;
+      padding: 16px 40px;
+      border-radius: 30px;
+      font-weight: 600;
+      font-size: 13px;
+      text-decoration: none;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      transition: background 0.2s, border-color 0.2s, color 0.2s;
+    }
+
+    .btn-next-step:hover {
+      background: var(--accent-color);
+      color: #000000;
+      border-color: var(--accent-color);
     }
 
     @media (max-width: 768px) {
       .form-grid { grid-template-columns: 1fr; }
       .form-group.full-width { grid-column: span 1; }
-      .header-title { flex-direction: column; gap: 15px; }
+      header { padding: 20px; }
+      .header-title { flex-direction: column; align-items: flex-start; gap: 15px; }
     }
   </style>
-
-  
 </head>
 <body>
-  <header>
+
+<header>
   <div class="logo">
     <a href="home.html"><img src="logo3.jpg" alt="StitchVale"></a>
   </div>
 </header>
 
-<div class="wrapper">
+<div class="wrapper" id="mainContent" style="display: none;">
   
   <div class="header-title">
     <div>
-      <h1>Nuovo Capo</h1>
-      <p>Inserisci i dettagli del prodotto per pubblicarlo nel catalogo di StitchVale.</p>
+      <h1>Identity Brand</h1>
+      <p>Personalizza l'estetica, i dettagli e la presentazione del tuo marchio su StitchVale.</p>
     </div>
-    <a href="dashboard-brand.html" class="btn-back">← Torna all'Area Brand</a>
+    <a href="brand.html" class="btn-back">← Torna alla Dashboard</a>
   </div>
 
-  <div class="form-box">
-    <form id="productForm" onsubmit="publishProduct(event)">
-      
+  <form id="brandIdentityForm" onsubmit="handleFormSubmit(event)">
+    
+    <div class="section-box">
+      <h2>1. Informazioni Generali</h2>
       <div class="form-grid">
-        
         <div class="form-group">
-          <label for="prodName">Nome Prodotto</label>
-          <input type="text" id="prodName" placeholder="Es: Felpa Oversize Heavyweight" required>
+          <label for="brandName">Nome Brand</label>
+          <input type="text" id="brandName" placeholder="Es: StitchVale Studio" required>
         </div>
-
         <div class="form-group">
-          <label for="prodBrand">Seleziona il tuo Brand</label>
-          <input type="text" id="prodBrand" placeholder="Es: StitchVale Studio" required>
+          <label for="brandSlogan">Slogan / Payoff Breve</label>
+          <input type="text" id="brandSlogan" placeholder="Es: Luxury Streetwear Core">
         </div>
-
         <div class="form-group">
-          <label for="prodPrice">Prezzo (€)</label>
-          <input type="number" id="prodPrice" step="0.01" placeholder="Es: 65.00" required>
+          <label for="brandSlug">Custom Link / Slug URL</label>
+          <input type="text" id="brandSlug" placeholder="Es: stitchvale-studio (senza spazi)">
         </div>
-
         <div class="form-group">
-          <label for="prodCategory">Categoria</label>
-          <select id="prodCategory">
-            <option value="felpe">Felpe / Hoodie</option>
-            <option value="tshirt">T-Shirt / Magliette</option>
-            <option value="pantaloni">Pantaloni / Cargo</option>
-            <option value="accessori">Accessori</option>
+          <label for="brandLocation">Città / Sede Operativa</label>
+          <input type="text" id="brandLocation" placeholder="Es: Milano, Italia">
+        </div>
+        <div class="form-group full-width">
+          <label for="brandBio">Biografia / Storia del Marchio</label>
+          <textarea id="brandBio" placeholder="Descrivi la visione del tuo brand, le ispirazioni dei tuoi drop e la filosofia dei tessuti..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-box">
+      <h2>2. Visual & Estetica</h2>
+      <div class="form-grid">
+        <div class="form-group full-width">
+          <label for="brandLogo">Carica Logo Ufficiale (1:1)</label>
+          <input type="file" id="brandLogo" accept="image/*">
+          <small id="logoStatus" style="color: #666; margin-top: 5px;"></small>
+        </div>
+        <div class="form-group full-width">
+          <label for="brandStyle">Stile Principale del Brand</label>
+          <select id="brandStyle">
+            <option value="streetwear">Streetwear / Oversize</option>
+            <option value="minimal">Minimal / Essential</option>
+            <option value="vintage">Y2K / Vintage Retro</option>
+            <option value="luxury">Luxury / High-End</option>
           </select>
         </div>
-
-        <div class="form-group full-width">
-          <label for="prodDescription">Descrizione del Prodotto</label>
-          <textarea id="prodDescription" placeholder="Dettagli sul fit, composizione del tessuto (es. 100% cotone 400gsm), dettagli sulla stampa o ricamo..."></textarea>
-        </div>
-
-        <div class="form-group full-width">
-          <label>Immagine Prodotto</label>
-          <div class="file-input-wrapper">
-            <span id="fileLabel" class="file-input-text">Trascina qui la foto del capo o clicca per cercarla</span>
-            <input type="file" id="prodImage" accept="image/*" onchange="updateFileName()" required>
-          </div>
-        </div>
-
       </div>
+    </div>
 
-      <button type="submit" id="btnSubmit" class="btn-submit">Pubblica nel Drop</button>
+    <div class="section-box">
+      <h2>3. Canali Social & Contatti</h2>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="brandInstagram">Username Instagram</label>
+          <input type="text" id="brandInstagram" placeholder="Es: @stitchvale">
+        </div>
+        <div class="form-group">
+          <label for="brandTikTok">Username TikTok</label>
+          <input type="text" id="brandTikTok" placeholder="Es: @stitchvale_studio">
+        </div>
+        <div class="form-group full-width">
+          <label for="brandWebsite">Sito Web Esterno (Opzionale)</label>
+          <input type="url" id="brandWebsite" placeholder="https://www.tuosito.com">
+        </div>
+      </div>
+    </div>
 
-    </form>
+    <div style="text-align: right; margin-bottom: 40px;">
+      <button type="submit" id="saveBtn" class="btn-save">Salva Configurazione Brand</button>
+    </div>
+
+  </form>
+
+  <div class="navigation-zone">
+    <p>Vuoi tornare a controllare i tuoi prodotti o caricarne uno nuovo?</p>
+    <a href="brand.html" class="btn-next-step">Vai alla gestione prodotti →</a>
   </div>
 
 </div>
 
-  <script>
-    const API_URL = "https://stitchvale-api.onrender.com";
+<script>
+  const API_URL = "https://stitchvale-api.onrender.com";
 
-  // Cambia il testo del box di upload quando viene scelta una foto
-  function updateFileName() {
-    const input = document.getElementById("prodImage");
-    const label = document.getElementById("fileLabel");
-    if (input.files.length > 0) {
-      label.innerText = `File selezionato: ${input.files[0].name}`;
-      label.style.color = "#ffffff";
+  window.addEventListener('DOMContentLoaded', async () => {
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+
+    if (!token || role !== "brand") {
+      alert("ACCESSO NEGATO: Sezione riservata esclusivamente ai Brand.");
+      window.location.href = "account.html";
+    } else {
+      document.getElementById("mainContent").style.display = "block";
+      await loadBrandData();
+    }
+  });
+
+  async function loadBrandData() {
+    const token = localStorage.getItem("token");
+    try {
+      const res = await fetch(API_URL + "/brands", {
+        method: "GET",
+        headers: { "Authorization": "Bearer " + token }
+      });
+      
+      if (res.ok) {
+        const brandsList = await res.json();
+        if (brandsList && brandsList.length > 0) {
+          const b = brandsList[0]; 
+          
+          if (b.name) document.getElementById("brandName").value = b.name;
+          if (b.slogan) document.getElementById("brandSlogan").value = b.slogan;
+          if (b.slug) document.getElementById("brandSlug").value = b.slug;
+          if (b.location) document.getElementById("brandLocation").value = b.location;
+          if (b.bio) document.getElementById("brandBio").value = b.bio;
+          if (b.style) document.getElementById("brandStyle").value = b.style;
+          if (b.instagram) document.getElementById("brandInstagram").value = b.instagram;
+          if (b.tiktok) document.getElementById("brandTikTok").value = b.tiktok;
+          if (b.website) document.getElementById("brandWebsite").value = b.website;
+          
+          if (b.logo) {
+            document.getElementById("logoStatus").innerText = "Logo attuale: " + b.logo;
+          }
+        }
+      }
+    } catch (err) {
+      console.error("Errore recupero informazioni brand:", err);
     }
   }
 
-  // Funzione per inviare il prodotto al server (Render + Supabase)
-  async function publishProduct(event) {
+  async function handleFormSubmit(event) {
     event.preventDefault();
-    const btn = document.getElementById("btnSubmit");
-
-    const name = document.getElementById("prodName").value;
-    const brand = document.getElementById("prodBrand").value;
-    const price = document.getElementById("prodPrice").value;
-    const category = document.getElementById("prodCategory").value;
-    const description = document.getElementById("prodDescription").value;
-    const imageFile = document.getElementById("prodImage").files[0];
-
-    // Effetto loading sul pulsante
-    btn.innerText = "Pubblicazione in corso...";
+    const btn = document.getElementById("saveBtn");
+    const token = localStorage.getItem("token");
+    
+    btn.innerText = "Salvataggio...";
     btn.disabled = true;
-    btn.style.opacity = "0.7";
 
-    // Usiamo FormData perché dobbiamo inviare un file fisico (l'immagine)
     const formData = new FormData();
-    formData.append("name", name);
-    formData.append("brand", brand);
-    formData.append("price", price);
-    formData.append("category", category);
-    formData.append("description", description);
-    formData.append("image", imageFile);
+    formData.append("name", document.getElementById("brandName").value);
+    formData.append("slogan", document.getElementById("brandSlogan").value || "");
+    formData.append("slug", document.getElementById("brandSlug").value || "");
+    formData.append("location", document.getElementById("brandLocation").value || "");
+    formData.append("bio", document.getElementById("brandBio").value || "");
+    formData.append("style", document.getElementById("brandStyle").value);
+    formData.append("instagram", document.getElementById("brandInstagram").value || "");
+    formData.append("tiktok", document.getElementById("brandTikTok").value || "");
+    formData.append("website", document.getElementById("brandWebsite").value || "");
+
+    const logoInput = document.getElementById("brandLogo");
+    if (logoInput.files.length > 0) {
+      formData.append("logo", logoInput.files[0]);
+    }
 
     try {
-      const res = await fetch(API_URL + "/products", {
+      const res = await fetch(API_URL + "/brands", {
         method: "POST",
-        // Nota: Con FormData non bisogna impostare l'header "Content-Type", ci pensa il browser automaticamente
+        headers: { "Authorization": "Bearer " + token },
         body: formData
       });
 
+      const data = await res.json();
+
       if (res.ok) {
-        alert(`Grandioso! "${name}" è stato aggiunto con successo al catalogo.`);
-        document.getElementById("productForm").reset();
-        document.getElementById("fileLabel").innerText = "Trascina qui la foto del capo o clicca per cercarla";
-        document.getElementById("fileLabel").style.color = "var(--text-muted)";
+        alert("Profilo Brand salvato con successo!");
+        await loadBrandData();
       } else {
-        const errorData = await res.json();
-        alert("Errore durante la pubblicazione: " + (errorData.message || "Risposta negativa dal server."));
+        alert("Errore: " + (data.message || "Impossibile salvare i dati."));
       }
     } catch (err) {
       console.error(err);
-      alert("Impossibile connettersi al server Render. Verifica la connessione.");
+      alert("Errore di rete durante il salvataggio.");
     } finally {
-      // Ripristina il pulsante originale
-      btn.innerText = "Pubblica nel Drop";
+      btn.innerText = "Salva Configurazione Brand";
       btn.disabled = false;
-      btn.style.opacity = "1";
     }
   }
-  </script>
+</script>
+
 </body>
 </html>
