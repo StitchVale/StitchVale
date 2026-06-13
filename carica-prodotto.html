@@ -44,16 +44,13 @@
     }
 
     .wrapper {
-      max-width: 650px;
+      max-width: 850px;
       margin: 60px auto;
       padding: 0 25px;
     }
 
     .header-title {
       margin-bottom: 40px;
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
     }
 
     .header-title h1 {
@@ -69,28 +66,23 @@
       margin: 0;
     }
 
-    .btn-back {
-      background: transparent;
-      color: var(--text-muted);
-      border: 1px solid var(--border-color);
-      padding: 10px 18px;
-      border-radius: 20px;
-      font-size: 13px;
-      text-decoration: none;
-      transition: color 0.2s, border-color 0.2s;
-    }
-
-    .btn-back:hover {
-      color: var(--text-main);
-      border-color: #444;
-    }
-
-    /* Box del Form */
-    .form-box {
+    .section-box {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
       border-radius: 16px;
       padding: 35px;
+      margin-bottom: 30px;
+    }
+
+    .section-box h2 {
+      font-size: 18px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin: 0 0 25px 0;
+      color: var(--text-main);
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 12px;
     }
 
     .form-grid {
@@ -120,6 +112,7 @@
 
     input[type="text"], 
     input[type="number"], 
+    input[type="file"],
     select, 
     textarea {
       width: 100%;
@@ -135,73 +128,87 @@
       transition: border-color 0.2s ease;
     }
 
+    input[type="file"] {
+      padding: 10px;
+      cursor: pointer;
+    }
+
     input:focus, select:focus, textarea:focus {
       border-color: var(--focus-border);
     }
 
     textarea {
-      height: 100px;
+      height: 120px;
       resize: none;
     }
 
-    /* Upload file wrapper */
-    .file-input-wrapper {
+    /* Griglia Anteprime Immagini */
+    .preview-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .preview-item {
       position: relative;
-      background: var(--input-bg);
-      border: 1px dashed var(--border-color);
-      padding: 20px;
-      border-radius: 10px;
-      text-align: center;
-      cursor: pointer;
-      transition: border-color 0.2s;
+      width: 100%;
+      padding-top: 100%; /* Mantiene il formato 1:1 */
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
     }
 
-    .file-input-wrapper:hover {
-      border-color: #444;
-    }
-
-    .file-input-wrapper input[type="file"] {
+    .preview-item img {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      opacity: 0;
-      cursor: pointer;
+      object-fit: cover;
     }
 
-    .file-input-text {
-      font-size: 14px;
-      color: var(--text-muted);
-    }
-
-    /* Bottone Pubblica */
-    .btn-submit {
-      width: 100%;
+    .btn-save {
       background: var(--accent-color);
       color: #000000;
       border: none;
-      padding: 16px;
+      padding: 15px 35px;
       border-radius: 10px;
       font-weight: 600;
-      font-size: 15px;
+      font-size: 14px;
       cursor: pointer;
-      margin-top: 10px;
-      transition: opacity 0.2s, transform 0.1s;
+      transition: opacity 0.2s;
     }
 
-    .btn-submit:hover {
+    .btn-save:hover {
       opacity: 0.9;
     }
 
-    .btn-submit:active {
-      transform: scale(0.99);
+    .navigation-zone {
+      margin-top: 50px;
+      padding-top: 30px;
+      border-top: 1px solid var(--border-color);
+      text-align: center;
+    }
+
+    .btn-back {
+      display: inline-block;
+      background: transparent;
+      color: var(--text-muted);
+      padding: 10px 20px;
+      text-decoration: none;
+      font-size: 14px;
+      transition: color 0.2s;
+    }
+
+    .btn-back:hover {
+      color: var(--text-main);
     }
 
     @media (max-width: 768px) {
       .form-grid { grid-template-columns: 1fr; }
       .form-group.full-width { grid-column: span 1; }
-      .header-title { flex-direction: column; gap: 15px; }
+      header { padding: 20px; }
     }
   </style>
 </head>
@@ -213,59 +220,67 @@
   </div>
 </header>
 
-<div class="wrapper">
+<div class="wrapper" id="mainContent" style="display: none;">
   
   <div class="header-title">
-    <div>
-      <h1>Nuovo Capo</h1>
-      <p>Inserisci i dettagli del prodotto per pubblicarlo nel catalogo di StitchVale.</p>
-    </div>
-    <a href="brand.html" class="btn-back">← Torna all'Area Brand</a>
+    <h1>Nuovo Drop / Prodotto</h1>
+    <p>Aggiungi un nuovo capo d'abbigliamento o accessorio al catalogo del tuo brand su StitchVale.</p>
   </div>
 
-  <div class="form-box">
-    <form id="productForm" onsubmit="publishProduct(event)">
-      
+  <form id="productForm" onsubmit="handleProductSubmit(event)">
+    
+    <div class="section-box">
+      <h2>1. Dettagli Prodotto</h2>
       <div class="form-grid">
+        <div class="form-group">
+          <label for="productName">Nome del Capo</label>
+          <input type="text" id="productName" placeholder="Es: Hoodie Oversize 'STITCH'" required>
+        </div>
         
         <div class="form-group">
-          <label for="prodName">Nome Prodotto</label>
-          <input type="text" id="prodName" placeholder="Es: Felpa Oversize Heavyweight" required>
-        </div>
-
-        <div class="form-group">
-          <label for="prodPrice">Prezzo (€)</label>
-          <input type="number" id="prodPrice" step="0.01" placeholder="Es: 65.00" required>
-        </div>
-
-        <div class="form-group full-width">
-          <label for="prodCategory">Categoria</label>
-          <select id="prodCategory">
-            <option value="felpe">Felpe / Hoodie</option>
-            <option value="tshirt">T-Shirt / Magliette</option>
-            <option value="pantaloni">Pantaloni / Cargo</option>
-            <option value="accessori">Accessori</option>
+          <label for="productCategory">Categoria</label>
+          <select id="productCategory">
+            <option value="T-Shirt">T-Shirt</option>
+            <option value="Felpe / Hoodie">Felpe / Hoodie</option>
+            <option value="Pantaloni / Denim">Pantaloni / Denim</option>
+            <option value="Giacche / Outerwear">Giacche / Outerwear</option>
+            <option value="Accessori">Accessori</option>
           </select>
         </div>
 
-        <div class="form-group full-width">
-          <label for="prodDescription">Descrizione del Prodotto</label>
-          <textarea id="prodDescription" placeholder="Dettagli sul fit, composizione del tessuto (es. 100% cotone 400gsm)..."></textarea>
+        <div class="form-group">
+          <label for="productPrice">Prezzo (€)</label>
+          <input type="number" id="productPrice" placeholder="Es: 75" step="0.01" required>
         </div>
 
         <div class="form-group full-width">
-          <label>Immagine Prodotto</label>
-          <div class="file-input-wrapper">
-            <span id="fileLabel" class="file-input-text">Trascina qui la foto del capo o clicca per cercarla</span>
-            <input type="file" id="prodImage" accept="image/*" onchange="updateFileName()" required>
-          </div>
+          <label for="productDescription">Descrizione, Vestibilità & Materiali</label>
+          <textarea id="productDescription" placeholder="Specifica i grammi del cotone (es. 400 GSM), il tipo di ricamo o stampa e i dettagli della vestibilità (Boxy, Raglan, Oversize)..." required></textarea>
         </div>
-
       </div>
+    </div>
 
-      <button type="submit" id="btnSubmit" class="btn-submit">Pubblica nel Drop</button>
+    <div class="section-box">
+      <h2>2. Media & Lookbook</h2>
+      <div class="form-group full-width">
+        <label for="productImages">Immagini del Prodotto (Seleziona una o più foto)</label>
+        <input type="file" id="productImages" accept="image/*" multiple required onchange="previewFiles()">
+        <small style="color: var(--text-muted); margin-top: 6px; display: block;">
+          Puoi caricare fino a 8 foto contemporaneamente. Tieni premuto Ctrl (Windows) o Cmd (Mac) per selezionarle insieme.
+        </small>
+        
+        <div class="preview-container" id="imagePreviewZone"></div>
+      </div>
+    </div>
 
-    </form>
+    <div style="text-align: right; margin-bottom: 40px;">
+      <button type="submit" id="saveProductBtn" class="btn-save">Pubblica Prodotto nel Catalogo</button>
+    </div>
+
+  </form>
+
+  <div class="navigation-zone">
+    <a href="brand.html" class="btn-back">← Torna al Profilo Brand</a>
   </div>
 
 </div>
@@ -273,75 +288,90 @@
 <script>
   const API_URL = "https://stitchvale-api.onrender.com";
 
-  function updateFileName() {
-    const input = document.getElementById("prodImage");
-    const label = document.getElementById("fileLabel");
-    if (input.files.length > 0) {
-      label.innerText = `File selezionato: ${input.files[0].name}`;
-      label.style.color = "#ffffff";
+  window.addEventListener('DOMContentLoaded', () => {
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+
+    if (!token || role !== "brand") {
+      alert("ACCESSO NEGATO: Questa sezione è abilitata solo per i Brand registrati.");
+      window.location.href = "account.html";
+    } else {
+      document.getElementById("mainContent").style.display = "block";
+    }
+  });
+
+  // Funzione per generare l'anteprima visiva immediata sul browser delle foto selezionate
+  function previewFiles() {
+    const previewZone = document.getElementById("imagePreviewZone");
+    const files = document.getElementById("productImages").files;
+    
+    previewZone.innerHTML = ""; // Svuota anteprime precedenti
+
+    if (files) {
+      Array.from(files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const div = document.createElement("div");
+          div.className = "preview-item";
+          div.innerHTML = `<img src="${e.target.result}" alt="Anteprima">`;
+          previewZone.appendChild(div);
+        }
+        reader.readAsDataURL(file);
+      });
     }
   }
 
-  async function publishProduct(event) {
+  // Invio dei dati e dell'array di file multimediali al Backend Render
+  async function handleProductSubmit(event) {
     event.preventDefault();
-    const btn = document.getElementById("btnSubmit");
-
-    const name = document.getElementById("prodName").value;
-    const price = document.getElementById("prodPrice").value;
-    const category = document.getElementById("prodCategory").value;
-    const description = document.getElementById("prodDescription").value;
-    const imageFile = document.getElementById("prodImage").files[0];
-
+    const btn = document.getElementById("saveProductBtn");
     const token = localStorage.getItem("token");
-
-    if (!token) {
-      alert("Sessione scaduta. Effettua nuovamente il login.");
-      return;
-    }
-
-    if (!imageFile) {
-      alert("Seleziona un file d'immagine valido prima di procedere.");
-      return;
-    }
-
-    btn.innerText = "Pubblicazione in corso...";
+    
+    btn.innerText = "Caricamento Drop...";
     btn.disabled = true;
-    btn.style.opacity = "0.7";
 
     const formData = new FormData();
-    formData.append("name", name);
-    formData.append("price", price);
-    formData.append("category", category);
-    formData.append("description", description);
-    formData.append("images", imageFile);
+    formData.append("name", document.getElementById("productName").value);
+    formData.append("category", document.getElementById("productCategory").value);
+    formData.append("description", document.getElementById("productDescription").value);
+    formData.append("price", document.getElementById("productPrice").value);
+
+    // Gestione dell'invio Multi-File
+    const fileInput = document.getElementById("productImages");
+    if (fileInput.files.length > 0) {
+      for (let i = 0; i < fileInput.files.length; i++) {
+        // Appende ogni singolo file dentro il pacchetto multimediale chiamato "images"
+        formData.append("images", fileInput.files[i]);
+      }
+    }
 
     try {
       const res = await fetch(API_URL + "/products", {
         method: "POST",
-        headers: {
-          "Authorization": `Bearer ${token}`
+        headers: { 
+          "Authorization": "Bearer " + token 
         },
         body: formData
       });
 
+      const data = await res.json();
+
       if (res.ok) {
-        alert(`Grandioso! "${name}" è stato aggiunto con successo al catalogo.`);
+        alert("Successo! Il capo è stato pubblicato con tutte le immagini associate.");
         document.getElementById("productForm").reset();
-        document.getElementById("fileLabel").innerText = "Trascina qui la foto del capo o clicca per cercarla";
-        document.getElementById("fileLabel").style.color = "var(--text-muted)";
+        document.getElementById("imagePreviewZone").innerHTML = ""; // Svuota le miniature
       } else {
-        const errorData = await res.json();
-        alert("Errore durante la pubblicazione: " + (errorData.message || "Verifica i dati inseriti."));
+        alert("Errore: " + (data.message || "Impossibile caricare il prodotto."));
       }
     } catch (err) {
       console.error(err);
-      alert("Impossibile connettersi al server Render. Verifica la connessione.");
+      alert("Errore di connessione di rete con il server Render.");
     } finally {
-      btn.innerText = "Pubblica nel Drop";
+      btn.innerText = "Pubblica Prodotto nel Catalogo";
       btn.disabled = false;
-      btn.style.opacity = "1";
     }
   }
 </script>
+
 </body>
 </html>
