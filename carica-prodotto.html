@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Carica Prodotto — StitchVale</title>
+  <title>Gestione Prodotto — StitchVale</title>
 
   <style>
     :root {
@@ -142,7 +142,6 @@
       resize: none;
     }
 
-    /* Griglia Anteprime Immagini */
     .preview-container {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
@@ -153,7 +152,7 @@
     .preview-item {
       position: relative;
       width: 100%;
-      padding-top: 100%; /* Mantiene il formato 1:1 */
+      padding-top: 100%;
       border-radius: 8px;
       overflow: hidden;
       border: 1px solid var(--border-color);
@@ -204,12 +203,6 @@
     .btn-back:hover {
       color: var(--text-main);
     }
-
-    @media (max-width: 768px) {
-      .form-grid { grid-template-columns: 1fr; }
-      .form-group.full-width { grid-column: span 1; }
-      header { padding: 20px; }
-    }
   </style>
 </head>
 <body>
@@ -223,8 +216,8 @@
 <div class="wrapper" id="mainContent" style="display: none;">
   
   <div class="header-title">
-    <h1>Nuovo Drop / Prodotto</h1>
-    <p>Aggiungi un nuovo capo d'abbigliamento o accessorio al catalogo del tuo brand su StitchVale.</p>
+    <h1 id="pageMainTitle">Nuovo Drop / Prodotto</h1>
+    <p id="pageSubTitle">Aggiungi un nuovo capo d'abbigliamento o accessorio al catalogo del tuo brand su StitchVale.</p>
   </div>
 
   <form id="productForm" onsubmit="handleProductSubmit(event)">
@@ -255,7 +248,7 @@
 
         <div class="form-group full-width">
           <label for="productDescription">Descrizione, Vestibilità & Materiali</label>
-          <textarea id="productDescription" placeholder="Specifica i grammi del cotone (es. 400 GSM), il tipo di ricamo o stampa e i dettagli della vestibilità (Boxy, Raglan, Oversize)..." required></textarea>
+          <textarea id="productDescription" placeholder="Specifica i dettagli..." required></textarea>
         </div>
       </div>
     </div>
@@ -263,10 +256,10 @@
     <div class="section-box">
       <h2>2. Media & Lookbook</h2>
       <div class="form-group full-width">
-        <label for="productImages">Immagini del Prodotto (Seleziona una o più foto)</label>
-        <input type="file" id="productImages" accept="image/*" multiple required onchange="previewFiles()">
-        <small style="color: var(--text-muted); margin-top: 6px; display: block;">
-          Puoi caricare fino a 8 foto contemporaneamente. Tieni premuto Ctrl (Windows) o Cmd (Mac) per selezionarle insieme.
+        <label for="productImages">Immagini del Prodotto</label>
+        <input type="file" id="productImages" accept="image/*" multiple onchange="previewFiles()">
+        <small id="imageNotice" style="color: var(--text-muted); margin-top: 6px; display: block;">
+          Seleziona una o più foto. Tieni premuto Ctrl (Windows) o Cmd (Mac) per selezionarle insieme.
         </small>
         
         <div class="preview-container" id="imagePreviewZone"></div>
@@ -274,7 +267,7 @@
     </div>
 
     <div style="text-align: right; margin-bottom: 40px;">
-      <button type="submit" id="saveProductBtn" class="btn-save">Pubblica Prodotto nel Catalogo</button>
+      <button type="submit" id="saveProductBtn" class="btn-save">Pubblica Prodotto</button>
     </div>
 
   </form>
@@ -287,25 +280,72 @@
 
 <script>
   const API_URL = "https://stitchvale-api.onrender.com";
+  
+  // Controlliamo se nell'URL c'è un ID (es: carica-prodotto.html?id=32)
+  const urlParams = new URLSearchParams(window.location.search);
+  const editProductId = urlParams.get("id");
 
-  window.addEventListener('DOMContentLoaded', () => {
+  window.addEventListener('DOMContentLoaded', async () => {
     const token = localStorage.getItem("token");
     const role = localStorage.getItem("role");
 
     if (!token || role !== "brand") {
-      alert("ACCESSO NEGATO: Questa sezione è abilitata solo per i Brand registrati.");
+      alert("ACCESSO NEGATO.");
       window.location.href = "account.html";
+      return;
+    }
+
+    document.getElementById("mainContent").style.display = "block";
+
+    // Se c'è un ID, siamo in modalità MODIFICA
+    if (editProductId) {
+      document.getElementById("pageMainTitle").innerText = "Modifica Prodotto";
+      document.getElementById("pageSubTitle").innerText = "Modifica le informazioni o le foto del capo già pubblicato.";
+      document.getElementById("saveProductBtn").innerText = "Salva Modifiche";
+      document.getElementById("productImages").required = false; // Le vecchie foto restano se non ne carica di nuove
+      document.getElementById("imageNotice").innerText = "Opzionale: Carica nuove foto solo se desideri sostituire integralmente quelle attuali.";
+      
+      await loadProductData(editProductId);
     } else {
-      document.getElementById("mainContent").style.display = "block";
+      document.getElementById("productImages").required = true; // Obbligatorio solo per nuovi prodotti
     }
   });
 
-  // Funzione per generare l'anteprima visiva immediata sul browser delle foto selezionate
+  // Carica i dati attuali del prodotto dal server per metterli negli input
+  async function loadProductData(id) {
+    try {
+      const res = await fetch(API_URL + "/products");
+      const products = await res.json();
+      // Trova il prodotto specifico
+      const item = products.find(p => p.id == id);
+      
+      if (item) {
+        document.getElementById("productName").value = item.name;
+        document.getElementById("productCategory").value = item.category;
+        document.getElementById("productPrice").value = item.price;
+        document.getElementById("productDescription").value = item.description;
+
+        // Mostra le anteprime delle immagini attuali
+        const previewZone = document.getElementById("imagePreviewZone");
+        const currentImages = item.images || [item.image];
+        currentImages.forEach(imgName => {
+          if (imgName) {
+            const div = document.createElement("div");
+            div.className = "preview-item";
+            div.innerHTML = `<img src="${API_URL}/uploads/${imgName}" alt="Corrente">`;
+            previewZone.appendChild(div);
+          }
+        });
+      }
+    } catch (err) {
+      console.error("Errore recupero info prodotto:", err);
+    }
+  }
+
   function previewFiles() {
     const previewZone = document.getElementById("imagePreviewZone");
     const files = document.getElementById("productImages").files;
-    
-    previewZone.innerHTML = ""; // Svuota anteprime precedenti
+    previewZone.innerHTML = ""; 
 
     if (files) {
       Array.from(files).forEach(file => {
@@ -321,13 +361,12 @@
     }
   }
 
-  // Invio dei dati e dell'array di file multimediali al Backend Render
   async function handleProductSubmit(event) {
     event.preventDefault();
     const btn = document.getElementById("saveProductBtn");
     const token = localStorage.getItem("token");
     
-    btn.innerText = "Caricamento Drop...";
+    btn.innerText = "Salvataggio...";
     btn.disabled = true;
 
     const formData = new FormData();
@@ -336,38 +375,39 @@
     formData.append("description", document.getElementById("productDescription").value);
     formData.append("price", document.getElementById("productPrice").value);
 
-    // Gestione dell'invio Multi-File
     const fileInput = document.getElementById("productImages");
     if (fileInput.files.length > 0) {
       for (let i = 0; i < fileInput.files.length; i++) {
-        // Appende ogni singolo file dentro il pacchetto multimediale chiamato "images"
         formData.append("images", fileInput.files[i]);
       }
     }
 
+    // Determina se fare POST (nuovo) o PUT (modifica)
+    const url = editProductId ? `${API_URL}/products/${editProductId}` : `${API_URL}/products`;
+    const method = editProductId ? "PUT" : "POST";
+
     try {
-      const res = await fetch(API_URL + "/products", {
-        method: "POST",
-        headers: { 
-          "Authorization": "Bearer " + token 
-        },
+      const res = await fetch(url, {
+        method: method,
+        headers: { "Authorization": "Bearer " + token },
         body: formData
       });
 
-      const data = await res.json();
-
       if (res.ok) {
-        alert("Successo! Il capo è stato pubblicato con tutte le immagini associate.");
-        document.getElementById("productForm").reset();
-        document.getElementById("imagePreviewZone").innerHTML = ""; // Svuota le miniature
+        alert(editProductId ? "Prodotto aggiornato correttamente!" : "Prodotto pubblicato!");
+        if (!editProductId) {
+          document.getElementById("productForm").reset();
+          document.getElementById("imagePreviewZone").innerHTML = "";
+        }
       } else {
-        alert("Errore: " + (data.message || "Impossibile caricare il prodotto."));
+        const data = await res.json();
+        alert("Errore: " + (data.message || "Impossibile salvare."));
       }
     } catch (err) {
       console.error(err);
-      alert("Errore di connessione di rete con il server Render.");
+      alert("Errore di rete.");
     } finally {
-      btn.innerText = "Pubblica Prodotto nel Catalogo";
+      btn.innerText = editProductId ? "Salva Modifiche" : "Pubblica Prodotto";
       btn.disabled = false;
     }
   }
