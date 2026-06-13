@@ -354,7 +354,79 @@ app.post("/products", auth, upload.array("images", 8), async (req, res) => {
     res.status(500).json({ message: "Errore interno del server" });
   }
 });
+/* ================= UPDATE PRODUCT (MODIFICA) ================= */
+app.put("/products/:id", auth, upload.array("images", 8), async (req, res) => {
+  try {
+    const productId = req.params.id;
 
+    // 1. Verifichiamo prima se il prodotto esiste ed appartiene al brand che sta provando a modificarlo
+    const { data: existingProduct, error: fetchError } = await supabase
+      .from("products")
+      .select("*")
+      .eq("id", productId)
+      .maybeSingle();
+
+    if (fetchError || !existingProduct) {
+      return res.status(404).json({ message: "Prodotto non trovato." });
+    }
+
+    if (existingProduct.brand !== req.user.email) {
+      return res.status(403).json({ message: "Non hai i permessi per modificare questo prodotto." });
+    }
+
+    // 2. Prepariamo i dati aggiornati dal form
+    const updatedData = {
+      name: req.body.name || existingProduct.name,
+      category: req.body.category || existingProduct.category,
+      description: req.body.description || existingProduct.description,
+      price: req.body.price ? Number(req.body.price) : existingProduct.price
+    };
+
+    // 3. Se l'utente ha caricato nuove immagini, le elaboriamo
+    if (req.files && req.files.length > 0) {
+      const newImages = [];
+      for (const file of req.files) {
+        const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1E9);
+        const fileName = `product-${uniqueSuffix}${path.extname(file.originalname)}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from("uploads")
+          .upload(fileName, file.buffer, {
+            contentType: file.mimetype,
+            upsert: true
+          });
+
+        if (!uploadError) {
+          newImages.push(fileName);
+        } else {
+          console.error("Errore upload immagine modifica:", uploadError);
+        }
+      }
+      
+      if (newImages.length > 0) {
+        updatedData.images = newImages;
+        updatedData.image = newImages[0]; // La prima diventa la principale
+      }
+    }
+
+    // 4. Eseguiamo l'aggiornamento sul database
+    const { data, error } = await supabase
+      .from("products")
+      .update(updatedData)
+      .eq("id", productId)
+      .select();
+
+    if (error) {
+      console.error("Errore update DB prodotti:", error);
+      return res.status(400).json(error);
+    }
+
+    res.json({ message: "Prodotto aggiornato con successo!", product: data?.[0] });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Errore interno del server" });
+  }
+});
 /* ================= ORDERS ================= */
 app.get("/orders", auth, async (req, res) => {
   try {
