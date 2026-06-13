@@ -248,10 +248,12 @@
         <div class="form-group">
           <label for="brandLogo">Carica Logo Ufficiale (1:1)</label>
           <input type="file" id="brandLogo" accept="image/*">
+          <small id="logoStatus" style="color: #666; margin-top: 5px;"></small>
         </div>
         <div class="form-group">
           <label for="brandCover">Carica Immagine di Copertina / Sfondo</label>
           <input type="file" id="brandCover" accept="image/*">
+          <small id="coverStatus" style="color: #666; margin-top: 5px;"></small>
         </div>
         <div class="form-group full-width">
           <label for="brandStyle">Stile Principale del Brand</label>
@@ -290,7 +292,7 @@
   </form>
 
   <div class="navigation-zone">
-    <p>Hai completato o aggiornato il profilo del tuo brand? Passa alla gestione del tuo catalogo.</p>
+    <p>Hai completato o aggiornato il profil del tuo brand? Passa alla gestione del tuo catalogo.</p>
     <a href="carica-prodotto.html" class="btn-next-step">Gestisci e Carica Prodotti →</a>
   </div>
 
@@ -299,7 +301,7 @@
 <script>
   const API_URL = "https://stitchvale-api.onrender.com";
 
-  window.addEventListener('DOMContentLoaded', () => {
+  window.addEventListener('DOMContentLoaded', async () => {
     const token = localStorage.getItem("token");
     const role = localStorage.getItem("role");
 
@@ -308,8 +310,49 @@
       window.location.href = "account.html";
     } else {
       document.getElementById("mainContent").style.display = "block";
+      // AVVIA IL CARICAMENTO DEI DATI ESISTENTI AL REFRESH
+      await loadBrandData();
     }
   });
+
+  // NUOVA FUNZIONE: Scarica e precompila automaticamente i dati esistenti del Brand
+  async function loadBrandData() {
+    const token = localStorage.getItem("token");
+    try {
+      const res = await fetch(API_URL + "/brands", {
+        method: "GET",
+        headers: { "Authorization": "Bearer " + token }
+      });
+      
+      if (res.ok) {
+        const brandsList = await res.json();
+        // Se la lista contiene elementi, prendiamo i dati correnti del brand connesso
+        if (brandsList && brandsList.length > 0) {
+          const b = brandsList[0]; 
+          
+          if (b.name) document.getElementById("brandName").value = b.name;
+          if (b.slogan) document.getElementById("brandSlogan").value = b.slogan;
+          if (b.slug) document.getElementById("brandSlug").value = b.slug;
+          if (b.location) document.getElementById("brandLocation").value = b.location;
+          if (b.bio) document.getElementById("brandBio").value = b.bio;
+          if (b.style) document.getElementById("brandStyle").value = b.style;
+          if (b.instagram) document.getElementById("brandInstagram").value = b.instagram;
+          if (b.tiktok) document.getElementById("brandTikTok").value = b.tiktok;
+          if (b.website) document.getElementById("brandWebsite").value = b.website;
+          
+          // Avvisi visivi sui file multimediali già salvati nel database
+          if (b.logo) {
+            document.getElementById("logoStatus").innerText = "Logo già salvato: " + b.logo;
+          }
+          if (b.cover) {
+            document.getElementById("coverStatus").innerText = "Immagine copertina già salvata: " + b.cover;
+          }
+        }
+      }
+    } catch (err) {
+      console.error("Errore recupero informazioni brand:", err);
+    }
+  }
 
   async function handleFormSubmit(event) {
     event.preventDefault();
@@ -321,14 +364,14 @@
 
     const formData = new FormData();
     formData.append("name", document.getElementById("brandName").value);
-    formData.append("slogan", document.getElementById("brandSlogan").value);
-    formData.append("slug", document.getElementById("brandSlug").value);
-    formData.append("location", document.getElementById("brandLocation").value);
-    formData.append("bio", document.getElementById("brandBio").value);
+    formData.append("slogan", document.getElementById("brandSlogan").value || "");
+    formData.append("slug", document.getElementById("brandSlug").value || "");
+    formData.append("location", document.getElementById("brandLocation").value || "");
+    formData.append("bio", document.getElementById("brandBio").value || "");
     formData.append("style", document.getElementById("brandStyle").value);
-    formData.append("instagram", document.getElementById("brandInstagram").value);
-    formData.append("tiktok", document.getElementById("brandTikTok").value);
-    formData.append("website", document.getElementById("brandWebsite").value);
+    formData.append("instagram", document.getElementById("brandInstagram").value || "");
+    formData.append("tiktok", document.getElementById("brandTikTok").value || "");
+    formData.append("website", document.getElementById("brandWebsite").value || "");
 
     // Allegato LOGO
     const logoInput = document.getElementById("brandLogo");
@@ -355,6 +398,7 @@
 
       if (res.ok) {
         alert("Profilo Brand salvato con successo (Inclusi Logo e Sfondo)!");
+        await loadBrandData(); // Rinfresca le scritte di stato dei file
       } else {
         alert("Errore: " + (data.message || "Impossibile salvare i dati."));
       }
